@@ -122,16 +122,16 @@
     .poll-voters{font-size:11px;color:var(--mu2);margin-top:4px;}
     .poll-voters b{color:var(--tx);}
 
-    /* РЕАКЦИИ — с тултипом для тренера */
-    .reactions-row{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:10px;}
-    .react-btn{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.05);border:1px solid var(--b);border-radius:20px;padding:5px 11px;font-size:13px;transition:all .2s;cursor:pointer;position:relative;}
+    /* РЕАКЦИИ — имена под реакцией (для тренера) */
+    .reactions-row{display:flex;align-items:flex-start;flex-wrap:wrap;gap:6px;margin-top:10px;}
+    .react-group{display:flex;flex-direction:column;align-items:center;gap:3px;}
+    .react-btn{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.05);border:1px solid var(--b);border-radius:20px;padding:5px 11px;font-size:13px;transition:all .2s;cursor:pointer;}
     .react-btn:hover{border-color:rgba(110,231,183,.3);background:rgba(110,231,183,.06);}
     .react-btn.active{border-color:var(--ac);background:rgba(110,231,183,.1);color:var(--ac);}
     .react-count{font-size:12px;font-weight:600;color:var(--mu2);}
     .react-btn.active .react-count{color:var(--ac);}
-    /* Тултип кто поставил реакцию */
-    .react-tooltip{display:none;position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:rgba(9,13,22,.97);border:1px solid var(--ba);border-radius:10px;padding:8px 12px;font-size:12px;white-space:nowrap;z-index:200;box-shadow:0 4px 20px rgba(0,0,0,.5);pointer-events:none;max-width:220px;white-space:normal;text-align:center;}
-    .react-btn:hover .react-tooltip{display:block;}
+    /* Имена под реакцией — только для тренера */
+    .react-names{font-size:10px;color:var(--mu2);text-align:center;max-width:90px;line-height:1.3;}
     .add-react{background:rgba(255,255,255,.04);border:1px solid var(--b);border-radius:20px;padding:5px 10px;font-size:14px;transition:all .2s;}
     .add-react:hover{border-color:rgba(110,231,183,.3);}
     .emoji-picker{display:none;position:absolute;background:rgba(10,15,26,.97);border:1px solid var(--ba);border-radius:var(--r2);padding:8px;z-index:50;gap:4px;flex-wrap:wrap;width:200px;box-shadow:0 8px 32px rgba(0,0,0,.5);}
@@ -177,24 +177,28 @@
     .ph-img{aspect-ratio:1/1;border-radius:10px;object-fit:cover;border:1px solid var(--b);}
     .chart-w{position:relative;height:210px;margin-top:6px;}
 
-    /* ПЛАН — кнопки */
     .plan-a{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(110,231,183,.08),rgba(99,102,241,.06));border:1px solid var(--ba);border-radius:var(--r);padding:16px 18px;text-decoration:none;color:var(--tx);transition:all .2s;margin-bottom:14px;}
     .plan-a:hover{border-color:var(--ac);transform:translateY(-1px);}
     .tg-a{display:flex;align-items:center;gap:12px;background:rgba(0,136,204,.1);border:1px solid rgba(0,136,204,.22);border-radius:var(--r);padding:15px 18px;text-decoration:none;color:var(--tx);transition:all .2s;}
     .tg-a:hover{background:rgba(0,136,204,.16);}
 
-    /* ПРОСМОТРЩИК ПЛАНА — встроенный */
-    .plan-viewer-wrap{margin-bottom:14px;}
-    .plan-viewer-header{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,rgba(110,231,183,.1),rgba(99,102,241,.07));border:1px solid var(--ba);border-radius:var(--r) var(--r) 0 0;padding:14px 16px;}
-    .plan-viewer-title{display:flex;align-items:center;gap:10px;}
-    .plan-file-icon{font-size:24px;}
-    .plan-file-name{font-size:13px;font-weight:600;color:var(--tx);}
-    .plan-file-type{font-size:11px;color:var(--mu2);}
-    .plan-viewer-btns{display:flex;gap:8px;}
-    .plan-iframe-wrap{border:1px solid var(--ba);border-top:none;border-radius:0 0 var(--r) var(--r);overflow:hidden;background:rgba(255,255,255,.02);}
-    .plan-iframe{width:100%;height:520px;border:none;display:block;}
-    /* Для Excel — Google Sheets viewer */
-    .plan-gsheets{width:100%;height:520px;border:none;display:block;border-radius:0 0 var(--r) var(--r);}
+    /* ПЛАН — кнопка открыть + модалка с таблицей */
+    .plan-btn{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(110,231,183,.1),rgba(99,102,241,.07));border:1px solid var(--ba);border-radius:var(--r);padding:16px 18px;color:var(--tx);transition:all .2s;margin-bottom:14px;cursor:pointer;width:100%;text-align:left;}
+    .plan-btn:hover{border-color:var(--ac);transform:translateY(-1px);}
+    /* Модалка плана — широкая */
+    #mPlan .modal{max-width:96vw;width:100%;}
+    @media(min-width:700px){#mPlan .modal{max-width:860px;}}
+    /* Таблица Excel */
+    .plan-sheet-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+    .sheet-tab{padding:6px 14px;border-radius:20px;border:1px solid var(--b);font-size:12px;font-weight:600;color:var(--mu2);cursor:pointer;background:rgba(255,255,255,.03);transition:all .2s;}
+    .sheet-tab.active{border-color:var(--ac);color:var(--ac);background:var(--acd);}
+    .plan-table-wrap{overflow-x:auto;border-radius:var(--r2);border:1px solid var(--b);}
+    .plan-table{border-collapse:collapse;width:100%;font-size:12px;}
+    .plan-table th{background:rgba(110,231,183,.08);color:var(--ac);font-weight:700;padding:9px 12px;text-align:left;border-bottom:1px solid var(--ba);white-space:nowrap;position:sticky;top:0;}
+    .plan-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--tx);white-space:nowrap;}
+    .plan-table tr:hover td{background:rgba(255,255,255,.03);}
+    .plan-table tr:last-child td{border-bottom:none;}
+    .plan-table-scroll{max-height:60vh;overflow-y:auto;}
 
     /* ЗАГРУЗКА ПЛАНА у тренера */
     .plan-upload-section{background:rgba(255,255,255,.03);border:1px solid var(--b);border-radius:var(--r2);padding:14px;margin-top:10px;}
@@ -322,7 +326,7 @@
       </div>
       <!-- план -->
       <div id="planBtn"></div>
-      <a class="tg-a" href="https://t.me/gdyhrhf" target="_blank">
+      <a class="tg-a" href="https://t.me/klim_fit" target="_blank">
         <span style="font-size:26px">✈️</span>
         <div><b style="font-size:14px">Связаться с тренером</b><br><span style="font-size:12px;color:var(--mu2)">Написать в Telegram</span></div>
       </a>
@@ -515,6 +519,22 @@
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mAddPh')">Отмена</button><button class="btn btn-p" onclick="uploadPhoto()">Загрузить</button></div>
 </div></div>
 
+<!-- Просмотр плана тренировок -->
+<div class="mo" id="mPlan"><div class="modal">
+  <div class="mh"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div class="mt" style="margin-bottom:0">📋 План тренировок</div>
+    <a id="planDownloadBtn" href="#" download class="btn btn-g sm">⬇ Скачать</a>
+  </div>
+  <div class="plan-sheet-tabs" id="planSheetTabs"></div>
+  <div class="plan-table-scroll">
+    <div class="plan-table-wrap">
+      <table class="plan-table" id="planTable"></table>
+    </div>
+  </div>
+  <div class="mf"><button class="btn btn-g" onclick="closeMo('mPlan')">Закрыть</button></div>
+</div></div>
+
 <div class="toasts" id="toasts"></div>
 
 <script>
@@ -618,51 +638,90 @@ function planIcon(fileType) {
   return '📋';
 }
 
-// Рендер просмотрщика плана у ученика
-function renderPlanViewer(planUrl, planFileName, planFileType) {
+// Кнопка "Посмотреть план" — открывает модалку с таблицей
+function renderPlanBtn(planUrl, planFileName, planFileType) {
   if (!planUrl) return '';
   const icon = planIcon(planFileType);
   const name = planFileName || 'План тренировок';
-
-  // Для Excel используем Google Sheets Viewer (онлайн)
-  // Для PDF — нативный iframe
-  // Для Word — Google Docs Viewer
-  let viewerHtml = '';
-  if (planFileType === 'excel' || planFileType === 'csv') {
-    const viewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(planUrl)}`;
-    viewerHtml = `<iframe class="plan-gsheets" src="${viewerUrl}" frameborder="0" allowfullscreen loading="lazy"></iframe>`;
-  } else if (planFileType === 'pdf') {
-    viewerHtml = `<iframe class="plan-iframe" src="${planUrl}#toolbar=0" frameborder="0" loading="lazy"></iframe>`;
-  } else if (planFileType === 'word') {
-    const viewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(planUrl)}`;
-    viewerHtml = `<iframe class="plan-gsheets" src="${viewerUrl}" frameborder="0" allowfullscreen loading="lazy"></iframe>`;
-  } else if (planUrl.startsWith('http')) {
-    // Ссылка — пробуем iframe, на случай Google Sheets/Docs embed
-    const embedUrl = planUrl.includes('docs.google.com')
-      ? planUrl.replace('/edit', '/preview').replace('/pub', '/preview')
-      : planUrl;
-    viewerHtml = `<iframe class="plan-gsheets" src="${embedUrl}" frameborder="0" allowfullscreen loading="lazy"></iframe>`;
-  }
-
   return `
-    <div class="plan-viewer-wrap">
-      <div class="plan-viewer-header">
-        <div class="plan-viewer-title">
-          <span class="plan-file-icon">${icon}</span>
-          <div>
-            <div class="plan-file-name">${esc(name)}</div>
-            <div class="plan-file-type">План тренировок</div>
-          </div>
-        </div>
-        <div class="plan-viewer-btns">
-          <a href="${planUrl}" target="_blank" download class="btn btn-g sm">⬇ Скачать</a>
-          <a href="${planUrl}" target="_blank" class="btn btn-p sm">↗ Открыть</a>
-        </div>
+    <button class="plan-btn" onclick="showPlanModal()">
+      <span style="font-size:30px">${icon}</span>
+      <div style="flex:1">
+        <b style="font-size:14px">Посмотреть план тренировок</b>
+        <div style="font-size:12px;color:var(--mu2);margin-top:2px">${esc(name)}</div>
       </div>
-      <div class="plan-iframe-wrap">
-        ${viewerHtml}
-      </div>
-    </div>`;
+      <span style="font-size:20px">→</span>
+    </button>`;
+}
+
+// Открытие модалки с таблицей плана
+let _planData = null;
+async function showPlanModal() {
+  openMo('mPlan');
+  const tabsEl  = document.getElementById('planSheetTabs');
+  const tableEl = document.getElementById('planTable');
+  tabsEl.innerHTML  = '';
+  tableEl.innerHTML = '<tr><td style="padding:20px;color:var(--mu2)"><div class="sp-ring" style="margin:0 auto 10px"></div>Загрузка...</td></tr>';
+
+  try {
+    const data = await api('/api/users/' + ME.id + '/plan');
+    // Обновляем ссылку на скачивание
+    if (data.planUrl) document.getElementById('planDownloadBtn').href = data.planUrl;
+
+    if (data.planData && data.planData.sheets && data.planData.sheets.length) {
+      _planData = data.planData;
+      const sheets = _planData.sheets;
+      // Вкладки листов
+      if (sheets.length > 1) {
+        tabsEl.innerHTML = sheets.map((s,i) =>
+          `<span class="sheet-tab${i===0?' active':''}" onclick="showSheet(${i},this)">${esc(s.name)}</span>`
+        ).join('');
+      }
+      showSheetData(sheets[0]);
+    } else if (data.planUrl) {
+      // Нет данных Excel — показываем ссылку
+      tableEl.innerHTML = `<tr><td style="padding:24px;text-align:center;color:var(--mu2)">
+        <div style="font-size:36px;margin-bottom:10px">${planIcon(data.planFileType)}</div>
+        <div style="margin-bottom:14px">Предпросмотр недоступен</div>
+        <a href="${data.planUrl}" target="_blank" class="btn btn-p">↗ Открыть файл</a>
+      </td></tr>`;
+    }
+  } catch(e) {
+    tableEl.innerHTML = `<tr><td style="padding:20px;color:var(--red)">${e.message}</td></tr>`;
+  }
+}
+
+function showSheet(idx, btn) {
+  document.querySelectorAll('.sheet-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (_planData && _planData.sheets[idx]) showSheetData(_planData.sheets[idx]);
+}
+
+function showSheetData(sheet) {
+  const tableEl = document.getElementById('planTable');
+  if (!sheet.rows || !sheet.rows.length) {
+    tableEl.innerHTML = '<tr><td style="padding:20px;color:var(--mu2)">Лист пустой</td></tr>';
+    return;
+  }
+  const maxCols = Math.max(...sheet.rows.map(r => r.length));
+  const header  = sheet.rows[0];
+  const body    = sheet.rows.slice(1);
+
+  let html = '<thead><tr>';
+  header.forEach(cell => { html += `<th>${esc(String(cell ?? ''))}</th>`; });
+  // добавляем пустые столбцы если в строках больше
+  for (let i = header.length; i < maxCols; i++) html += '<th></th>';
+  html += '</tr></thead><tbody>';
+
+  body.forEach(row => {
+    html += '<tr>';
+    for (let i = 0; i < maxCols; i++) {
+      html += `<td>${esc(String(row[i] ?? ''))}</td>`;
+    }
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  tableEl.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════
@@ -761,20 +820,19 @@ function renderPost(p, isAdmin){
     }).join('')+'</div>';
   }
 
-  // Реакции — с именами для тренера
+  // Реакции — с именами под кнопкой для тренера
   const reactions=p.reactions||{};
   const reactHtml=EMOJIS.filter(e=>reactions[e]?.length>0).map(emoji=>{
     const arr = reactions[emoji] || [];
-    // Поддержка старого формата (строки) и нового (объекты)
     const myR = arr.some(r => typeof r === 'string' ? r === ME?.id : r.userId === ME?.id);
     const count = arr.length;
-    // Имена для тренера
-    let tooltipHtml = '';
+    // Имена под кнопкой — только для тренера
+    let namesHtml = '';
     if (isAdmin && arr.length > 0) {
-      const names = arr.map(r => typeof r === 'string' ? r : esc(r.userName || '?')).join(', ');
-      tooltipHtml = `<div class="react-tooltip">${names}</div>`;
+      const names = arr.map(r => typeof r === 'string' ? '?' : esc(r.userName || '?')).join(', ');
+      namesHtml = `<div class="react-names">${names}</div>`;
     }
-    return `<button class="react-btn${myR?' active':''}" onclick="reactPost('${p.id}','${emoji}')">${emoji}<span class="react-count">${count}</span>${tooltipHtml}</button>`;
+    return `<div class="react-group"><button class="react-btn${myR?' active':''}" onclick="reactPost('${p.id}','${emoji}')">${emoji}<span class="react-count">${count}</span></button>${namesHtml}</div>`;
   }).join('');
 
   const addReactHtml=isAdmin?'':`<div class="react-wrap">
@@ -1091,9 +1149,8 @@ async function loadUserHome(){
 
   const pb=document.getElementById('planBtn');
   if (ME.planUrl) {
-    // Определяем, обычная ссылка или загруженный файл
     const fileType = ME.planFileType || 'url';
-    pb.innerHTML = renderPlanViewer(ME.planUrl, ME.planFileName, fileType);
+    pb.innerHTML = renderPlanBtn(ME.planUrl, ME.planFileName, fileType);
   } else {
     pb.innerHTML = '';
   }
