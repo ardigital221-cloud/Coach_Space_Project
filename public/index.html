@@ -1,55 +1,839 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .main { grid-column: span 2; background: #007bff; color: white; }
-        .label { font-size: 11px; opacity: 0.8; text-transform: uppercase; }
-        .val { font-size: 20px; font-weight: bold; margin-top: 5px; }
-        .item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitPro — Управление тренировками</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:      #0d0f14;
+      --bg2:     #13161e;
+      --bg3:     #1a1f2b;
+      --card:    #1e2330;
+      --border:  rgba(255,255,255,0.07);
+      --accent:  #6ee7b7;
+      --accent2: #34d399;
+      --danger:  #f87171;
+      --warn:    #fbbf24;
+      --text:    #e8eaf0;
+      --muted:   #6b7280;
+      --radius:  14px;
+      --shadow:  0 4px 32px rgba(0,0,0,0.45);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Manrope', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; font-size: 15px; line-height: 1.6;
+    }
+    button { cursor: pointer; font-family: inherit; border: none; outline: none; }
+    input, select { font-family: inherit; outline: none; }
+    h1,h2,h3 { font-family: 'Unbounded', sans-serif; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg2); }
+    ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+
+    /* ── ВХОД ── */
+    #loginPage {
+      min-height: 100vh; display: flex;
+      align-items: center; justify-content: center;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(110,231,183,.13), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(52,211,153,.07), transparent),
+        var(--bg);
+      padding: 24px;
+    }
+    .login-box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 22px; padding: 48px 40px;
+      width: 100%; max-width: 420px;
+      box-shadow: var(--shadow); animation: fadeUp .5s ease;
+    }
+    .login-logo {
+      font-family: 'Unbounded', sans-serif;
+      font-size: 22px; font-weight: 700; color: var(--accent); margin-bottom: 6px;
+    }
+    .login-sub { color: var(--muted); font-size: 14px; margin-bottom: 36px; }
+    .f-label {
+      display: block; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .8px;
+      color: var(--muted); margin-bottom: 7px;
+    }
+    .f-input {
+      width: 100%; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 11px; color: var(--text);
+      padding: 12px 15px; font-size: 14px; transition: border .2s;
+    }
+    .f-input:focus { border-color: var(--accent); }
+    .f-group { margin-bottom: 16px; }
+    .pw-wrap { position: relative; }
+    .pw-wrap .f-input { padding-right: 44px; }
+    .eye-btn {
+      position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
+      background: none; color: var(--muted); font-size: 18px; line-height: 1;
+      padding: 0; transition: color .2s;
+    }
+    .eye-btn:hover { color: var(--text); }
+    .err { color: var(--danger); font-size: 13px; margin: 8px 0 4px; display: none; }
+    .btn-login {
+      width: 100%; margin-top: 22px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #09190f; font-family: 'Unbounded', sans-serif;
+      font-size: 13px; font-weight: 700; padding: 15px;
+      border-radius: var(--radius); transition: opacity .2s, transform .1s;
+    }
+    .btn-login:hover { opacity: .9; }
+    .btn-login:active { transform: scale(.98); }
+
+    /* ── APP ── */
+    #app { display: none; min-height: 100vh; }
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,15,20,.88);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px; height: 62px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .h-logo { font-family: 'Unbounded', sans-serif; font-size: 15px; font-weight: 700; color: var(--accent); }
+    .h-right { display: flex; align-items: center; gap: 12px; }
+    .h-name { font-size: 14px; font-weight: 600; }
+    .role-badge {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .7px; padding: 3px 10px; border-radius: 20px;
+    }
+    .r-admin   { background: rgba(110,231,183,.15); color: var(--accent); }
+    .r-student { background: rgba(251,191,36,.15);  color: var(--warn); }
+    .btn-out {
+      background: var(--bg3); color: var(--muted); font-size: 13px;
+      font-weight: 600; padding: 7px 14px; border-radius: 8px;
+      border: 1px solid var(--border); transition: all .2s;
+    }
+    .btn-out:hover { color: var(--danger); border-color: var(--danger); }
+
+    /* ── ТАБЫ ── */
+    .tabs {
+      padding: 0 24px; background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      display: flex; gap: 4px; overflow-x: auto;
+    }
+    .tab {
+      font-size: 13px; font-weight: 600; color: var(--muted);
+      padding: 14px 18px; background: transparent;
+      border: none; border-bottom: 2px solid transparent;
+      white-space: nowrap; transition: color .2s, border-color .2s;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ── КОНТЕНТ ── */
+    .content { max-width: 1100px; margin: 0 auto; padding: 30px 24px; }
+    .panel { display: none; animation: fadeUp .3s ease; }
+    .panel.active { display: block; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px; margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .8px; color: var(--muted); margin-bottom: 18px;
+    }
+
+    /* ── СТАТ ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 14px; margin-bottom: 24px; }
+    .stat-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+    .stat-lbl { font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+    .stat-val { font-family: 'Unbounded', sans-serif; font-size: 28px; font-weight: 700; line-height: 1; }
+    .cg { color: var(--accent); } .cw { color: var(--warn); } .cr { color: var(--danger); }
+
+    /* ── СПИСОК ── */
+    .s-list { display: flex; flex-direction: column; gap: 11px; }
+    .s-row {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 15px 18px; transition: border-color .2s;
+    }
+    .s-row:hover { border-color: rgba(110,231,183,.22); }
+    .s-num { font-family: 'Unbounded', sans-serif; font-size: 20px; font-weight: 700; min-width: 46px; text-align: center; }
+    .s-info { flex: 1; min-width: 0; }
+    .s-name { font-weight: 600; font-size: 15px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .s-meta { font-size: 12px; color: var(--muted); }
+    .s-btns { display: flex; gap: 7px; flex-shrink: 0; }
+
+    /* ── КНОПКИ ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 600; padding: 9px 17px;
+      border-radius: 10px; border: 1px solid transparent; transition: all .2s;
+    }
+    .btn-a { background: linear-gradient(135deg,var(--accent),var(--accent2)); color: #09190f; }
+    .btn-a:hover { opacity: .88; }
+    .btn-g { background: var(--bg3); color: var(--text); border-color: var(--border); }
+    .btn-g:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-d { background: rgba(248,113,113,.1); color: var(--danger); border-color: rgba(248,113,113,.2); }
+    .btn-d:hover { background: rgba(248,113,113,.2); }
+    .btn-w { background: rgba(251,191,36,.1); color: var(--warn); border-color: rgba(251,191,36,.2); }
+    .btn-w:hover { background: rgba(251,191,36,.2); }
+    .sm { font-size: 12px; padding: 6px 12px; }
+
+    /* ── РАСПИСАНИЕ ── */
+    .sched-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(210px,1fr)); gap: 13px; }
+    .slot-c {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 17px;
+      position: relative; overflow: hidden; transition: all .2s;
+    }
+    .slot-c::before {
+      content:''; position:absolute; top:0; left:0; width:3px; height:100%;
+      background: var(--accent); opacity:0; transition: opacity .2s;
+    }
+    .slot-c:hover { border-color: rgba(110,231,183,.25); }
+    .slot-c:hover::before { opacity:1; }
+    .slot-c.bkd::before { opacity:1; background: var(--warn); }
+    .slot-c.bkd { border-color: rgba(251,191,36,.2); }
+    .sl-title { font-weight: 700; font-size: 14px; margin-bottom: 7px; }
+    .sl-dt  { font-size: 13px; color: var(--muted); margin-bottom: 3px; }
+    .sl-dur { font-size: 12px; color: var(--muted); margin-bottom: 11px; }
+    .sl-who { font-size: 13px; color: var(--warn); font-weight: 600; margin-bottom: 10px; }
+    .badge {
+      display: inline-block; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .6px;
+      padding: 3px 10px; border-radius: 20px; margin-bottom: 11px;
+    }
+    .b-free { background: rgba(110,231,183,.12); color: var(--accent); }
+    .b-busy { background: rgba(251,191,36,.12);  color: var(--warn); }
+
+    /* ── ДЕНЬ-ФИЛЬТР ── */
+    .day-filter { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+    .day-btn {
+      font-size: 12px; font-weight: 600; padding: 6px 13px;
+      border-radius: 8px; background: var(--bg3); color: var(--muted);
+      border: 1px solid var(--border); transition: all .2s;
+    }
+    .day-btn:hover { color: var(--text); }
+    .day-btn.active { background: rgba(110,231,183,.15); color: var(--accent); border-color: rgba(110,231,183,.3); }
+
+    /* ── АБОНЕМЕНТ ── */
+    .sub-card {
+      background: linear-gradient(135deg,#182b22,#1e2330);
+      border: 1px solid rgba(110,231,183,.22); border-radius: 20px;
+      padding: 30px; margin-bottom: 22px; position: relative; overflow: hidden;
+    }
+    .sub-card::after { content:'💪'; position:absolute; right:22px; top:18px; font-size:46px; opacity:.12; }
+    .sub-lbl { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--accent); opacity:.7; margin-bottom:7px; }
+    .sub-num { font-family:'Unbounded',sans-serif; font-size:54px; font-weight:700; line-height:1; margin-bottom:4px; }
+    .sub-desc { font-size:13px; color:var(--muted); margin-bottom:18px; }
+    .sub-pay  { font-size:14px; }
+    .sub-pay span { color:var(--warn); font-weight:600; }
+
+    /* ── ГРИД ── */
+    .g2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media(max-width:700px){ .g2{ grid-template-columns:1fr; } }
+
+    /* ── МОДАЛКИ ── */
+    .mo {
+      position:fixed; inset:0; background:rgba(0,0,0,.72);
+      backdrop-filter:blur(5px); z-index:500;
+      display:none; align-items:center; justify-content:center; padding:20px;
+    }
+    .mo.open { display:flex; animation:fadeIn .2s ease; }
+    .modal {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:20px; padding:30px; width:100%; max-width:460px;
+      max-height:90vh; overflow-y:auto; animation:slideUp .3s ease;
+    }
+    .m-title {
+      font-family:'Unbounded',sans-serif; font-size:15px; font-weight:700;
+      margin-bottom:22px; padding-bottom:14px; border-bottom:1px solid var(--border);
+    }
+    .m-foot { display:flex; gap:10px; justify-content:flex-end; margin-top:22px; padding-top:14px; border-top:1px solid var(--border); }
+
+    /* ── ТОСТЫ ── */
+    .toasts { position:fixed; bottom:22px; right:22px; z-index:9999; display:flex; flex-direction:column; gap:9px; }
+    .toast {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:var(--radius); padding:13px 17px; font-size:14px;
+      max-width:310px; box-shadow:var(--shadow); animation:slideIn .3s ease;
+    }
+    .toast.success { border-left:3px solid var(--accent); }
+    .toast.error   { border-left:3px solid var(--danger); }
+    .toast.warn    { border-left:3px solid var(--warn); }
+
+    /* ── EMPTY ── */
+    .empty { text-align:center; padding:44px 20px; color:var(--muted); }
+    .empty-i { font-size:44px; margin-bottom:10px; opacity:.35; }
+
+    /* ── АНИМАЦИИ ── */
+    @keyframes fadeUp  { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+    @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+    @keyframes slideIn { from{opacity:0;transform:translateX(18px)} to{opacity:1;transform:none} }
+    @keyframes slideUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
+
+    @media(max-width:580px){
+      .login-box{padding:36px 24px;} .content{padding:18px 14px;}
+      .s-row{flex-wrap:wrap;} .s-btns{width:100%;} .h-name{display:none;}
+    }
+  </style>
 </head>
 <body>
-    <div class="grid">
-        <div class="card main"><div class="label">Баланс 🇰🇿</div><div class="val" id="main">0 ₸</div></div>
-        <div class="card"><div class="label">Депозит 🐷</div><div class="val" id="deposit">0 ₸</div></div>
-        <div class="card"><div class="label">Я дал (Долг)</div><div class="val" id="lent">0 ₸</div></div>
-        <div class="card"><div class="label">Я взял (Долг)</div><div class="val" id="borrowed">0 ₸</div></div>
+
+<!-- ════ ВХОД ════ -->
+<div id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">⚡COach Space</div>
+    <div class="login-sub">Система управления тренировками</div>
+
+    <div class="f-group">
+      <label class="f-label">Логин</label>
+      <input class="f-input" id="inL" placeholder="Введите логин" autocomplete="off" />
     </div>
-    <canvas id="chart" style="margin: 20px 0;"></canvas>
-    <div id="history" class="card"></div>
+    <div class="f-group">
+      <label class="f-label">Пароль</label>
+      <div class="pw-wrap">
+        <input class="f-input" type="password" id="inP" placeholder="Введите пароль" autocomplete="current-password" />
+        <button class="eye-btn" id="eyeBtn" onclick="togglePwd()">👁</button>
+      </div>
+    </div>
+    <div class="err" id="loginErr"></div>
+    <button class="btn-login" onclick="doLogin()">Войти →</button>
+  </div>
+</div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        async function load() {
-            const res = await fetch(`/api/stats/${tg.initDataUnsafe?.user?.id || 'test'}`);
-            const data = await res.json();
-            document.getElementById('main').innerText = data.main.toLocaleString() + ' ₸';
-            document.getElementById('deposit').innerText = data.deposit.toLocaleString() + ' ₸';
-            document.getElementById('lent').innerText = data.lent.toLocaleString() + ' ₸';
-            document.getElementById('borrowed').innerText = data.borrowed.toLocaleString() + ' ₸';
-            
-            new Chart(document.getElementById('chart'), {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(data.categories),
-                    datasets: [{ data: Object.values(data.categories), backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545'] }]
-                }
-            });
+<!-- ════ ПРИЛОЖЕНИЕ ════ -->
+<div id="app">
+  <header>
+    <div class="h-logo">⚡ FitPro</div>
+    <div class="h-right">
+      <span class="h-name" id="hName"></span>
+      <span class="role-badge" id="hRole"></span>
+      <button class="btn-out" onclick="doLogout()">Выйти</button>
+    </div>
+  </header>
+  <div class="tabs" id="tabs"></div>
+  <div class="content">
 
-            const hist = document.getElementById('history');
-            data.history.slice(0, 10).forEach(tx => {
-                hist.innerHTML += `<div class="item"><span>${tx.category}</span><b>${tx.amount} ₸</b></div>`;
-            });
-        }
-        tg.expand();
-        load();
-    </script>
+    <!-- Тренер: ученики -->
+    <div class="panel" id="panel-students">
+      <div class="stat-grid" id="adminStats"></div>
+      <div class="card">
+        <div class="card-title">Список учеников</div>
+        <div class="s-list" id="sList"></div>
+      </div>
+    </div>
+
+    <!-- Тренер: расписание -->
+    <div class="panel" id="panel-sched">
+      <div class="card">
+        <div class="card-title">Создать тренировочный слот</div>
+        <div class="g2">
+          <div>
+            <div class="f-group">
+              <label class="f-label">Название</label>
+              <input class="f-input" id="slotTitle" placeholder="Персональная тренировка" />
+            </div>
+            <div class="f-group">
+              <label class="f-label">Дата и время</label>
+              <input class="f-input" type="datetime-local" id="slotDt" />
+            </div>
+          </div>
+          <div>
+            <div class="f-group">
+              <label class="f-label">Длительность (мин)</label>
+              <input class="f-input" type="number" id="slotDur" value="60" min="15" max="180" step="15" />
+            </div>
+            <div class="f-group" style="margin-top:20px">
+              <button class="btn btn-a" onclick="createSlot()">➕ Создать слот</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Расписание</div>
+        <div class="day-filter" id="adminDays"></div>
+        <div class="sched-grid" id="adminGrid"></div>
+      </div>
+    </div>
+
+    <!-- Ученик: абонемент -->
+    <div class="panel" id="panel-sub">
+      <div class="sub-card">
+        <div class="sub-lbl">Мой абонемент</div>
+        <div class="sub-num" id="subNum">—</div>
+        <div class="sub-desc">занятий осталось</div>
+        <div class="sub-pay">Дата оплаты: <span id="subPay">—</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Мои записи</div>
+        <div id="myBooks"></div>
+      </div>
+    </div>
+
+    <!-- Ученик: запись -->
+    <div class="panel" id="panel-book">
+      <div class="card">
+        <div class="card-title">Доступные тренировки</div>
+        <div class="day-filter" id="studentDays"></div>
+        <div class="sched-grid" id="studentGrid"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Модалка: новый ученик ── -->
+<div class="mo" id="mAdd">
+  <div class="modal">
+    <div class="m-title">➕ Новый ученик</div>
+    <div class="f-group"><label class="f-label">Имя</label><input class="f-input" id="nName" placeholder="Иван Иванов" /></div>
+    <div class="f-group"><label class="f-label">Логин (для входа)</label><input class="f-input" id="nLogin" placeholder="ivan_petrov" autocomplete="off" /></div>
+    <div class="f-group"><label class="f-label">Пароль</label><input class="f-input" id="nPwd" placeholder="Минимум 4 символа" /></div>
+    <div class="f-group"><label class="f-label">Telegram ID (необязательно)</label><input class="f-input" id="nTg" placeholder="123456789" type="number" /></div>
+    <div class="g2">
+      <div class="f-group"><label class="f-label">Занятий</label><input class="f-input" id="nSess" type="number" value="8" min="0" /></div>
+      <div class="f-group"><label class="f-label">Дата оплаты</label><input class="f-input" id="nPay" type="date" /></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-g" onclick="closeMo('mAdd')">Отмена</button>
+      <button class="btn btn-a" onclick="addStudent()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Модалка: редактировать ученика ── -->
+<div class="mo" id="mEdit">
+  <div class="modal">
+    <div class="m-title">✏️ Редактировать ученика</div>
+    <input type="hidden" id="eId" />
+    <div class="f-group"><label class="f-label">Имя</label><input class="f-input" id="eName" /></div>
+    <div class="f-group"><label class="f-label">Новый пароль (пустое = без изменений)</label><input class="f-input" id="ePwd" placeholder="Новый пароль" /></div>
+    <div class="f-group"><label class="f-label">Telegram ID</label><input class="f-input" id="eTg" type="number" /></div>
+    <div class="g2">
+      <div class="f-group"><label class="f-label">Занятий</label><input class="f-input" id="eSess" type="number" min="0" /></div>
+      <div class="f-group"><label class="f-label">Дата оплаты</label><input class="f-input" id="ePay" type="date" /></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-g" onclick="closeMo('mEdit')">Отмена</button>
+      <button class="btn btn-a" onclick="saveEdit()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+// ═══════════════════════════════════════
+// ХРАНИЛИЩЕ — localStorage
+// ═══════════════════════════════════════
+const UK = 'fp_users';
+const SK = 'fp_sched';
+
+function loadU() { try { return JSON.parse(localStorage.getItem(UK)) || []; } catch { return []; } }
+function saveU(d){ localStorage.setItem(UK, JSON.stringify(d)); }
+function loadS() { try { return JSON.parse(localStorage.getItem(SK)) || []; } catch { return []; } }
+function saveS(d){ localStorage.setItem(SK, JSON.stringify(d)); }
+
+// Создаём тренера при первом запуске
+(function initDB() {
+  const u = loadU();
+  if (!u.find(x => x.role === 'admin')) {
+    u.push({ id:'trainer_1', name:'Тренер', login:'Klimm2000', pwd:'As123456',
+             role:'admin', telegramId:null, sessions:0, paymentDate:null });
+    saveU(u);
+  }
+})();
+
+// ═══════════════════════════════════════
+// СОСТОЯНИЕ
+// ═══════════════════════════════════════
+let me = null;
+let allS = [];
+let selDay = 'all';
+
+// ═══════════════════════════════════════
+// АВТОРИЗАЦИЯ
+// ═══════════════════════════════════════
+function togglePwd() {
+  const i = document.getElementById('inP');
+  const b = document.getElementById('eyeBtn');
+  if (i.type === 'password') { i.type = 'text'; b.textContent = '🙈'; }
+  else { i.type = 'password'; b.textContent = '👁'; }
+}
+
+function doLogin() {
+  const login = document.getElementById('inL').value.trim();
+  const pwd   = document.getElementById('inP').value;
+  const err   = document.getElementById('loginErr');
+  err.style.display = 'none';
+
+  if (!login || !pwd) {
+    err.style.display = 'block'; err.textContent = 'Введите логин и пароль'; return;
+  }
+  const user = loadU().find(u => u.login === login && u.pwd === pwd);
+  if (!user) {
+    err.style.display = 'block'; err.textContent = 'Неверный логин или пароль'; return;
+  }
+  me = user;
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  document.getElementById('hName').textContent = me.name;
+  const r = document.getElementById('hRole');
+  if (me.role === 'admin') { r.textContent = 'Тренер'; r.className = 'role-badge r-admin'; }
+  else                     { r.textContent = 'Ученик'; r.className = 'role-badge r-student'; }
+
+  buildTabs();
+}
+
+['inL','inP'].forEach(id =>
+  document.getElementById(id).addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); })
+);
+
+function doLogout() {
+  me = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('inL').value = '';
+  document.getElementById('inP').value = '';
+}
+
+// ═══════════════════════════════════════
+// НАВИГАЦИЯ
+// ═══════════════════════════════════════
+function buildTabs() {
+  const wrap = document.getElementById('tabs');
+  wrap.innerHTML = '';
+  const tabs = me.role === 'admin'
+    ? [{ id:'students', l:'👥 Ученики' }, { id:'sched', l:'📅 Расписание' }]
+    : [{ id:'sub', l:'💳 Мой абонемент' }, { id:'book', l:'📅 Запись' }];
+  tabs.forEach((t,i) => {
+    const b = document.createElement('button');
+    b.className = 'tab' + (i===0?' active':'');
+    b.textContent = t.l;
+    b.onclick = () => showPanel(t.id, b);
+    wrap.appendChild(b);
+  });
+  showPanel(tabs[0].id, wrap.querySelector('.tab'));
+}
+
+function showPanel(id, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+  selDay = 'all';
+  if (id==='students') renderStudents();
+  if (id==='sched')    renderAdminSched();
+  if (id==='sub')      renderSub();
+  if (id==='book')     renderBook();
+}
+
+// ═══════════════════════════════════════
+// ТРЕНЕР: УЧЕНИКИ
+// ═══════════════════════════════════════
+function renderStudents() {
+  const students = loadU().filter(u => u.role==='student');
+  const today = new Date().toISOString().split('T')[0];
+
+  document.getElementById('adminStats').innerHTML = `
+    <div class="stat-card"><div class="stat-lbl">Всего учеников</div><div class="stat-val cg">${students.length}</div></div>
+    <div class="stat-card"><div class="stat-lbl">Мало занятий (≤2)</div><div class="stat-val cw">${students.filter(s=>s.sessions<=2&&s.sessions>0).length}</div></div>
+    <div class="stat-card"><div class="stat-lbl">Абонемент кончился</div><div class="stat-val cr">${students.filter(s=>s.sessions<=0).length}</div></div>
+    <div class="stat-card"><div class="stat-lbl">Оплата сегодня</div><div class="stat-val cw">${students.filter(s=>s.paymentDate===today).length}</div></div>
+  `;
+
+  const list = document.getElementById('sList');
+  if (!students.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-i">👥</div><div>Нет учеников. Нажмите «Добавить»!</div></div>`;
+  } else {
+    const sorted = [...students].sort((a,b) => a.sessions - b.sessions);
+    list.innerHTML = sorted.map(s => {
+      const cls = s.sessions<=0?'cr':s.sessions<=2?'cw':'cg';
+      const pd  = s.paymentDate ? new Date(s.paymentDate).toLocaleDateString('ru-RU') : 'не задана';
+      const pt  = s.paymentDate === today;
+      return `
+        <div class="s-row">
+          <div class="s-num ${cls}">${s.sessions}</div>
+          <div class="s-info">
+            <div class="s-name">${esc(s.name)}</div>
+            <div class="s-meta">🔑 ${esc(s.login)}${s.telegramId?' · ✈️ TG':''} · Оплата: <span style="color:${pt?'var(--warn)':'var(--muted)'}">${pd}${pt?' ⚠️':''}</span></div>
+          </div>
+          <div class="s-btns">
+            <button class="btn btn-w sm" onclick="markAtt('${s.id}','${esc(s.name)}')">✓ Занятие</button>
+            <button class="btn btn-g sm" onclick="openEdit('${s.id}')">✏️</button>
+            <button class="btn btn-d sm" onclick="delStudent('${s.id}')">🗑</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  const d = document.createElement('div');
+  d.style.marginTop = '16px';
+  d.innerHTML = `<button class="btn btn-a" onclick="openMo('mAdd')">➕ Добавить ученика</button>`;
+  list.appendChild(d);
+}
+
+function markAtt(id, name) {
+  if (!confirm(`Отметить присутствие ${name}? (−1 занятие)`)) return;
+  const users = loadU();
+  const u = users.find(x => x.id===id);
+  if (!u || u.sessions<=0) { toast('Нет доступных занятий', 'error'); return; }
+  u.sessions--;
+  saveU(users);
+  toast(`✅ ${name}: осталось ${u.sessions} занятий`, 'success');
+  if (u.sessions <= 2) toast(`⚠️ У ${name} осталось мало занятий!`, 'warn');
+  renderStudents();
+}
+
+function openEdit(id) {
+  const u = loadU().find(x => x.id===id);
+  if (!u) return;
+  document.getElementById('eId').value   = u.id;
+  document.getElementById('eName').value = u.name;
+  document.getElementById('ePwd').value  = '';
+  document.getElementById('eTg').value   = u.telegramId||'';
+  document.getElementById('eSess').value = u.sessions;
+  document.getElementById('ePay').value  = u.paymentDate||'';
+  openMo('mEdit');
+}
+
+function saveEdit() {
+  const id = document.getElementById('eId').value;
+  const users = loadU();
+  const u = users.find(x => x.id===id);
+  if (!u) return;
+  const n = document.getElementById('eName').value.trim();
+  if (n) u.name = n;
+  const np = document.getElementById('ePwd').value;
+  if (np) u.pwd = np;
+  u.telegramId  = document.getElementById('eTg').value || null;
+  u.sessions    = parseInt(document.getElementById('eSess').value) || 0;
+  u.paymentDate = document.getElementById('ePay').value || null;
+  saveU(users);
+  toast('✅ Данные сохранены', 'success');
+  closeMo('mEdit');
+  renderStudents();
+}
+
+function addStudent() {
+  const name  = document.getElementById('nName').value.trim();
+  const login = document.getElementById('nLogin').value.trim();
+  const pwd   = document.getElementById('nPwd').value;
+  const tg    = document.getElementById('nTg').value;
+  const sess  = parseInt(document.getElementById('nSess').value) || 0;
+  const pay   = document.getElementById('nPay').value;
+
+  if (!name || !login || !pwd) { toast('Имя, логин и пароль обязательны', 'error'); return; }
+  if (pwd.length < 4) { toast('Пароль — минимум 4 символа', 'error'); return; }
+  const users = loadU();
+  if (users.find(u => u.login===login)) { toast('Логин уже занят', 'error'); return; }
+
+  users.push({ id:'u_'+Date.now(), name, login, pwd, role:'student',
+               telegramId:tg||null, sessions:sess, paymentDate:pay||null });
+  saveU(users);
+  toast(`✅ Ученик ${name} добавлен`, 'success');
+  closeMo('mAdd');
+  ['nName','nLogin','nPwd','nTg','nPay'].forEach(i => document.getElementById(i).value='');
+  document.getElementById('nSess').value = '8';
+  renderStudents();
+}
+
+function delStudent(id) {
+  if (!confirm('Удалить ученика?')) return;
+  saveU(loadU().filter(u => u.id!==id));
+  const s = loadS(); s.forEach(x => { if(x.bookedBy===id){x.bookedBy=null;x.bookedByName=null;} }); saveS(s);
+  toast('Ученик удалён', 'warn');
+  renderStudents();
+}
+
+// ═══════════════════════════════════════
+// ТРЕНЕР: РАСПИСАНИЕ
+// ═══════════════════════════════════════
+function renderAdminSched() {
+  allS = loadS();
+  _adminGrid();
+}
+
+function _adminGrid() {
+  buildDayFlt('adminDays', allS, '_adminGrid');
+  const slots = byDay(allS);
+  const g = document.getElementById('adminGrid');
+  if (!slots.length) { g.innerHTML=`<div class="empty"><div class="empty-i">📅</div><div>Нет слотов</div></div>`; return; }
+  g.innerHTML = slots.map(s => {
+    const dt = new Date(s.datetime);
+    const ds = dt.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',weekday:'short'});
+    const ts = dt.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+    return `
+      <div class="slot-c ${s.bookedBy?'bkd':''}">
+        <div class="sl-title">${esc(s.title)}</div>
+        <div class="sl-dt">📅 ${ds}, ${ts}</div>
+        <div class="sl-dur">⏱ ${s.duration} мин</div>
+        ${s.bookedBy?`<div class="sl-who">👤 ${esc(s.bookedByName)}</div><div class="badge b-busy">Занято</div>`:`<div class="badge b-free">Свободно</div>`}
+        <br><button class="btn btn-d sm" onclick="delSlot('${s.id}')">🗑 Удалить</button>
+      </div>`;
+  }).join('');
+}
+
+function createSlot() {
+  const dt = document.getElementById('slotDt').value;
+  if (!dt) { toast('Укажите дату и время', 'warn'); return; }
+  const s = loadS();
+  s.push({ id:'sl_'+Date.now(),
+    title:    document.getElementById('slotTitle').value.trim()||'Тренировка',
+    datetime: new Date(dt).toISOString(),
+    duration: parseInt(document.getElementById('slotDur').value)||60,
+    bookedBy: null, bookedByName: null });
+  saveS(s);
+  toast('✅ Слот создан', 'success');
+  document.getElementById('slotDt').value = '';
+  document.getElementById('slotTitle').value = '';
+  renderAdminSched();
+}
+
+function delSlot(id) {
+  if (!confirm('Удалить слот?')) return;
+  saveS(loadS().filter(s => s.id!==id));
+  toast('Слот удалён', 'warn');
+  renderAdminSched();
+}
+
+// ═══════════════════════════════════════
+// УЧЕНИК: АБОНЕМЕНТ
+// ═══════════════════════════════════════
+function renderSub() {
+  me = loadU().find(u => u.id===me.id) || me;
+  const n = document.getElementById('subNum');
+  n.textContent = me.sessions;
+  n.style.color = me.sessions<=0?'var(--danger)':me.sessions<=2?'var(--warn)':'var(--accent)';
+  document.getElementById('subPay').textContent = me.paymentDate
+    ? new Date(me.paymentDate).toLocaleDateString('ru-RU') : 'не задана';
+
+  const now = new Date();
+  const my  = loadS().filter(s => s.bookedBy===me.id && new Date(s.datetime)>=now)
+                     .sort((a,b) => new Date(a.datetime)-new Date(b.datetime));
+  const box = document.getElementById('myBooks');
+  if (!my.length) { box.innerHTML=`<div class="empty"><div class="empty-i">📅</div><div>Нет записей</div></div>`; return; }
+  box.innerHTML = my.map(s => {
+    const d = new Date(s.datetime).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    return `
+      <div class="s-row">
+        <div class="s-info"><div class="s-name">${esc(s.title)}</div><div class="s-meta">📅 ${d} · ⏱ ${s.duration} мин</div></div>
+        <button class="btn btn-d sm" onclick="cancelBook('${s.id}')">✕ Отменить</button>
+      </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// УЧЕНИК: ЗАПИСЬ
+// ═══════════════════════════════════════
+function renderBook() {
+  allS = loadS();
+  _studentGrid();
+}
+
+function _studentGrid() {
+  const now  = new Date();
+  const free = allS.filter(s => !s.bookedBy && new Date(s.datetime)>now);
+  buildDayFlt('studentDays', free, '_studentGrid');
+  const slots = byDay(free);
+  const g = document.getElementById('studentGrid');
+  if (!slots.length) { g.innerHTML=`<div class="empty"><div class="empty-i">📅</div><div>Нет свободных тренировок</div></div>`; return; }
+  g.innerHTML = slots.map(s => {
+    const dt = new Date(s.datetime);
+    const ds = dt.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',weekday:'long'});
+    const ts = dt.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+    return `
+      <div class="slot-c">
+        <div class="sl-title">${esc(s.title)}</div>
+        <div class="sl-dt">📅 ${ds}</div>
+        <div class="sl-dt">🕐 ${ts}</div>
+        <div class="sl-dur">⏱ ${s.duration} мин</div>
+        <div class="badge b-free">Свободно</div><br>
+        <button class="btn btn-a sm" onclick="bookSlot('${s.id}')">Записаться →</button>
+      </div>`;
+  }).join('');
+}
+
+function bookSlot(id) {
+  const fresh = loadU().find(u => u.id===me.id)||me;
+  if (fresh.sessions<=0) { toast('❌ Нет занятий. Пополните абонемент.','error'); return; }
+  const sched = loadS();
+  const slot  = sched.find(s => s.id===id);
+  if (!slot) { toast('Слот не найден','error'); return; }
+  if (slot.bookedBy) { toast('Слот уже занят','error'); renderBook(); return; }
+  slot.bookedBy = me.id; slot.bookedByName = me.name;
+  saveS(sched);
+  toast('✅ Вы записаны на тренировку!','success');
+  renderBook();
+}
+
+function cancelBook(id) {
+  if (!confirm('Отменить запись?')) return;
+  const sched = loadS();
+  const slot  = sched.find(s => s.id===id);
+  if (slot && slot.bookedBy===me.id) {
+    slot.bookedBy=null; slot.bookedByName=null;
+    saveS(sched); toast('Запись отменена','warn'); renderSub();
+  }
+}
+
+// ═══════════════════════════════════════
+// ДЕНЬ-ФИЛЬТР
+// ═══════════════════════════════════════
+function byDay(slots) {
+  if (selDay==='all') return slots;
+  return slots.filter(s => new Date(s.datetime).toDateString()===selDay);
+}
+
+function buildDayFlt(cid, slots, fnName) {
+  const days = {};
+  slots.forEach(s => {
+    const d = new Date(s.datetime), k = d.toDateString();
+    if (!days[k]) days[k] = d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',weekday:'short'});
+  });
+  const box = document.getElementById(cid);
+  const keys = Object.keys(days);
+  if (!keys.length) { box.innerHTML=''; return; }
+  box.innerHTML =
+    `<button class="day-btn${selDay==='all'?' active':''}" onclick="setDay('all','${cid}','${fnName}')">Все</button>`
+    + keys.map(k => `<button class="day-btn${selDay===k?' active':''}" onclick="setDay('${k}','${cid}','${fnName}')">${days[k]}</button>`).join('');
+}
+
+function setDay(day, cid, fnName) {
+  selDay = day;
+  const fns = { _adminGrid, _studentGrid };
+  if (fns[fnName]) fns[fnName]();
+}
+
+// ═══════════════════════════════════════
+// УТИЛИТЫ
+// ═══════════════════════════════════════
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function toast(msg, type='success') {
+  const icons = {success:'✅',error:'❌',warn:'⚠️'};
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = `${icons[type]||'•'} ${msg}`;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+function openMo(id)  { document.getElementById(id).classList.add('open'); }
+function closeMo(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.mo').forEach(mo =>
+  mo.addEventListener('click', e => { if(e.target===mo) mo.classList.remove('open'); })
+);
+
+// Мин. дата = сейчас
+document.getElementById('slotDt').min = (() => {
+  const n=new Date(); n.setMinutes(n.getMinutes()-n.getTimezoneOffset());
+  return n.toISOString().slice(0,16);
+})();
+document.getElementById('nPay').value =
+  new Date(Date.now()+30*86400000).toISOString().split('T')[0];
+</script>
 </body>
 </html>
