@@ -375,30 +375,45 @@ app.delete('/api/posts/:id', async (req, res) => {
 
 /**
  * POST /api/posts/:id/react
- * Body: { userId, userName, emoji }
- * Реакции теперь хранят объекты {userId, userName} — тренер видит имена
+ * Body: { userId, userName, emoji, single? }
+ * single=true → один юзер = одна реакция (старая снимается автоматически)
  */
 app.post('/api/posts/:id/react', async (req, res) => {
   try {
-    const { userId, userName, emoji } = req.body;
+    const { userId, userName, emoji, single } = req.body;
     if (!userId || !emoji) return res.status(400).json({ error: 'userId и emoji обязательны' });
     const ref = db.collection('posts').doc(req.params.id);
     const doc = await ref.get();
     if (!doc.exists) return res.status(404).json({ error: 'Пост не найден' });
 
     const reactions = doc.data().reactions || {};
+
+    // Если режим single — снимаем все предыдущие реакции этого юзера
+    if (single) {
+      Object.keys(reactions).forEach(e => {
+        reactions[e] = reactions[e].filter(r =>
+          typeof r === 'string' ? r !== userId : r.userId !== userId
+        );
+      });
+    }
+
     if (!reactions[emoji]) reactions[emoji] = [];
 
-    // Поддерживаем как старый формат (строки) так и новый (объекты)
+    // Проверяем, стоит ли уже эта реакция (toggle)
     const idx = reactions[emoji].findIndex(r =>
       typeof r === 'string' ? r === userId : r.userId === userId
     );
 
     if (idx === -1) {
+      // Добавляем
       reactions[emoji].push({ userId, userName: userName || 'Пользователь' });
     } else {
+      // Та же реакция повторно — снимаем (toggle off)
       reactions[emoji].splice(idx, 1);
     }
+
+    // Чистим пустые массивы
+    Object.keys(reactions).forEach(e => { if (!reactions[e].length) delete reactions[e]; });
 
     await ref.update({ reactions });
     res.json({ success: true, reactions });
