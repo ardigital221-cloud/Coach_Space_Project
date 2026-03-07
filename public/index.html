@@ -1,422 +1,677 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Coach Space — Управление тренировками</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Coach Space</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
+    /* ══════════════ ПЕРЕМЕННЫЕ ══════════════ */
     :root {
-      --bg:      #0d0f14;
-      --bg2:     #13161e;
-      --bg3:     #1a1f2b;
-      --card:    #1e2330;
-      --border:  rgba(255,255,255,0.07);
-      --accent:  #6ee7b7;
-      --accent2: #34d399;
-      --danger:  #f87171;
-      --warn:    #fbbf24;
-      --text:    #e8eaf0;
-      --muted:   #6b7280;
-      --radius:  14px;
-      --shadow:  0 4px 32px rgba(0,0,0,0.45);
+      --bg:        #080c14;
+      --bg2:       #0d1220;
+      --glass:     rgba(255,255,255,0.04);
+      --glass2:    rgba(255,255,255,0.08);
+      --border:    rgba(255,255,255,0.08);
+      --border2:   rgba(110,231,183,0.2);
+      --accent:    #6ee7b7;
+      --accent2:   #34d399;
+      --accent-dim:rgba(110,231,183,0.12);
+      --danger:    #f87171;
+      --warn:      #fbbf24;
+      --text:      #f0f4f8;
+      --muted:     #64748b;
+      --muted2:    #94a3b8;
+      --r:         16px;
+      --r2:        12px;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Manrope', sans-serif;
-      background: var(--bg); color: var(--text);
-      min-height: 100vh; font-size: 15px; line-height: 1.6;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{
+      font-family:'Inter',sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      font-size:15px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
     }
-    button { cursor: pointer; font-family: inherit; border: none; outline: none; }
-    input, select { font-family: inherit; outline: none; }
-    h1,h2,h3 { font-family: 'Unbounded', sans-serif; }
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg2); }
-    ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
-
-    /* ── ВХОД ── */
-    #loginPage {
-      min-height: 100vh; display: flex;
-      align-items: center; justify-content: center;
+    body::before{
+      content:'';
+      position:fixed;inset:0;z-index:-1;
       background:
-        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(110,231,183,.13), transparent),
-        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(52,211,153,.07), transparent),
-        var(--bg);
-      padding: 24px;
+        radial-gradient(ellipse 70% 50% at 20% 0%,  rgba(110,231,183,.07),transparent),
+        radial-gradient(ellipse 60% 40% at 80% 100%,rgba(52,211,153,.05),transparent),
+        radial-gradient(ellipse 40% 30% at 50% 50%,  rgba(99,102,241,.04),transparent);
     }
-    .login-box {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 22px; padding: 48px 40px;
-      width: 100%; max-width: 420px;
-      box-shadow: var(--shadow); animation: fadeUp .5s ease;
-    }
-    .login-logo {
-      font-family: 'Unbounded', sans-serif;
-      font-size: 22px; font-weight: 700; color: var(--accent); margin-bottom: 6px;
-    }
-    .login-sub { color: var(--muted); font-size: 14px; margin-bottom: 36px; }
-    .f-label {
-      display: block; font-size: 11px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .8px;
-      color: var(--muted); margin-bottom: 7px;
-    }
-    .f-input {
-      width: 100%; background: var(--bg3); border: 1px solid var(--border);
-      border-radius: 11px; color: var(--text);
-      padding: 12px 15px; font-size: 14px; transition: border .2s;
-    }
-    .f-input:focus { border-color: var(--accent); }
-    .f-group { margin-bottom: 16px; }
-    .pw-wrap { position: relative; }
-    .pw-wrap .f-input { padding-right: 44px; }
-    .eye-btn {
-      position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
-      background: none; color: var(--muted); font-size: 18px; line-height: 1;
-      padding: 0; transition: color .2s;
-    }
-    .eye-btn:hover { color: var(--text); }
-    .err { color: var(--danger); font-size: 13px; margin: 8px 0 4px; display: none; }
-    .btn-login {
-      width: 100%; margin-top: 22px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #09190f; font-family: 'Unbounded', sans-serif;
-      font-size: 13px; font-weight: 700; padding: 15px;
-      border-radius: var(--radius); transition: opacity .2s, transform .1s;
-    }
-    .btn-login:hover { opacity: .9; }
-    .btn-login:active { transform: scale(.98); }
+    button{cursor:pointer;font-family:inherit;border:none;outline:none;}
+    input,select,textarea{font-family:inherit;outline:none;}
+    img{max-width:100%;display:block;}
+    ::-webkit-scrollbar{width:5px;}
+    ::-webkit-scrollbar-track{background:var(--bg2);}
+    ::-webkit-scrollbar-thumb{background:rgba(110,231,183,.3);border-radius:3px;}
 
-    /* ── APP ── */
-    #app { display: none; min-height: 100vh; }
-    header {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(13,15,20,.88);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 24px; height: 62px;
-      display: flex; align-items: center; justify-content: space-between;
+    /* ══ GLASSMORPHISM МИКСИН ══ */
+    .glass{
+      background:var(--glass);
+      backdrop-filter:blur(20px);
+      -webkit-backdrop-filter:blur(20px);
+      border:1px solid var(--border);
     }
-    .h-logo { font-family: 'Unbounded', sans-serif; font-size: 15px; font-weight: 700; color: var(--accent); }
-    .h-right { display: flex; align-items: center; gap: 12px; }
-    .h-name { font-size: 14px; font-weight: 600; }
-    .role-badge {
-      font-size: 11px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .7px; padding: 3px 10px; border-radius: 20px;
-    }
-    .r-admin   { background: rgba(110,231,183,.15); color: var(--accent); }
-    .r-student { background: rgba(251,191,36,.15);  color: var(--warn); }
-    .btn-out {
-      background: var(--bg3); color: var(--muted); font-size: 13px;
-      font-weight: 600; padding: 7px 14px; border-radius: 8px;
-      border: 1px solid var(--border); transition: all .2s;
-    }
-    .btn-out:hover { color: var(--danger); border-color: var(--danger); }
-
-    /* ── ТАБЫ ── */
-    .tabs {
-      padding: 0 24px; background: var(--bg2);
-      border-bottom: 1px solid var(--border);
-      display: flex; gap: 4px; overflow-x: auto;
-    }
-    .tab {
-      font-size: 13px; font-weight: 600; color: var(--muted);
-      padding: 14px 18px; background: transparent;
-      border: none; border-bottom: 2px solid transparent;
-      white-space: nowrap; transition: color .2s, border-color .2s;
-    }
-    .tab:hover { color: var(--text); }
-    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-    /* ── КОНТЕНТ ── */
-    .content { max-width: 1100px; margin: 0 auto; padding: 30px 24px; }
-    .panel { display: none; animation: fadeUp .3s ease; }
-    .panel.active { display: block; }
-
-    .card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 24px; margin-bottom: 20px;
-    }
-    .card-title {
-      font-size: 12px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .8px; color: var(--muted); margin-bottom: 18px;
+    .glass2{
+      background:var(--glass2);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      border:1px solid var(--border);
     }
 
-    /* ── СТАТ ── */
-    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 14px; margin-bottom: 24px; }
-    .stat-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
-    .stat-lbl { font-size: 12px; color: var(--muted); margin-bottom: 5px; }
-    .stat-val { font-family: 'Unbounded', sans-serif; font-size: 28px; font-weight: 700; line-height: 1; }
-    .cg { color: var(--accent); } .cw { color: var(--warn); } .cr { color: var(--danger); }
+    /* ══════════════ ЭКРАН ЗАГРУЗКИ ══════════════ */
+    #splash{
+      position:fixed;inset:0;z-index:999;
+      background:var(--bg);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+      transition:opacity .4s ease;
+    }
+    #splash.hide{opacity:0;pointer-events:none;}
+    .splash-logo{font-family:'Unbounded',sans-serif;font-size:28px;font-weight:700;color:var(--accent);}
+    .splash-ring{
+      width:44px;height:44px;
+      border:3px solid rgba(110,231,183,.2);
+      border-top-color:var(--accent);
+      border-radius:50%;
+      animation:spin .8s linear infinite;
+    }
 
-    /* ── СПИСОК ── */
-    .s-list { display: flex; flex-direction: column; gap: 11px; }
-    .s-row {
-      display: flex; align-items: center; gap: 14px;
-      background: var(--bg3); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 15px 18px; transition: border-color .2s;
+    /* ══════════════ ЭКРАН ВХОДА ══════════════ */
+    #loginPage{
+      min-height:100vh;
+      display:none;align-items:center;justify-content:center;
+      padding:24px;
     }
-    .s-row:hover { border-color: rgba(110,231,183,.22); }
-    .s-num { font-family: 'Unbounded', sans-serif; font-size: 20px; font-weight: 700; min-width: 46px; text-align: center; }
-    .s-info { flex: 1; min-width: 0; }
-    .s-name { font-weight: 600; font-size: 15px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .s-meta { font-size: 12px; color: var(--muted); }
-    .s-btns { display: flex; gap: 7px; flex-shrink: 0; }
+    #loginPage.show{display:flex;}
+    .login-card{
+      background:rgba(13,18,32,.8);
+      backdrop-filter:blur(40px);
+      -webkit-backdrop-filter:blur(40px);
+      border:1px solid var(--border2);
+      border-radius:24px;
+      padding:52px 44px;
+      width:100%;max-width:420px;
+      box-shadow:0 0 80px rgba(110,231,183,.06);
+      animation:fadeUp .5s ease;
+    }
+    .login-logo{
+      font-family:'Unbounded',sans-serif;
+      font-size:24px;font-weight:700;
+      background:linear-gradient(135deg,var(--accent),#a7f3d0);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      margin-bottom:6px;
+    }
+    .login-sub{color:var(--muted2);font-size:13px;margin-bottom:40px;}
 
-    /* ── КНОПКИ ── */
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 13px; font-weight: 600; padding: 9px 17px;
-      border-radius: 10px; border: 1px solid transparent; transition: all .2s;
+    /* ══ ПОЛЯ ФОРМЫ ══ */
+    .f-group{margin-bottom:18px;}
+    .f-label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--muted2);margin-bottom:8px;}
+    .f-input,.f-select,.f-textarea{
+      width:100%;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--border);
+      border-radius:var(--r2);
+      color:var(--text);
+      padding:13px 16px;
+      font-size:14px;
+      transition:border .2s,background .2s;
     }
-    .btn-a { background: linear-gradient(135deg,var(--accent),var(--accent2)); color: #09190f; }
-    .btn-a:hover { opacity: .88; }
-    .btn-g { background: var(--bg3); color: var(--text); border-color: var(--border); }
-    .btn-g:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-d { background: rgba(248,113,113,.1); color: var(--danger); border-color: rgba(248,113,113,.2); }
-    .btn-d:hover { background: rgba(248,113,113,.2); }
-    .btn-w { background: rgba(251,191,36,.1); color: var(--warn); border-color: rgba(251,191,36,.2); }
-    .btn-w:hover { background: rgba(251,191,36,.2); }
-    .sm { font-size: 12px; padding: 6px 12px; }
+    .f-input:focus,.f-select:focus,.f-textarea:focus{
+      border-color:var(--accent);
+      background:rgba(110,231,183,.06);
+    }
+    .f-select option{background:#0d1220;}
+    .f-textarea{resize:vertical;min-height:80px;}
+    .pw-wrap{position:relative;}
+    .pw-wrap .f-input{padding-right:46px;}
+    .eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;color:var(--muted);font-size:17px;padding:0;transition:color .2s;}
+    .eye:hover{color:var(--text);}
+    .f-err{color:var(--danger);font-size:13px;margin-top:10px;display:none;}
 
-    /* ── РАСПИСАНИЕ ── */
-    .sched-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(210px,1fr)); gap: 13px; }
-    .slot-c {
-      background: var(--bg3); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 17px;
-      position: relative; overflow: hidden; transition: all .2s;
+    /* ══ КНОПКИ ══ */
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      font-size:13px;font-weight:600;
+      padding:11px 20px;border-radius:var(--r2);
+      border:1px solid transparent;
+      transition:all .2s;white-space:nowrap;
     }
-    .slot-c::before {
-      content:''; position:absolute; top:0; left:0; width:3px; height:100%;
-      background: var(--accent); opacity:0; transition: opacity .2s;
+    .btn-full{width:100%;}
+    .btn-primary{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#062010;font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;
     }
-    .slot-c:hover { border-color: rgba(110,231,183,.25); }
-    .slot-c:hover::before { opacity:1; }
-    .slot-c.bkd::before { opacity:1; background: var(--warn); }
-    .slot-c.bkd { border-color: rgba(251,191,36,.2); }
-    .sl-title { font-weight: 700; font-size: 14px; margin-bottom: 7px; }
-    .sl-dt  { font-size: 13px; color: var(--muted); margin-bottom: 3px; }
-    .sl-dur { font-size: 12px; color: var(--muted); margin-bottom: 11px; }
-    .sl-who { font-size: 13px; color: var(--warn); font-weight: 600; margin-bottom: 10px; }
-    .badge {
-      display: inline-block; font-size: 11px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .6px;
-      padding: 3px 10px; border-radius: 20px; margin-bottom: 11px;
-    }
-    .b-free { background: rgba(110,231,183,.12); color: var(--accent); }
-    .b-busy { background: rgba(251,191,36,.12);  color: var(--warn); }
+    .btn-primary:hover{opacity:.88;transform:translateY(-1px);}
+    .btn-primary:active{transform:scale(.98);}
+    .btn-ghost{background:var(--glass2);color:var(--text);border-color:var(--border);}
+    .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+    .btn-danger{background:rgba(248,113,113,.1);color:var(--danger);border-color:rgba(248,113,113,.2);}
+    .btn-danger:hover{background:rgba(248,113,113,.2);}
+    .btn-warn{background:rgba(251,191,36,.1);color:var(--warn);border-color:rgba(251,191,36,.2);}
+    .btn-warn:hover{background:rgba(251,191,36,.2);}
+    .btn-sm{font-size:12px;padding:7px 14px;border-radius:9px;}
 
-    /* ── ДЕНЬ-ФИЛЬТР ── */
-    .day-filter { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
-    .day-btn {
-      font-size: 12px; font-weight: 600; padding: 6px 13px;
-      border-radius: 8px; background: var(--bg3); color: var(--muted);
-      border: 1px solid var(--border); transition: all .2s;
-    }
-    .day-btn:hover { color: var(--text); }
-    .day-btn.active { background: rgba(110,231,183,.15); color: var(--accent); border-color: rgba(110,231,183,.3); }
+    /* ══════════════ ОСНОВНОЕ ПРИЛОЖЕНИЕ ══════════════ */
+    #app{display:none;min-height:100vh;padding-bottom:80px;}
+    #app.show{display:block;}
 
-    /* ── АБОНЕМЕНТ ── */
-    .sub-card {
-      background: linear-gradient(135deg,#182b22,#1e2330);
-      border: 1px solid rgba(110,231,183,.22); border-radius: 20px;
-      padding: 30px; margin-bottom: 22px; position: relative; overflow: hidden;
+    /* ══ ШАПКА ══ */
+    .topbar{
+      position:sticky;top:0;z-index:100;
+      background:rgba(8,12,20,.85);
+      backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+      border-bottom:1px solid var(--border);
+      padding:0 20px;height:60px;
+      display:flex;align-items:center;justify-content:space-between;
     }
-    .sub-card::after { content:'💪'; position:absolute; right:22px; top:18px; font-size:46px; opacity:.12; }
-    .sub-lbl { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--accent); opacity:.7; margin-bottom:7px; }
-    .sub-num { font-family:'Unbounded',sans-serif; font-size:54px; font-weight:700; line-height:1; margin-bottom:4px; }
-    .sub-desc { font-size:13px; color:var(--muted); margin-bottom:18px; }
-    .sub-pay  { font-size:14px; }
-    .sub-pay span { color:var(--warn); font-weight:600; }
+    .topbar-logo{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;color:var(--accent);}
+    .topbar-right{display:flex;align-items:center;gap:10px;}
+    .topbar-name{font-size:13px;font-weight:600;color:var(--muted2);}
+    .topbar-role{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;padding:3px 9px;border-radius:20px;}
+    .role-a{background:rgba(110,231,183,.15);color:var(--accent);}
+    .role-s{background:rgba(251,191,36,.15);color:var(--warn);}
+    .btn-logout{background:none;color:var(--muted);font-size:20px;padding:6px;transition:color .2s;}
+    .btn-logout:hover{color:var(--danger);}
 
-    /* ── ГРИД ── */
-    .g2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    @media(max-width:700px){ .g2{ grid-template-columns:1fr; } }
-
-    /* ── МОДАЛКИ ── */
-    .mo {
-      position:fixed; inset:0; background:rgba(0,0,0,.72);
-      backdrop-filter:blur(5px); z-index:500;
-      display:none; align-items:center; justify-content:center; padding:20px;
+    /* ══ НИЖНЯЯ НАВИГАЦИЯ ══ */
+    .bottom-nav{
+      position:fixed;bottom:0;left:0;right:0;z-index:100;
+      background:rgba(8,12,20,.92);
+      backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+      border-top:1px solid var(--border);
+      display:flex;
+      padding:0 8px;padding-bottom:env(safe-area-inset-bottom);
     }
-    .mo.open { display:flex; animation:fadeIn .2s ease; }
-    .modal {
-      background:var(--card); border:1px solid var(--border);
-      border-radius:20px; padding:30px; width:100%; max-width:460px;
-      max-height:90vh; overflow-y:auto; animation:slideUp .3s ease;
+    .nav-btn{
+      flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:4px;padding:10px 4px;background:none;
+      font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;
+      color:var(--muted);border:none;transition:color .2s;
     }
-    .m-title {
-      font-family:'Unbounded',sans-serif; font-size:15px; font-weight:700;
-      margin-bottom:22px; padding-bottom:14px; border-bottom:1px solid var(--border);
+    .nav-btn .nav-icon{font-size:20px;}
+    .nav-btn.active{color:var(--accent);}
+
+    /* ══ КОНТЕНТ ══ */
+    .content{max-width:680px;margin:0 auto;padding:20px 16px;}
+    .panel{display:none;animation:fadeUp .3s ease;}
+    .panel.active{display:block;}
+
+    /* ══ КАРТОЧКИ ══ */
+    .card{
+      background:rgba(13,18,32,.7);
+      backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+      border:1px solid var(--border);
+      border-radius:var(--r);padding:20px;margin-bottom:16px;
     }
-    .m-foot { display:flex; gap:10px; justify-content:flex-end; margin-top:22px; padding-top:14px; border-top:1px solid var(--border); }
+    .card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--muted2);margin-bottom:16px;}
+    .card-accent{border-color:var(--border2);box-shadow:0 0 40px rgba(110,231,183,.05);}
 
-    /* ── ТОСТЫ ── */
-    .toasts { position:fixed; bottom:22px; right:22px; z-index:9999; display:flex; flex-direction:column; gap:9px; }
-    .toast {
-      background:var(--card); border:1px solid var(--border);
-      border-radius:var(--radius); padding:13px 17px; font-size:14px;
-      max-width:310px; box-shadow:var(--shadow); animation:slideIn .3s ease;
+    /* ══ АБОНЕМЕНТ ══ */
+    .sub-hero{
+      background:linear-gradient(135deg,rgba(110,231,183,.08),rgba(52,211,153,.04));
+      border:1px solid var(--border2);
+      border-radius:20px;padding:28px 24px;margin-bottom:16px;
+      position:relative;overflow:hidden;
     }
-    .toast.success { border-left:3px solid var(--accent); }
-    .toast.error   { border-left:3px solid var(--danger); }
-    .toast.warn    { border-left:3px solid var(--warn); }
-
-    /* ── EMPTY ── */
-    .empty { text-align:center; padding:44px 20px; color:var(--muted); }
-    .empty-i { font-size:44px; margin-bottom:10px; opacity:.35; }
-
-    /* ── АНИМАЦИИ ── */
-    @keyframes fadeUp  { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
-    @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
-    @keyframes slideIn { from{opacity:0;transform:translateX(18px)} to{opacity:1;transform:none} }
-    @keyframes slideUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:none} }
-
-    @media(max-width:580px){
-      .login-box{padding:36px 24px;} .content{padding:18px 14px;}
-      .s-row{flex-wrap:wrap;} .s-btns{width:100%;} .h-name{display:none;}
+    .sub-hero::before{
+      content:'';position:absolute;top:-30px;right:-30px;
+      width:120px;height:120px;
+      background:radial-gradient(circle,rgba(110,231,183,.15),transparent 70%);
     }
+    .sub-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--accent);opacity:.7;margin-bottom:8px;}
+    .sub-count{
+      font-family:'Unbounded',sans-serif;font-size:64px;font-weight:700;
+      color:var(--accent);line-height:1;margin-bottom:6px;
+    }
+    .sub-desc{font-size:13px;color:var(--muted2);margin-bottom:18px;}
+    .sub-pay{display:flex;align-items:center;gap:8px;font-size:14px;}
+    .sub-pay span{color:var(--warn);font-weight:600;}
+    .streak-wrap{display:flex;align-items:center;gap:8px;margin-top:12px;}
+    .streak-fire{font-size:28px;animation:pulse 1.5s ease infinite;}
+    .streak-text{font-size:13px;color:var(--muted2);}
+    .streak-text b{color:var(--text);}
+
+    /* ══ ПОСТЫ ══ */
+    .post-card{
+      background:rgba(13,18,32,.6);
+      border:1px solid var(--border);
+      border-radius:var(--r2);
+      padding:16px 18px;margin-bottom:10px;
+      transition:border-color .2s;
+    }
+    .post-card:hover{border-color:rgba(110,231,183,.2);}
+    .post-text{font-size:14px;line-height:1.7;margin-bottom:8px;}
+    .post-link{font-size:13px;color:var(--accent);}
+    .post-date{font-size:11px;color:var(--muted);margin-top:8px;}
+
+    /* ══ УЧЕНИКИ (для тренера) ══ */
+    .s-row{
+      display:flex;align-items:center;gap:14px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--border);
+      border-radius:var(--r2);padding:14px 16px;
+      margin-bottom:10px;transition:border-color .2s;
+    }
+    .s-row:hover{border-color:rgba(110,231,183,.2);}
+    .s-ava{
+      width:44px;height:44px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent-dim),rgba(52,211,153,.1));
+      border:1px solid var(--border2);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;
+      color:var(--accent);flex-shrink:0;
+    }
+    .s-info{flex:1;min-width:0;}
+    .s-name{font-weight:600;font-size:14px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .s-meta{font-size:12px;color:var(--muted2);}
+    .s-sess{font-family:'Unbounded',sans-serif;font-size:22px;font-weight:700;min-width:44px;text-align:center;flex-shrink:0;}
+    .s-btns{display:flex;gap:6px;flex-shrink:0;}
+
+    /* ══ СТАТИСТИКА ══ */
+    .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
+    .stat-box{
+      background:rgba(255,255,255,.03);border:1px solid var(--border);
+      border-radius:var(--r2);padding:16px;text-align:center;
+    }
+    .stat-n{font-family:'Unbounded',sans-serif;font-size:28px;font-weight:700;line-height:1;}
+    .stat-l{font-size:11px;color:var(--muted2);margin-top:4px;}
+    .cg{color:var(--accent);} .cw{color:var(--warn);} .cr{color:var(--danger);}
+
+    /* ══ МАГАЗИН ══ */
+    .shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+    .shop-item{
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      overflow:hidden;transition:all .2s;
+    }
+    .shop-item:hover{border-color:rgba(110,231,183,.25);transform:translateY(-2px);}
+    .shop-img{width:100%;aspect-ratio:1/1;object-fit:cover;background:rgba(255,255,255,.05);}
+    .shop-img-placeholder{width:100%;aspect-ratio:1/1;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:40px;opacity:.3;}
+    .shop-body{padding:12px;}
+    .shop-name{font-weight:600;font-size:13px;margin-bottom:4px;}
+    .shop-price{font-family:'Unbounded',sans-serif;font-size:15px;color:var(--accent);margin-bottom:10px;}
+
+    /* ══ ПРОГРЕСС ══ */
+    .progress-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+    .prog-photo{aspect-ratio:1/1;border-radius:10px;object-fit:cover;border:1px solid var(--border);}
+
+    /* ══ CHART ══ */
+    .chart-wrap{position:relative;height:220px;margin-top:8px;}
+
+    /* ══ МОДАЛКИ ══ */
+    .mo{
+      position:fixed;inset:0;background:rgba(0,0,0,.75);
+      backdrop-filter:blur(8px);z-index:500;
+      display:none;align-items:flex-end;justify-content:center;
+      padding:0;
+    }
+    @media(min-width:600px){.mo{align-items:center;padding:20px;}}
+    .mo.open{display:flex;animation:fadeIn .2s ease;}
+    .modal{
+      background:rgba(10,15,26,.95);
+      border:1px solid var(--border2);
+      border-radius:24px 24px 0 0;
+      padding:28px 24px;
+      width:100%;max-width:480px;
+      max-height:88vh;overflow-y:auto;
+      animation:slideUp .3s ease;
+    }
+    @media(min-width:600px){.modal{border-radius:24px;}}
+    .modal-handle{width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 20px;}
+    .modal-title{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:700;margin-bottom:22px;}
+    .modal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    @media(max-width:480px){.g2{grid-template-columns:1fr;}}
+
+    /* ══ UPLOAD КНОПКА ══ */
+    .upload-btn{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+      border:2px dashed var(--border);border-radius:var(--r2);
+      padding:24px;cursor:pointer;transition:border-color .2s;
+      background:rgba(255,255,255,.02);
+    }
+    .upload-btn:hover{border-color:var(--accent);}
+    .upload-btn input{display:none;}
+    .upload-icon{font-size:28px;opacity:.5;}
+    .upload-label{font-size:13px;color:var(--muted2);}
+    .upload-preview{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;display:none;}
+
+    /* ══ ТОСТЫ ══ */
+    .toasts{position:fixed;bottom:90px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+    .toast{
+      background:rgba(10,15,26,.95);
+      border:1px solid var(--border);
+      border-radius:var(--r2);padding:12px 16px;
+      font-size:13px;max-width:300px;
+      box-shadow:0 8px 32px rgba(0,0,0,.4);
+      animation:slideIn .3s ease;
+    }
+    .toast.s{border-left:3px solid var(--accent);}
+    .toast.e{border-left:3px solid var(--danger);}
+    .toast.w{border-left:3px solid var(--warn);}
+
+    /* ══ EMPTY ══ */
+    .empty{text-align:center;padding:40px 20px;color:var(--muted2);}
+    .empty-i{font-size:48px;margin-bottom:12px;opacity:.3;}
+
+    /* ══ АНИМАЦИИ ══ */
+    @keyframes fadeUp  {from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+    @keyframes fadeIn  {from{opacity:0}to{opacity:1}}
+    @keyframes slideIn {from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+    @keyframes slideUp {from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+    @keyframes spin    {to{transform:rotate(360deg)}}
+    @keyframes pulse   {0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+    @keyframes shimmer {0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+    /* ══ СКЕЛЕТОН ══ */
+    .skel{
+      border-radius:8px;height:16px;
+      background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.04) 75%);
+      background-size:200% 100%;animation:shimmer 1.5s infinite;
+    }
+
+    /* ══ СЕКЦИЯ ЗАГОЛОВОК ══ */
+    .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .sec-title{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;}
+
+    /* ══ РАЗДЕЛИТЕЛЬ ══ */
+    .divider{height:1px;background:var(--border);margin:16px 0;}
+
+    /* ══ СТУДЕНТ-ПЛАН ══ */
+    .plan-btn{
+      display:flex;align-items:center;gap:14px;
+      background:linear-gradient(135deg,rgba(110,231,183,.08),rgba(99,102,241,.06));
+      border:1px solid var(--border2);
+      border-radius:var(--r);padding:18px 20px;
+      text-decoration:none;color:var(--text);
+      transition:all .2s;margin-bottom:16px;
+    }
+    .plan-btn:hover{border-color:var(--accent);transform:translateY(-1px);}
+    .plan-icon{font-size:32px;}
+    .plan-text b{font-weight:700;font-size:15px;display:block;}
+    .plan-text span{font-size:12px;color:var(--muted2);}
+
+    /* ══ ЧАТ КНОПКА ══ */
+    .tg-btn{
+      display:flex;align-items:center;gap:12px;
+      background:rgba(0,136,204,.1);
+      border:1px solid rgba(0,136,204,.25);
+      border-radius:var(--r);padding:16px 20px;
+      text-decoration:none;color:var(--text);
+      transition:all .2s;
+    }
+    .tg-btn:hover{background:rgba(0,136,204,.15);}
+    .tg-icon{font-size:28px;}
   </style>
 </head>
 <body>
 
-<!-- ════ ВХОД ════ -->
-<div id="loginPage">
-  <div class="login-box">
-    <div class="login-logo">⚡ Coach Space</div>
-    <div class="login-sub">Система управления тренировками</div>
+<!-- ══ СПЛЭШ ══ -->
+<div id="splash">
+  <div class="splash-logo">⚡ Coach Space</div>
+  <div class="splash-ring"></div>
+</div>
 
+<!-- ══ ВХОД ══ -->
+<div id="loginPage">
+  <div class="login-card">
+    <div class="login-logo">⚡ Coach Space</div>
+    <div class="login-sub">Платформа для тренировок и прогресса</div>
     <div class="f-group">
       <label class="f-label">Логин</label>
-      <input class="f-input" id="inL" placeholder="Введите логин" autocomplete="off" />
+      <input class="f-input" id="inL" placeholder="Ваш логин" autocomplete="off"/>
     </div>
     <div class="f-group">
       <label class="f-label">Пароль</label>
       <div class="pw-wrap">
-        <input class="f-input" type="password" id="inP" placeholder="Введите пароль" autocomplete="current-password" />
-        <button class="eye-btn" id="eyeBtn" onclick="togglePwd()">👁</button>
+        <input class="f-input" type="password" id="inP" placeholder="Пароль" autocomplete="current-password"/>
+        <button class="eye" onclick="togglePwd()" id="eyeBtn">👁</button>
       </div>
     </div>
-    <div class="err" id="loginErr"></div>
-    <button class="btn-login" onclick="doLogin()">Войти →</button>
+    <div class="f-err" id="loginErr"></div>
+    <button class="btn btn-primary btn-full" style="margin-top:24px" onclick="doLogin()">Войти →</button>
   </div>
 </div>
 
-<!-- ════ ПРИЛОЖЕНИЕ ════ -->
+<!-- ══ ПРИЛОЖЕНИЕ ══ -->
 <div id="app">
-  <header>
-    <div class="h-logo">⚡ Coach Space</div>
-    <div class="h-right">
-      <span class="h-name" id="hName"></span>
-      <span class="role-badge" id="hRole"></span>
-      <button class="btn-out" onclick="doLogout()">Выйти</button>
+  <!-- Шапка -->
+  <div class="topbar">
+    <div class="topbar-logo">⚡ Coach Space</div>
+    <div class="topbar-right">
+      <span class="topbar-name" id="hName"></span>
+      <span class="topbar-role" id="hRole"></span>
+      <button class="btn-logout" onclick="doLogout()" title="Выйти">⏏</button>
     </div>
-  </header>
-  <div class="tabs" id="tabs"></div>
+  </div>
+
+  <!-- Контент -->
   <div class="content">
 
-    <!-- Тренер: ученики -->
-    <div class="panel" id="panel-students">
-      <div class="stat-grid" id="adminStats"></div>
-      <div class="card">
-        <div class="card-title">Список учеников</div>
-        <div class="s-list" id="sList"></div>
+    <!-- ════ ГЛАВНАЯ — ТРЕНЕР ════ -->
+    <div class="panel" id="p-admin-home">
+      <div class="stats-grid" id="adminStats"></div>
+
+      <!-- Список учеников -->
+      <div class="sec-head">
+        <div class="sec-title">👥 Ученики</div>
+        <button class="btn btn-primary btn-sm" onclick="openMo('mAddUser')">+ Добавить</button>
       </div>
+      <div id="adminStudents"></div>
+
+      <!-- Опубликовать пост -->
+      <div class="divider"></div>
+      <div class="sec-head">
+        <div class="sec-title">📢 Новости</div>
+        <button class="btn btn-ghost btn-sm" onclick="openMo('mPost')">+ Пост</button>
+      </div>
+      <div id="adminPosts"></div>
     </div>
 
-    <!-- Тренер: расписание -->
-    <div class="panel" id="panel-sched">
+    <!-- ════ ПРОГРЕСС — ТРЕНЕР ════ -->
+    <div class="panel" id="p-admin-progress">
       <div class="card">
-        <div class="card-title">Создать тренировочный слот</div>
-        <div class="g2">
-          <div>
-            <div class="f-group">
-              <label class="f-label">Название</label>
-              <input class="f-input" id="slotTitle" placeholder="Персональная тренировка" />
-            </div>
-            <div class="f-group">
-              <label class="f-label">Дата и время</label>
-              <input class="f-input" type="datetime-local" id="slotDt" />
-            </div>
-          </div>
-          <div>
-            <div class="f-group">
-              <label class="f-label">Длительность (мин)</label>
-              <input class="f-input" type="number" id="slotDur" value="60" min="15" max="180" step="15" />
-            </div>
-            <div class="f-group" style="margin-top:20px">
-              <button class="btn btn-a" onclick="createSlot()">➕ Создать слот</button>
-            </div>
-          </div>
+        <div class="card-title">Выберите ученика</div>
+        <select class="f-select" id="progressStudentSel" onchange="loadStudentProgress()">
+          <option value="">— выберите —</option>
+        </select>
+      </div>
+      <div id="progressContent"></div>
+    </div>
+
+    <!-- ════ МАГАЗИН — ТРЕНЕР ════ -->
+    <div class="panel" id="p-admin-shop">
+      <div class="sec-head">
+        <div class="sec-title">🛒 Магазин</div>
+        <button class="btn btn-primary btn-sm" onclick="openMo('mAddShop')">+ Товар</button>
+      </div>
+      <div class="shop-grid" id="adminShopGrid"></div>
+    </div>
+
+    <!-- ════ ГЛАВНАЯ — УЧЕНИК ════ -->
+    <div class="panel" id="p-user-home">
+      <!-- Абонемент -->
+      <div class="sub-hero" id="subHero">
+        <div class="sub-label">Мой абонемент</div>
+        <div class="sub-count" id="subCount">—</div>
+        <div class="sub-desc">тренировок осталось</div>
+        <div class="sub-pay">Дата оплаты: <span id="subPayDate">—</span></div>
+        <div class="streak-wrap" id="streakWrap" style="display:none">
+          <div class="streak-fire">🔥</div>
+          <div class="streak-text">Ты в деле! <b>Продолжай!</b></div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-title">Расписание</div>
-        <div class="day-filter" id="adminDays"></div>
-        <div class="sched-grid" id="adminGrid"></div>
-      </div>
+
+      <!-- Кнопка план -->
+      <div id="planBtnWrap"></div>
+
+      <!-- Кнопка чат -->
+      <a id="tgChatBtn" class="tg-btn" href="#" target="_blank">
+        <div class="tg-icon">✈️</div>
+        <div><b style="font-size:14px">Связаться с тренером</b><br><span style="font-size:12px;color:var(--muted2)">Telegram</span></div>
+      </a>
+
+      <!-- Посты -->
+      <div class="divider"></div>
+      <div class="sec-title" style="margin-bottom:12px">📢 Новости</div>
+      <div id="userPosts"></div>
     </div>
 
-    <!-- Ученик: абонемент -->
-    <div class="panel" id="panel-sub">
-      <div class="sub-card">
-        <div class="sub-lbl">Мой абонемент</div>
-        <div class="sub-num" id="subNum">—</div>
-        <div class="sub-desc">занятий осталось</div>
-        <div class="sub-pay">Дата оплаты: <span id="subPay">—</span></div>
+    <!-- ════ ПРОГРЕСС — УЧЕНИК ════ -->
+    <div class="panel" id="p-user-progress">
+      <div class="sec-head">
+        <div class="sec-title">📈 Мой прогресс</div>
+        <button class="btn btn-primary btn-sm" onclick="openMo('mAddWeight')">+ Вес</button>
       </div>
-      <div class="card">
-        <div class="card-title">Мои записи</div>
-        <div id="myBooks"></div>
+
+      <div class="card card-accent">
+        <div class="card-title">График веса</div>
+        <div class="chart-wrap"><canvas id="weightChart"></canvas></div>
       </div>
+
+      <div class="sec-head" style="margin-top:8px">
+        <div class="sec-title">📸 Фото прогресса</div>
+        <button class="btn btn-ghost btn-sm" onclick="openMo('mAddPhoto')">+ Фото</button>
+      </div>
+      <div class="progress-photos" id="progressPhotos"></div>
     </div>
 
-    <!-- Ученик: запись -->
-    <div class="panel" id="panel-book">
-      <div class="card">
-        <div class="card-title">Доступные тренировки</div>
-        <div class="day-filter" id="studentDays"></div>
-        <div class="sched-grid" id="studentGrid"></div>
-      </div>
+    <!-- ════ МАГАЗИН — УЧЕНИК ════ -->
+    <div class="panel" id="p-user-shop">
+      <div class="sec-title" style="margin-bottom:14px">🛒 Магазин</div>
+      <div class="shop-grid" id="userShopGrid"></div>
     </div>
 
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<!-- ══ НИЖНЯЯ НАВИГАЦИЯ ══ -->
+<nav class="bottom-nav" id="bottomNav" style="display:none"></nav>
+
+<!-- ════════ МОДАЛКИ ════════ -->
+
+<!-- Добавить ученика -->
+<div class="mo" id="mAddUser">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">➕ Новый ученик</div>
+    <div class="f-group"><label class="f-label">Имя</label><input class="f-input" id="uName" placeholder="Иван Иванов"/></div>
+    <div class="g2">
+      <div class="f-group"><label class="f-label">Логин</label><input class="f-input" id="uLogin" placeholder="ivan2024" autocomplete="off"/></div>
+      <div class="f-group"><label class="f-label">Пароль</label><input class="f-input" id="uPwd" placeholder="Пароль"/></div>
+    </div>
+    <div class="g2">
+      <div class="f-group"><label class="f-label">Telegram ID</label><input class="f-input" id="uTg" type="number" placeholder="123456789"/></div>
+      <div class="f-group"><label class="f-label">Занятий</label><input class="f-input" id="uSess" type="number" value="8" min="0"/></div>
+    </div>
+    <div class="g2">
+      <div class="f-group"><label class="f-label">Дата оплаты</label><input class="f-input" id="uPayDate" type="date"/></div>
+      <div class="f-group"><label class="f-label">Ссылка на план (Excel)</label><input class="f-input" id="uPlan" placeholder="https://..."/></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeMo('mAddUser')">Отмена</button>
+      <button class="btn btn-primary" onclick="addUser()">Сохранить</button>
+    </div>
   </div>
 </div>
 
-<!-- ── Модалка: новый ученик ── -->
-<div class="mo" id="mAdd">
+<!-- Редактировать ученика -->
+<div class="mo" id="mEditUser">
   <div class="modal">
-    <div class="m-title">➕ Новый ученик</div>
-    <div class="f-group"><label class="f-label">Имя</label><input class="f-input" id="nName" placeholder="Иван Иванов" /></div>
-    <div class="f-group"><label class="f-label">Логин (для входа)</label><input class="f-input" id="nLogin" placeholder="ivan_petrov" autocomplete="off" /></div>
-    <div class="f-group"><label class="f-label">Пароль</label><input class="f-input" id="nPwd" placeholder="Минимум 4 символа" /></div>
-    <div class="f-group"><label class="f-label">Telegram ID (необязательно)</label><input class="f-input" id="nTg" placeholder="123456789" type="number" /></div>
+    <div class="modal-handle"></div>
+    <div class="modal-title">✏️ Редактировать</div>
+    <input type="hidden" id="editId"/>
+    <div class="f-group"><label class="f-label">Имя</label><input class="f-input" id="editName"/></div>
+    <div class="f-group"><label class="f-label">Новый пароль (пусто = без изм.)</label><input class="f-input" id="editPwd" placeholder="Новый пароль"/></div>
+    <div class="f-group"><label class="f-label">Telegram ID</label><input class="f-input" id="editTg" type="number"/></div>
     <div class="g2">
-      <div class="f-group"><label class="f-label">Занятий</label><input class="f-input" id="nSess" type="number" value="8" min="0" /></div>
-      <div class="f-group"><label class="f-label">Дата оплаты</label><input class="f-input" id="nPay" type="date" /></div>
+      <div class="f-group"><label class="f-label">Занятий</label><input class="f-input" id="editSess" type="number" min="0"/></div>
+      <div class="f-group"><label class="f-label">Дата оплаты</label><input class="f-input" id="editPayDate" type="date"/></div>
     </div>
-    <div class="m-foot">
-      <button class="btn btn-g" onclick="closeMo('mAdd')">Отмена</button>
-      <button class="btn btn-a" onclick="addStudent()">Сохранить</button>
+    <div class="f-group"><label class="f-label">Ссылка на план (Excel)</label><input class="f-input" id="editPlan" placeholder="https://..."/></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeMo('mEditUser')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveEditUser()">Сохранить</button>
     </div>
   </div>
 </div>
 
-<!-- ── Модалка: редактировать ученика ── -->
-<div class="mo" id="mEdit">
+<!-- Новый пост -->
+<div class="mo" id="mPost">
   <div class="modal">
-    <div class="m-title">✏️ Редактировать ученика</div>
-    <input type="hidden" id="eId" />
-    <div class="f-group"><label class="f-label">Имя</label><input class="f-input" id="eName" /></div>
-    <div class="f-group"><label class="f-label">Новый пароль (пустое = без изменений)</label><input class="f-input" id="ePwd" placeholder="Новый пароль" /></div>
-    <div class="f-group"><label class="f-label">Telegram ID</label><input class="f-input" id="eTg" type="number" /></div>
-    <div class="g2">
-      <div class="f-group"><label class="f-label">Занятий</label><input class="f-input" id="eSess" type="number" min="0" /></div>
-      <div class="f-group"><label class="f-label">Дата оплаты</label><input class="f-input" id="ePay" type="date" /></div>
+    <div class="modal-handle"></div>
+    <div class="modal-title">📢 Новый пост</div>
+    <div class="f-group"><label class="f-label">Текст</label><textarea class="f-textarea" id="postText" placeholder="Напишите новость..."></textarea></div>
+    <div class="f-group"><label class="f-label">Ссылка (необязательно)</label><input class="f-input" id="postLink" placeholder="https://..."/></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeMo('mPost')">Отмена</button>
+      <button class="btn btn-primary" onclick="addPost()">Опубликовать</button>
     </div>
-    <div class="m-foot">
-      <button class="btn btn-g" onclick="closeMo('mEdit')">Отмена</button>
-      <button class="btn btn-a" onclick="saveEdit()">Сохранить</button>
+  </div>
+</div>
+
+<!-- Добавить товар -->
+<div class="mo" id="mAddShop">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🛒 Новый товар</div>
+    <div class="f-group"><label class="f-label">Название</label><input class="f-input" id="shopName" placeholder="Протеин XL"/></div>
+    <div class="f-group"><label class="f-label">Цена (₽)</label><input class="f-input" id="shopPrice" type="number" placeholder="1990"/></div>
+    <div class="f-group">
+      <label class="f-label">Фото товара</label>
+      <label class="upload-btn" id="shopUploadLabel">
+        <input type="file" id="shopPhotoInput" accept="image/*" onchange="previewShopPhoto(event)"/>
+        <div class="upload-icon">📷</div>
+        <div class="upload-label">Нажмите для загрузки</div>
+      </label>
+      <img class="upload-preview" id="shopPreview" alt=""/>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeMo('mAddShop')">Отмена</button>
+      <button class="btn btn-primary" onclick="addShopItem()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Добавить вес -->
+<div class="mo" id="mAddWeight">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚖️ Записать вес</div>
+    <div class="f-group"><label class="f-label">Вес (кг)</label><input class="f-input" id="weightVal" type="number" step="0.1" placeholder="72.5"/></div>
+    <div class="f-group"><label class="f-label">Дата</label><input class="f-input" id="weightDate" type="date"/></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeMo('mAddWeight')">Отмена</button>
+      <button class="btn btn-primary" onclick="addWeight()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Добавить фото -->
+<div class="mo" id="mAddPhoto">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📸 Фото прогресса</div>
+    <div class="f-group">
+      <label class="upload-btn" id="photoUploadLabel">
+        <input type="file" id="progressPhotoInput" accept="image/*" onchange="previewProgressPhoto(event)"/>
+        <div class="upload-icon">📷</div>
+        <div class="upload-label">Выберите фото</div>
+      </label>
+      <img class="upload-preview" id="progressPreview" alt=""/>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeMo('mAddPhoto')">Отмена</button>
+      <button class="btn btn-primary" onclick="uploadProgressPhoto()">Загрузить</button>
     </div>
   </div>
 </div>
@@ -424,415 +679,618 @@
 <div class="toasts" id="toasts"></div>
 
 <script>
-// ═══════════════════════════════════════
-// ХРАНИЛИЩЕ — localStorage
-// ═══════════════════════════════════════
-const UK = 'fp_users';
-const SK = 'fp_sched';
+// ═══════════════════════════════════════════════════════
+//  СОСТОЯНИЕ
+// ═══════════════════════════════════════════════════════
+let ME = null;           // текущий пользователь
+let weightChartInst = null;
 
-function loadU() { try { return JSON.parse(localStorage.getItem(UK)) || []; } catch { return []; } }
-function saveU(d){ localStorage.setItem(UK, JSON.stringify(d)); }
-function loadS() { try { return JSON.parse(localStorage.getItem(SK)) || []; } catch { return []; } }
-function saveS(d){ localStorage.setItem(SK, JSON.stringify(d)); }
+// ═══════════════════════════════════════════════════════
+//  API-ОБЁРТКА
+// ═══════════════════════════════════════════════════════
+async function api(url, method = 'GET', body = null) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(url, opts);
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error || 'Ошибка запроса');
+  return d;
+}
 
-// Создаём тренера при первом запуске
-(function initDB() {
-  const u = loadU();
-  if (!u.find(x => x.role === 'admin')) {
-    u.push({ id:'trainer_1', name:'Тренер', login:'Klimm2000', pwd:'As123456',
-             role:'admin', telegramId:null, sessions:0, paymentDate:null });
-    saveU(u);
-  }
-})();
-
-// ═══════════════════════════════════════
-// СОСТОЯНИЕ
-// ═══════════════════════════════════════
-let me = null;
-let allS = [];
-let selDay = 'all';
-
-// ═══════════════════════════════════════
-// АВТОРИЗАЦИЯ
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+//  АВТОРИЗАЦИЯ
+// ═══════════════════════════════════════════════════════
 function togglePwd() {
-  const i = document.getElementById('inP');
-  const b = document.getElementById('eyeBtn');
+  const i = document.getElementById('inP'), b = document.getElementById('eyeBtn');
   if (i.type === 'password') { i.type = 'text'; b.textContent = '🙈'; }
   else { i.type = 'password'; b.textContent = '👁'; }
 }
 
-function doLogin() {
+async function doLogin() {
   const login = document.getElementById('inL').value.trim();
   const pwd   = document.getElementById('inP').value;
   const err   = document.getElementById('loginErr');
   err.style.display = 'none';
+  if (!login || !pwd) { showErr(err, 'Введите логин и пароль'); return; }
+  try {
+    const res = await api('/api/login', 'POST', { login, password: pwd });
+    ME = res.user;
+    // Сохраняем ID для авто-входа
+    localStorage.setItem('auth_id', ME.id);
+    startApp();
+  } catch(e) { showErr(err, e.message || 'Неверный логин или пароль'); }
+}
 
-  if (!login || !pwd) {
-    err.style.display = 'block'; err.textContent = 'Введите логин и пароль'; return;
-  }
-  const user = loadU().find(u => u.login === login && u.pwd === pwd);
-  if (!user) {
-    err.style.display = 'block'; err.textContent = 'Неверный логин или пароль'; return;
-  }
-  me = user;
-  document.getElementById('loginPage').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
+async function tryAutoLogin() {
+  const id = localStorage.getItem('auth_id');
+  if (!id) return false;
+  try {
+    ME = await api('/api/me/' + id);
+    return true;
+  } catch { localStorage.removeItem('auth_id'); return false; }
+}
 
-  document.getElementById('hName').textContent = me.name;
-  const r = document.getElementById('hRole');
-  if (me.role === 'admin') { r.textContent = 'Тренер'; r.className = 'role-badge r-admin'; }
-  else                     { r.textContent = 'Ученик'; r.className = 'role-badge r-student'; }
-
-  buildTabs();
+function doLogout() {
+  ME = null;
+  localStorage.removeItem('auth_id');
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('bottomNav').style.display = 'none';
+  document.getElementById('loginPage').classList.add('show');
 }
 
 ['inL','inP'].forEach(id =>
   document.getElementById(id).addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); })
 );
 
-function doLogout() {
-  me = null;
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('loginPage').style.display = 'flex';
-  document.getElementById('inL').value = '';
-  document.getElementById('inP').value = '';
+// ═══════════════════════════════════════════════════════
+//  ЗАПУСК ПРИЛОЖЕНИЯ
+// ═══════════════════════════════════════════════════════
+function startApp() {
+  document.getElementById('loginPage').classList.remove('show');
+  document.getElementById('app').classList.add('show');
+  document.getElementById('bottomNav').style.display = 'flex';
+
+  document.getElementById('hName').textContent = ME.name;
+  const r = document.getElementById('hRole');
+  if (ME.role === 'admin') { r.textContent = 'Тренер'; r.className = 'topbar-role role-a'; }
+  else                     { r.textContent = 'Ученик'; r.className = 'topbar-role role-s'; }
+
+  buildNav();
 }
 
-// ═══════════════════════════════════════
-// НАВИГАЦИЯ
-// ═══════════════════════════════════════
-function buildTabs() {
-  const wrap = document.getElementById('tabs');
-  wrap.innerHTML = '';
-  const tabs = me.role === 'admin'
-    ? [{ id:'students', l:'👥 Ученики' }, { id:'sched', l:'📅 Расписание' }]
-    : [{ id:'sub', l:'💳 Мой абонемент' }, { id:'book', l:'📅 Запись' }];
-  tabs.forEach((t,i) => {
-    const b = document.createElement('button');
-    b.className = 'tab' + (i===0?' active':'');
-    b.textContent = t.l;
-    b.onclick = () => showPanel(t.id, b);
-    wrap.appendChild(b);
-  });
-  showPanel(tabs[0].id, wrap.querySelector('.tab'));
+// ═══════════════════════════════════════════════════════
+//  НАВИГАЦИЯ
+// ═══════════════════════════════════════════════════════
+const TABS = {
+  admin: [
+    { id:'admin-home',     icon:'🏠', label:'Главная' },
+    { id:'admin-progress', icon:'📈', label:'Прогресс' },
+    { id:'admin-shop',     icon:'🛒', label:'Магазин'  }
+  ],
+  user: [
+    { id:'user-home',     icon:'🏠', label:'Главная' },
+    { id:'user-progress', icon:'📈', label:'Прогресс' },
+    { id:'user-shop',     icon:'🛒', label:'Магазин'  }
+  ]
+};
+
+function buildNav() {
+  const nav  = document.getElementById('bottomNav');
+  const tabs = ME.role === 'admin' ? TABS.admin : TABS.user;
+  nav.innerHTML = tabs.map((t,i) =>
+    `<button class="nav-btn${i===0?' active':''}" onclick="showTab('${t.id}',this)">
+       <span class="nav-icon">${t.icon}</span>${t.label}
+     </button>`
+  ).join('');
+  showTab(tabs[0].id, nav.querySelector('.nav-btn'));
 }
 
-function showPanel(id, btn) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+function showTab(id, btn) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('panel-'+id).classList.add('active');
-  selDay = 'all';
-  if (id==='students') renderStudents();
-  if (id==='sched')    renderAdminSched();
-  if (id==='sub')      renderSub();
-  if (id==='book')     renderBook();
+  document.getElementById('p-'+id).classList.add('active');
+  // Загрузка данных
+  if (id==='admin-home')     loadAdminHome();
+  if (id==='admin-progress') loadProgressPanel();
+  if (id==='admin-shop')     loadAdminShop();
+  if (id==='user-home')      loadUserHome();
+  if (id==='user-progress')  loadUserProgress();
+  if (id==='user-shop')      loadUserShop();
 }
 
-// ═══════════════════════════════════════
-// ТРЕНЕР: УЧЕНИКИ
-// ═══════════════════════════════════════
-function renderStudents() {
-  const students = loadU().filter(u => u.role==='student');
-  const today = new Date().toISOString().split('T')[0];
+// ═══════════════════════════════════════════════════════
+//  ТРЕНЕР: ГЛАВНАЯ
+// ═══════════════════════════════════════════════════════
+async function loadAdminHome() {
+  loadAdminStats();
+  loadAdminStudents();
+  loadAdminPosts();
+}
 
-  document.getElementById('adminStats').innerHTML = `
-    <div class="stat-card"><div class="stat-lbl">Всего учеников</div><div class="stat-val cg">${students.length}</div></div>
-    <div class="stat-card"><div class="stat-lbl">Мало занятий (≤2)</div><div class="stat-val cw">${students.filter(s=>s.sessions<=2&&s.sessions>0).length}</div></div>
-    <div class="stat-card"><div class="stat-lbl">Абонемент кончился</div><div class="stat-val cr">${students.filter(s=>s.sessions<=0).length}</div></div>
-    <div class="stat-card"><div class="stat-lbl">Оплата сегодня</div><div class="stat-val cw">${students.filter(s=>s.paymentDate===today).length}</div></div>
-  `;
+async function loadAdminStats() {
+  try {
+    const students = await api('/api/users');
+    const today    = new Date().toISOString().split('T')[0];
+    document.getElementById('adminStats').innerHTML = `
+      <div class="stat-box"><div class="stat-n cg">${students.length}</div><div class="stat-l">Учеников</div></div>
+      <div class="stat-box"><div class="stat-n cw">${students.filter(s=>s.sessions<=2&&s.sessions>0).length}</div><div class="stat-l">Мало занятий</div></div>
+      <div class="stat-box"><div class="stat-n cr">${students.filter(s=>s.sessions<=0).length}</div><div class="stat-l">Абонемент 0</div></div>
+      <div class="stat-box"><div class="stat-n cw">${students.filter(s=>s.paymentDate===today).length}</div><div class="stat-l">Оплата сегодня</div></div>
+    `;
+  } catch(e) { toast(e.message,'e'); }
+}
 
-  const list = document.getElementById('sList');
-  if (!students.length) {
-    list.innerHTML = `<div class="empty"><div class="empty-i">👥</div><div>Нет учеников. Нажмите «Добавить»!</div></div>`;
-  } else {
-    const sorted = [...students].sort((a,b) => a.sessions - b.sessions);
-    list.innerHTML = sorted.map(s => {
+async function loadAdminStudents() {
+  const box = document.getElementById('adminStudents');
+  try {
+    const students = await api('/api/users');
+    if (!students.length) {
+      box.innerHTML = `<div class="empty"><div class="empty-i">👥</div><div>Нет учеников</div></div>`;
+      return;
+    }
+    const today = new Date().toISOString().split('T')[0];
+    box.innerHTML = [...students].sort((a,b)=>a.sessions-b.sessions).map(s => {
       const cls = s.sessions<=0?'cr':s.sessions<=2?'cw':'cg';
-      const pd  = s.paymentDate ? new Date(s.paymentDate).toLocaleDateString('ru-RU') : 'не задана';
-      const pt  = s.paymentDate === today;
+      const pd  = s.paymentDate ? new Date(s.paymentDate).toLocaleDateString('ru-RU') : '—';
+      const pt  = s.paymentDate===today;
+      const ava = s.name.charAt(0).toUpperCase();
       return `
         <div class="s-row">
-          <div class="s-num ${cls}">${s.sessions}</div>
+          <div class="s-ava">${ava}</div>
           <div class="s-info">
             <div class="s-name">${esc(s.name)}</div>
-            <div class="s-meta">🔑 ${esc(s.login)}${s.telegramId?' · ✈️ TG':''} · Оплата: <span style="color:${pt?'var(--warn)':'var(--muted)'}">${pd}${pt?' ⚠️':''}</span></div>
+            <div class="s-meta">🔑 ${esc(s.login)} · Оплата: <span style="color:${pt?'var(--warn)':'var(--muted2)'}">${pd}${pt?' ⚠️':''}</span></div>
           </div>
+          <div class="s-sess ${cls}">${s.sessions}</div>
           <div class="s-btns">
-            <button class="btn btn-w sm" onclick="markAtt('${s.id}','${esc(s.name)}')">✓ Занятие</button>
-            <button class="btn btn-g sm" onclick="openEdit('${s.id}')">✏️</button>
-            <button class="btn btn-d sm" onclick="delStudent('${s.id}')">🗑</button>
+            <button class="btn btn-warn btn-sm" onclick="markAtt('${s.id}','${esc(s.name)}')">✓</button>
+            <button class="btn btn-ghost btn-sm" onclick="openEditUser('${s.id}')">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="delUser('${s.id}')">🗑</button>
           </div>
         </div>`;
     }).join('');
-  }
-
-  const d = document.createElement('div');
-  d.style.marginTop = '16px';
-  d.innerHTML = `<button class="btn btn-a" onclick="openMo('mAdd')">➕ Добавить ученика</button>`;
-  list.appendChild(d);
+  } catch(e) { box.innerHTML=`<div class="empty"><div>${e.message}</div></div>`; }
 }
 
-function markAtt(id, name) {
-  if (!confirm(`Отметить присутствие ${name}? (−1 занятие)`)) return;
-  const users = loadU();
-  const u = users.find(x => x.id===id);
-  if (!u || u.sessions<=0) { toast('Нет доступных занятий', 'error'); return; }
-  u.sessions--;
-  saveU(users);
-  toast(`✅ ${name}: осталось ${u.sessions} занятий`, 'success');
-  if (u.sessions <= 2) toast(`⚠️ У ${name} осталось мало занятий!`, 'warn');
-  renderStudents();
+async function markAtt(id, name) {
+  if (!confirm(`Отметить тренировку ${name}? (−1 занятие)`)) return;
+  try {
+    const r = await api(`/api/users/${id}/attendance`, 'POST');
+    toast(`✅ ${name}: осталось ${r.sessions} занятий`, 's');
+    loadAdminHome();
+  } catch(e) { toast(e.message,'e'); }
 }
 
-function openEdit(id) {
-  const u = loadU().find(x => x.id===id);
-  if (!u) return;
-  document.getElementById('eId').value   = u.id;
-  document.getElementById('eName').value = u.name;
-  document.getElementById('ePwd').value  = '';
-  document.getElementById('eTg').value   = u.telegramId||'';
-  document.getElementById('eSess').value = u.sessions;
-  document.getElementById('ePay').value  = u.paymentDate||'';
-  openMo('mEdit');
+async function loadAdminPosts() {
+  const box = document.getElementById('adminPosts');
+  try {
+    const posts = await api('/api/posts');
+    if (!posts.length) { box.innerHTML=`<div class="empty"><div class="empty-i">📢</div><div>Постов пока нет</div></div>`; return; }
+    box.innerHTML = posts.map(p => `
+      <div class="post-card">
+        <div class="post-text">${esc(p.text)}</div>
+        ${p.link?`<a class="post-link" href="${p.link}" target="_blank">🔗 Открыть ссылку</a>`:''}
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="post-date">${new Date(p.createdAt).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+          <button class="btn btn-danger btn-sm" onclick="delPost('${p.id}')">🗑</button>
+        </div>
+      </div>`).join('');
+  } catch(e) { box.innerHTML=`<div class="empty"><div>${e.message}</div></div>`; }
 }
 
-function saveEdit() {
-  const id = document.getElementById('eId').value;
-  const users = loadU();
-  const u = users.find(x => x.id===id);
-  if (!u) return;
-  const n = document.getElementById('eName').value.trim();
-  if (n) u.name = n;
-  const np = document.getElementById('ePwd').value;
-  if (np) u.pwd = np;
-  u.telegramId  = document.getElementById('eTg').value || null;
-  u.sessions    = parseInt(document.getElementById('eSess').value) || 0;
-  u.paymentDate = document.getElementById('ePay').value || null;
-  saveU(users);
-  toast('✅ Данные сохранены', 'success');
-  closeMo('mEdit');
-  renderStudents();
+// ── Добавить ученика ──
+async function addUser() {
+  const name    = v('uName'); const login   = v('uLogin');
+  const pwd     = v('uPwd');  const tg      = v('uTg');
+  const sess    = v('uSess'); const payDate = v('uPayDate');
+  const planUrl = v('uPlan');
+  if (!name||!login||!pwd) { toast('Имя, логин и пароль обязательны','e'); return; }
+  try {
+    await api('/api/users','POST',{ name,login,password:pwd,telegramId:tg||null,
+      sessions:parseInt(sess)||0,paymentDate:payDate||null,planUrl:planUrl||null });
+    toast(`✅ Ученик ${name} добавлен`,'s');
+    closeMo('mAddUser');
+    clearInputs(['uName','uLogin','uPwd','uTg','uPayDate','uPlan']);
+    document.getElementById('uSess').value='8';
+    loadAdminHome();
+  } catch(e) { toast(e.message,'e'); }
 }
 
-function addStudent() {
-  const name  = document.getElementById('nName').value.trim();
-  const login = document.getElementById('nLogin').value.trim();
-  const pwd   = document.getElementById('nPwd').value;
-  const tg    = document.getElementById('nTg').value;
-  const sess  = parseInt(document.getElementById('nSess').value) || 0;
-  const pay   = document.getElementById('nPay').value;
-
-  if (!name || !login || !pwd) { toast('Имя, логин и пароль обязательны', 'error'); return; }
-  if (pwd.length < 4) { toast('Пароль — минимум 4 символа', 'error'); return; }
-  const users = loadU();
-  if (users.find(u => u.login===login)) { toast('Логин уже занят', 'error'); return; }
-
-  users.push({ id:'u_'+Date.now(), name, login, pwd, role:'student',
-               telegramId:tg||null, sessions:sess, paymentDate:pay||null });
-  saveU(users);
-  toast(`✅ Ученик ${name} добавлен`, 'success');
-  closeMo('mAdd');
-  ['nName','nLogin','nPwd','nTg','nPay'].forEach(i => document.getElementById(i).value='');
-  document.getElementById('nSess').value = '8';
-  renderStudents();
+async function openEditUser(id) {
+  try {
+    const u = await api('/api/users/'+id);
+    document.getElementById('editId').value     = u.id;
+    document.getElementById('editName').value   = u.name;
+    document.getElementById('editPwd').value    = '';
+    document.getElementById('editTg').value     = u.telegramId||'';
+    document.getElementById('editSess').value   = u.sessions;
+    document.getElementById('editPayDate').value= u.paymentDate||'';
+    document.getElementById('editPlan').value   = u.planUrl||'';
+    openMo('mEditUser');
+  } catch(e) { toast(e.message,'e'); }
 }
 
-function delStudent(id) {
+async function saveEditUser() {
+  const id   = document.getElementById('editId').value;
+  const data = {
+    name:        v('editName'),
+    telegramId:  v('editTg')||null,
+    sessions:    parseInt(v('editSess'))||0,
+    paymentDate: v('editPayDate')||null,
+    planUrl:     v('editPlan')||null
+  };
+  const newPwd = v('editPwd');
+  if (newPwd) data.password = newPwd;
+  try {
+    await api('/api/users/'+id,'PUT',data);
+    toast('✅ Сохранено','s');
+    closeMo('mEditUser');
+    loadAdminHome();
+  } catch(e) { toast(e.message,'e'); }
+}
+
+async function delUser(id) {
   if (!confirm('Удалить ученика?')) return;
-  saveU(loadU().filter(u => u.id!==id));
-  const s = loadS(); s.forEach(x => { if(x.bookedBy===id){x.bookedBy=null;x.bookedByName=null;} }); saveS(s);
-  toast('Ученик удалён', 'warn');
-  renderStudents();
+  try { await api('/api/users/'+id,'DELETE'); toast('Ученик удалён','w'); loadAdminHome(); }
+  catch(e) { toast(e.message,'e'); }
 }
 
-// ═══════════════════════════════════════
-// ТРЕНЕР: РАСПИСАНИЕ
-// ═══════════════════════════════════════
-function renderAdminSched() {
-  allS = loadS();
-  _adminGrid();
+// ── Посты ──
+async function addPost() {
+  const text = v('postText'), link = v('postLink');
+  if (!text) { toast('Текст обязателен','e'); return; }
+  try {
+    await api('/api/posts','POST',{ text, link:link||null });
+    toast('✅ Опубликовано','s');
+    closeMo('mPost');
+    clearInputs(['postText','postLink']);
+    loadAdminHome();
+  } catch(e) { toast(e.message,'e'); }
 }
 
-function _adminGrid() {
-  buildDayFlt('adminDays', allS, '_adminGrid');
-  const slots = byDay(allS);
-  const g = document.getElementById('adminGrid');
-  if (!slots.length) { g.innerHTML=`<div class="empty"><div class="empty-i">📅</div><div>Нет слотов</div></div>`; return; }
-  g.innerHTML = slots.map(s => {
-    const dt = new Date(s.datetime);
-    const ds = dt.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',weekday:'short'});
-    const ts = dt.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
-    return `
-      <div class="slot-c ${s.bookedBy?'bkd':''}">
-        <div class="sl-title">${esc(s.title)}</div>
-        <div class="sl-dt">📅 ${ds}, ${ts}</div>
-        <div class="sl-dur">⏱ ${s.duration} мин</div>
-        ${s.bookedBy?`<div class="sl-who">👤 ${esc(s.bookedByName)}</div><div class="badge b-busy">Занято</div>`:`<div class="badge b-free">Свободно</div>`}
-        <br><button class="btn btn-d sm" onclick="delSlot('${s.id}')">🗑 Удалить</button>
-      </div>`;
-  }).join('');
+async function delPost(id) {
+  if (!confirm('Удалить пост?')) return;
+  try { await api('/api/posts/'+id,'DELETE'); toast('Удалено','w'); loadAdminPosts(); }
+  catch(e) { toast(e.message,'e'); }
 }
 
-function createSlot() {
-  const dt = document.getElementById('slotDt').value;
-  if (!dt) { toast('Укажите дату и время', 'warn'); return; }
-  const s = loadS();
-  s.push({ id:'sl_'+Date.now(),
-    title:    document.getElementById('slotTitle').value.trim()||'Тренировка',
-    datetime: new Date(dt).toISOString(),
-    duration: parseInt(document.getElementById('slotDur').value)||60,
-    bookedBy: null, bookedByName: null });
-  saveS(s);
-  toast('✅ Слот создан', 'success');
-  document.getElementById('slotDt').value = '';
-  document.getElementById('slotTitle').value = '';
-  renderAdminSched();
+// ═══════════════════════════════════════════════════════
+//  ТРЕНЕР: ПРОГРЕСС УЧЕНИКОВ
+// ═══════════════════════════════════════════════════════
+async function loadProgressPanel() {
+  try {
+    const students = await api('/api/users');
+    const sel = document.getElementById('progressStudentSel');
+    sel.innerHTML = '<option value="">— выберите ученика —</option>'
+      + students.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+    document.getElementById('progressContent').innerHTML = '';
+  } catch(e) { toast(e.message,'e'); }
 }
 
-function delSlot(id) {
-  if (!confirm('Удалить слот?')) return;
-  saveS(loadS().filter(s => s.id!==id));
-  toast('Слот удалён', 'warn');
-  renderAdminSched();
+async function loadStudentProgress() {
+  const uid = document.getElementById('progressStudentSel').value;
+  const box = document.getElementById('progressContent');
+  if (!uid) { box.innerHTML=''; return; }
+  box.innerHTML = `<div class="empty"><div class="splash-ring" style="margin:30px auto"></div></div>`;
+  try {
+    const data = await api('/api/progress/'+uid);
+    const weights = data.filter(d=>d.type==='weight');
+    const photos  = data.filter(d=>d.type==='photo');
+
+    let html = `<div class="card card-accent"><div class="card-title">График веса</div>`;
+    if (weights.length) {
+      html += `<div class="chart-wrap"><canvas id="adminWeightChart"></canvas></div>`;
+    } else {
+      html += `<div class="empty"><div class="empty-i">⚖️</div><div>Нет данных о весе</div></div>`;
+    }
+    html += `</div>`;
+
+    if (photos.length) {
+      html += `<div class="sec-title" style="margin-bottom:12px">📸 Фото прогресса</div>
+        <div class="progress-photos">`
+        + photos.map(p=>`<img class="prog-photo" src="${p.photoUrl}" loading="lazy"/>`).join('')
+        + `</div>`;
+    }
+
+    box.innerHTML = html;
+
+    if (weights.length) {
+      new Chart(document.getElementById('adminWeightChart'), buildChartConfig(weights));
+    }
+  } catch(e) { box.innerHTML=`<div class="empty"><div>${e.message}</div></div>`; }
 }
 
-// ═══════════════════════════════════════
-// УЧЕНИК: АБОНЕМЕНТ
-// ═══════════════════════════════════════
-function renderSub() {
-  me = loadU().find(u => u.id===me.id) || me;
-  const n = document.getElementById('subNum');
-  n.textContent = me.sessions;
-  n.style.color = me.sessions<=0?'var(--danger)':me.sessions<=2?'var(--warn)':'var(--accent)';
-  document.getElementById('subPay').textContent = me.paymentDate
-    ? new Date(me.paymentDate).toLocaleDateString('ru-RU') : 'не задана';
-
-  const now = new Date();
-  const my  = loadS().filter(s => s.bookedBy===me.id && new Date(s.datetime)>=now)
-                     .sort((a,b) => new Date(a.datetime)-new Date(b.datetime));
-  const box = document.getElementById('myBooks');
-  if (!my.length) { box.innerHTML=`<div class="empty"><div class="empty-i">📅</div><div>Нет записей</div></div>`; return; }
-  box.innerHTML = my.map(s => {
-    const d = new Date(s.datetime).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-    return `
-      <div class="s-row">
-        <div class="s-info"><div class="s-name">${esc(s.title)}</div><div class="s-meta">📅 ${d} · ⏱ ${s.duration} мин</div></div>
-        <button class="btn btn-d sm" onclick="cancelBook('${s.id}')">✕ Отменить</button>
-      </div>`;
-  }).join('');
+// ═══════════════════════════════════════════════════════
+//  ТРЕНЕР: МАГАЗИН
+// ═══════════════════════════════════════════════════════
+async function loadAdminShop() {
+  const grid = document.getElementById('adminShopGrid');
+  try {
+    const items = await api('/api/shop');
+    if (!items.length) {
+      grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="empty-i">🛒</div><div>Магазин пуст</div></div>`;
+      return;
+    }
+    grid.innerHTML = items.map(item=>`
+      <div class="shop-item">
+        ${item.photoUrl
+          ? `<img class="shop-img" src="${item.photoUrl}" loading="lazy" alt="${esc(item.name)}"/>`
+          : `<div class="shop-img-placeholder">📦</div>`}
+        <div class="shop-body">
+          <div class="shop-name">${esc(item.name)}</div>
+          <div class="shop-price">${item.price} ₽</div>
+          <button class="btn btn-danger btn-sm" onclick="delShopItem('${item.id}')">🗑 Удалить</button>
+        </div>
+      </div>`).join('');
+  } catch(e) { grid.innerHTML=`<div class="empty"><div>${e.message}</div></div>`; }
 }
 
-// ═══════════════════════════════════════
-// УЧЕНИК: ЗАПИСЬ
-// ═══════════════════════════════════════
-function renderBook() {
-  allS = loadS();
-  _studentGrid();
+function previewShopPhoto(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const prev = document.getElementById('shopPreview');
+  prev.src = URL.createObjectURL(file);
+  prev.style.display = 'block';
+  document.getElementById('shopUploadLabel').style.display = 'none';
 }
 
-function _studentGrid() {
-  const now  = new Date();
-  const free = allS.filter(s => !s.bookedBy && new Date(s.datetime)>now);
-  buildDayFlt('studentDays', free, '_studentGrid');
-  const slots = byDay(free);
-  const g = document.getElementById('studentGrid');
-  if (!slots.length) { g.innerHTML=`<div class="empty"><div class="empty-i">📅</div><div>Нет свободных тренировок</div></div>`; return; }
-  g.innerHTML = slots.map(s => {
-    const dt = new Date(s.datetime);
-    const ds = dt.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',weekday:'long'});
-    const ts = dt.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
-    return `
-      <div class="slot-c">
-        <div class="sl-title">${esc(s.title)}</div>
-        <div class="sl-dt">📅 ${ds}</div>
-        <div class="sl-dt">🕐 ${ts}</div>
-        <div class="sl-dur">⏱ ${s.duration} мин</div>
-        <div class="badge b-free">Свободно</div><br>
-        <button class="btn btn-a sm" onclick="bookSlot('${s.id}')">Записаться →</button>
-      </div>`;
-  }).join('');
+async function addShopItem() {
+  const name  = v('shopName'), price = v('shopPrice');
+  const file  = document.getElementById('shopPhotoInput').files[0];
+  if (!name||!price) { toast('Название и цена обязательны','e'); return; }
+
+  const fd = new FormData();
+  fd.append('name', name);
+  fd.append('price', price);
+  if (file) fd.append('photo', file);
+
+  try {
+    const r = await fetch('/api/shop',{method:'POST',body:fd});
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    toast('✅ Товар добавлен','s');
+    closeMo('mAddShop');
+    clearInputs(['shopName','shopPrice']);
+    document.getElementById('shopPhotoInput').value='';
+    document.getElementById('shopPreview').style.display='none';
+    document.getElementById('shopUploadLabel').style.display='flex';
+    loadAdminShop();
+  } catch(e) { toast(e.message,'e'); }
 }
 
-function bookSlot(id) {
-  const fresh = loadU().find(u => u.id===me.id)||me;
-  if (fresh.sessions<=0) { toast('❌ Нет занятий. Пополните абонемент.','error'); return; }
-  const sched = loadS();
-  const slot  = sched.find(s => s.id===id);
-  if (!slot) { toast('Слот не найден','error'); return; }
-  if (slot.bookedBy) { toast('Слот уже занят','error'); renderBook(); return; }
-  slot.bookedBy = me.id; slot.bookedByName = me.name;
-  saveS(sched);
-  toast('✅ Вы записаны на тренировку!','success');
-  renderBook();
+async function delShopItem(id) {
+  if (!confirm('Удалить товар?')) return;
+  try { await api('/api/shop/'+id,'DELETE'); toast('Удалено','w'); loadAdminShop(); }
+  catch(e) { toast(e.message,'e'); }
 }
 
-function cancelBook(id) {
-  if (!confirm('Отменить запись?')) return;
-  const sched = loadS();
-  const slot  = sched.find(s => s.id===id);
-  if (slot && slot.bookedBy===me.id) {
-    slot.bookedBy=null; slot.bookedByName=null;
-    saveS(sched); toast('Запись отменена','warn'); renderSub();
-  }
+// ═══════════════════════════════════════════════════════
+//  УЧЕНИК: ГЛАВНАЯ
+// ═══════════════════════════════════════════════════════
+async function loadUserHome() {
+  // Обновляем данные профиля
+  try { ME = await api('/api/me/'+ME.id); } catch{}
+
+  const count = document.getElementById('subCount');
+  count.textContent = ME.sessions;
+  count.style.color = ME.sessions<=0?'var(--danger)':ME.sessions<=2?'var(--warn)':'var(--accent)';
+
+  document.getElementById('subPayDate').textContent = ME.paymentDate
+    ? new Date(ME.paymentDate).toLocaleDateString('ru-RU') : '—';
+
+  const sw = document.getElementById('streakWrap');
+  sw.style.display = ME.sessions > 0 ? 'flex' : 'none';
+
+  // Кнопка плана
+  const pw = document.getElementById('planBtnWrap');
+  if (ME.planUrl) {
+    pw.innerHTML = `
+      <a class="plan-btn" href="${ME.planUrl}" target="_blank">
+        <div class="plan-icon">📋</div>
+        <div class="plan-text"><b>МОЙ ПЛАН ТРЕНИРОВОК</b><span>Открыть таблицу Excel</span></div>
+        <span style="font-size:20px;margin-left:auto">→</span>
+      </a>`;
+  } else { pw.innerHTML=''; }
+
+  // Telegram чат
+  const coachTg = await getCoachTgLink();
+  document.getElementById('tgChatBtn').href = coachTg;
+
+  loadUserPosts();
 }
 
-// ═══════════════════════════════════════
-// ДЕНЬ-ФИЛЬТР
-// ═══════════════════════════════════════
-function byDay(slots) {
-  if (selDay==='all') return slots;
-  return slots.filter(s => new Date(s.datetime).toDateString()===selDay);
+async function getCoachTgLink() {
+  try {
+    const snap = await fetch('/api/users?role=admin');
+    // Просто возвращаем t.me ссылку (задаётся через env тренером)
+    return 'https://t.me/' + (window._coachTgUsername || '');
+  } catch { return '#'; }
 }
 
-function buildDayFlt(cid, slots, fnName) {
-  const days = {};
-  slots.forEach(s => {
-    const d = new Date(s.datetime), k = d.toDateString();
-    if (!days[k]) days[k] = d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',weekday:'short'});
-  });
-  const box = document.getElementById(cid);
-  const keys = Object.keys(days);
-  if (!keys.length) { box.innerHTML=''; return; }
-  box.innerHTML =
-    `<button class="day-btn${selDay==='all'?' active':''}" onclick="setDay('all','${cid}','${fnName}')">Все</button>`
-    + keys.map(k => `<button class="day-btn${selDay===k?' active':''}" onclick="setDay('${k}','${cid}','${fnName}')">${days[k]}</button>`).join('');
+async function loadUserPosts() {
+  const box = document.getElementById('userPosts');
+  try {
+    const posts = await api('/api/posts');
+    if (!posts.length) { box.innerHTML=`<div class="empty"><div class="empty-i">📢</div><div>Новостей пока нет</div></div>`; return; }
+    box.innerHTML = posts.map(p=>`
+      <div class="post-card">
+        <div class="post-text">${esc(p.text)}</div>
+        ${p.link?`<a class="post-link" href="${p.link}" target="_blank">🔗 Открыть ссылку</a>`:''}
+        <div class="post-date">${new Date(p.createdAt).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+      </div>`).join('');
+  } catch{}
 }
 
-function setDay(day, cid, fnName) {
-  selDay = day;
-  const fns = { _adminGrid, _studentGrid };
-  if (fns[fnName]) fns[fnName]();
+// ═══════════════════════════════════════════════════════
+//  УЧЕНИК: ПРОГРЕСС
+// ═══════════════════════════════════════════════════════
+async function loadUserProgress() {
+  document.getElementById('weightDate').value = new Date().toISOString().split('T')[0];
+  try {
+    const data    = await api('/api/progress/'+ME.id);
+    const weights = data.filter(d=>d.type==='weight');
+    const photos  = data.filter(d=>d.type==='photo');
+
+    if (weightChartInst) { weightChartInst.destroy(); weightChartInst=null; }
+    if (weights.length) {
+      weightChartInst = new Chart(
+        document.getElementById('weightChart'),
+        buildChartConfig(weights)
+      );
+    } else {
+      document.getElementById('weightChart').parentElement.innerHTML =
+        `<div class="empty"><div class="empty-i">⚖️</div><div>Добавьте первую запись веса</div></div>`;
+    }
+
+    const pp = document.getElementById('progressPhotos');
+    if (photos.length) {
+      pp.innerHTML = photos.map(p=>
+        `<img class="prog-photo" src="${p.photoUrl}" loading="lazy"/>`
+      ).join('');
+    } else {
+      pp.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-i">📸</div><div>Нет фото</div></div>`;
+    }
+  } catch(e) { toast(e.message,'e'); }
 }
 
-// ═══════════════════════════════════════
-// УТИЛИТЫ
-// ═══════════════════════════════════════
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function buildChartConfig(weights) {
+  return {
+    type: 'line',
+    data: {
+      labels: weights.map(w=>w.date),
+      datasets: [{
+        label: 'Вес (кг)',
+        data:  weights.map(w=>w.weight),
+        borderColor: '#6ee7b7',
+        backgroundColor: 'rgba(110,231,183,.08)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#6ee7b7',
+        pointRadius: 5,
+        tension: 0.35,
+        fill: true
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ ticks:{ color:'#64748b', font:{size:11} }, grid:{ color:'rgba(255,255,255,.05)' } },
+        y:{ ticks:{ color:'#64748b', font:{size:11} }, grid:{ color:'rgba(255,255,255,.05)' } }
+      }
+    }
+  };
 }
-function toast(msg, type='success') {
-  const icons = {success:'✅',error:'❌',warn:'⚠️'};
-  const t = document.createElement('div');
+
+async function addWeight() {
+  const w = v('weightVal'), d = v('weightDate');
+  if (!w) { toast('Введите вес','e'); return; }
+  try {
+    await api('/api/progress','POST',{ userId:ME.id, weight:w, date:d });
+    toast('✅ Вес сохранён','s');
+    closeMo('mAddWeight');
+    document.getElementById('weightVal').value='';
+    loadUserProgress();
+  } catch(e) { toast(e.message,'e'); }
+}
+
+function previewProgressPhoto(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const prev = document.getElementById('progressPreview');
+  prev.src = URL.createObjectURL(file);
+  prev.style.display='block';
+  document.getElementById('photoUploadLabel').style.display='none';
+}
+
+async function uploadProgressPhoto() {
+  const file = document.getElementById('progressPhotoInput').files[0];
+  if (!file) { toast('Выберите фото','e'); return; }
+  const fd = new FormData();
+  fd.append('userId', ME.id);
+  fd.append('photo', file);
+  try {
+    const r = await fetch('/api/progress/photo',{method:'POST',body:fd});
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    toast('✅ Фото загружено','s');
+    closeMo('mAddPhoto');
+    document.getElementById('progressPhotoInput').value='';
+    document.getElementById('progressPreview').style.display='none';
+    document.getElementById('photoUploadLabel').style.display='flex';
+    loadUserProgress();
+  } catch(e) { toast(e.message,'e'); }
+}
+
+// ═══════════════════════════════════════════════════════
+//  УЧЕНИК: МАГАЗИН
+// ═══════════════════════════════════════════════════════
+async function loadUserShop() {
+  const grid = document.getElementById('userShopGrid');
+  try {
+    const items = await api('/api/shop');
+    if (!items.length) {
+      grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="empty-i">🛒</div><div>Магазин пуст</div></div>`;
+      return;
+    }
+    grid.innerHTML = items.map(item=>`
+      <div class="shop-item">
+        ${item.photoUrl
+          ? `<img class="shop-img" src="${item.photoUrl}" loading="lazy" alt="${esc(item.name)}"/>`
+          : `<div class="shop-img-placeholder">📦</div>`}
+        <div class="shop-body">
+          <div class="shop-name">${esc(item.name)}</div>
+          <div class="shop-price">${item.price} ₽</div>
+          <button class="btn btn-primary btn-sm" style="width:100%" onclick="orderItem('${item.id}','${esc(item.name)}')">Заказать</button>
+        </div>
+      </div>`).join('');
+  } catch(e) { grid.innerHTML=`<div class="empty"><div>${e.message}</div></div>`; }
+}
+
+async function orderItem(id, name) {
+  if (!confirm(`Заказать «${name}»? Тренер получит уведомление.`)) return;
+  try {
+    await api('/api/shop/'+id+'/order','POST',{ userId:ME.id, userName:ME.name });
+    toast(`✅ Заказ отправлен! Тренер свяжется с вами.`,'s');
+  } catch(e) { toast(e.message,'e'); }
+}
+
+// ═══════════════════════════════════════════════════════
+//  УТИЛИТЫ
+// ═══════════════════════════════════════════════════════
+function v(id)   { return document.getElementById(id).value.trim(); }
+function clearInputs(ids) { ids.forEach(id => document.getElementById(id).value=''); }
+function esc(s)  { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showErr(el,msg){ el.style.display='block'; el.textContent=msg; }
+
+function toast(msg, type='s') {
+  const ic = {s:'✅',e:'❌',w:'⚠️'};
+  const t  = document.createElement('div');
   t.className = `toast ${type}`;
-  t.textContent = `${icons[type]||'•'} ${msg}`;
+  t.textContent = `${ic[type]||'•'} ${msg}`;
   document.getElementById('toasts').appendChild(t);
-  setTimeout(() => t.remove(), 4000);
+  setTimeout(()=>t.remove(), 4000);
 }
 function openMo(id)  { document.getElementById(id).classList.add('open'); }
 function closeMo(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.mo').forEach(mo =>
-  mo.addEventListener('click', e => { if(e.target===mo) mo.classList.remove('open'); })
+document.querySelectorAll('.mo').forEach(m =>
+  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); })
 );
 
-// Мин. дата = сейчас
-document.getElementById('slotDt').min = (() => {
-  const n=new Date(); n.setMinutes(n.getMinutes()-n.getTimezoneOffset());
-  return n.toISOString().slice(0,16);
+// ═══════════════════════════════════════════════════════
+//  ИНИЦИАЛИЗАЦИЯ
+// ═══════════════════════════════════════════════════════
+(async function init() {
+  const splash = document.getElementById('splash');
+  const ok = await tryAutoLogin();
+  setTimeout(() => {
+    splash.classList.add('hide');
+    setTimeout(() => splash.style.display='none', 400);
+    if (ok) startApp();
+    else document.getElementById('loginPage').classList.add('show');
+  }, 800);
 })();
-document.getElementById('nPay').value =
+
+// Дефолтная дата для datepicker
+document.getElementById('uPayDate').value =
   new Date(Date.now()+30*86400000).toISOString().split('T')[0];
 </script>
 </body>
