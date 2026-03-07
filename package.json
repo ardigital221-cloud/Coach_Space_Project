@@ -1,7 +1,7 @@
 {
-  "name": "Проект Coach Space",
+  "name": "coach-space",
   "version": "1.0.0",
-  "description": "Веб-приложение для управления тренировками",
+  "description": "Веб-приложение для управления фитнес-тренировками",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
