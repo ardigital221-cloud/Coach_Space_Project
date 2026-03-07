@@ -522,9 +522,8 @@
 <!-- Просмотр плана тренировок -->
 <div class="mo" id="mPlan"><div class="modal">
   <div class="mh"></div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+  <div style="margin-bottom:16px">
     <div class="mt" style="margin-bottom:0">📋 План тренировок</div>
-    <a id="planDownloadBtn" href="#" download class="btn btn-g sm">⬇ Скачать</a>
   </div>
   <div class="plan-sheet-tabs" id="planSheetTabs"></div>
   <div class="plan-table-scroll">
@@ -665,9 +664,6 @@ async function showPlanModal() {
 
   try {
     const data = await api('/api/users/' + ME.id + '/plan');
-    // Обновляем ссылку на скачивание
-    if (data.planUrl) document.getElementById('planDownloadBtn').href = data.planUrl;
-
     if (data.planData && data.planData.sheets && data.planData.sheets.length) {
       _planData = data.planData;
       const sheets = _planData.sheets;
@@ -820,25 +816,37 @@ function renderPost(p, isAdmin){
     }).join('')+'</div>';
   }
 
-  // Реакции — с именами под кнопкой для тренера
+  // Реакции
   const reactions=p.reactions||{};
-  const reactHtml=EMOJIS.filter(e=>reactions[e]?.length>0).map(emoji=>{
-    const arr = reactions[emoji] || [];
-    const myR = arr.some(r => typeof r === 'string' ? r === ME?.id : r.userId === ME?.id);
-    const count = arr.length;
-    // Имена под кнопкой — только для тренера
-    let namesHtml = '';
-    if (isAdmin && arr.length > 0) {
+  // Для тренера — только те что есть + имена под ними
+  // Для ученика — все доступные эмодзи, активная подсвечена
+  let reactHtml = '';
+  if (isAdmin) {
+    reactHtml = EMOJIS.filter(e=>reactions[e]?.length>0).map(emoji=>{
+      const arr = reactions[emoji] || [];
+      const myR = arr.some(r => typeof r === 'string' ? r === ME?.id : r.userId === ME?.id);
+      const count = arr.length;
       const names = arr.map(r => typeof r === 'string' ? '?' : esc(r.userName || '?')).join(', ');
-      namesHtml = `<div class="react-names">${names}</div>`;
-    }
-    return `<div class="react-group"><button class="react-btn${myR?' active':''}" onclick="reactPost('${p.id}','${emoji}')">${emoji}<span class="react-count">${count}</span></button>${namesHtml}</div>`;
-  }).join('');
+      return `<div class="react-group">
+        <button class="react-btn${myR?' active':''}" onclick="reactPost('${p.id}','${emoji}')">${emoji}<span class="react-count">${count}</span></button>
+        <div class="react-names">${names}</div>
+      </div>`;
+    }).join('');
+  } else {
+    // Ученик: показываем все эмодзи, выбранная подсвечена
+    const myEmoji = EMOJIS.find(emoji => {
+      const arr = reactions[emoji] || [];
+      return arr.some(r => typeof r === 'string' ? r === ME?.id : r.userId === ME?.id);
+    });
+    reactHtml = EMOJIS.map(emoji => {
+      const arr = reactions[emoji] || [];
+      const count = arr.length;
+      const isMe = emoji === myEmoji;
+      return `<button class="react-btn${isMe?' active':''}" onclick="reactPost('${p.id}','${emoji}')">${emoji}${count > 0 ? `<span class="react-count">${count}</span>` : ''}</button>`;
+    }).join('');
+  }
 
-  const addReactHtml=isAdmin?'':`<div class="react-wrap">
-    <button class="add-react" onclick="toggleEmojiPicker(this,'${p.id}')">+ 😊</button>
-    <div class="emoji-picker">${EMOJIS.map(e=>`<button class="ep-em" onclick="reactPost('${p.id}','${e}');closeEmojiPickers()">${e}</button>`).join('')}</div>
-  </div>`;
+  const addReactHtml = '';
 
   return `
     <div class="post-card" id="post-${p.id}">
@@ -887,8 +895,9 @@ async function delPost(id){if(!confirm('Удалить пост?'))return;try{aw
 
 async function reactPost(postId,emoji){
   if(!ME)return;
+  // Передаём флаг singleMode — сервер снимет все другие реакции этого юзера
   try{
-    await api(`/api/posts/${postId}/react`,'POST',{userId:ME.id,userName:ME.name,emoji});
+    await api(`/api/posts/${postId}/react`,'POST',{userId:ME.id,userName:ME.name,emoji,single:true});
     const posts=await api('/api/posts');
     const p=posts.find(x=>x.id===postId); if(!p)return;
     const el=document.getElementById('post-'+postId);
