@@ -1,7 +1,9 @@
 /**
- * server.js — Coach Space v4
- * Исправления: убраны составные индексы Firestore (фильтруем на сервере),
- * добавлены реакции и опросы в постах, telegram тренера = 1620615291
+ * server.js — Coach Space v4.1
+ * Изменения:
+ * 1) COACH_TG обновлён на 1457231359
+ * 2) Загрузка Excel/PDF/документов в план тренировок (вместо ссылки)
+ * 3) Реакции: тренер видит кто поставил реакцию
  */
 
 require('dotenv').config();
@@ -17,8 +19,8 @@ const cron         = require('node-cron');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// ─── Telegram ID тренера (хардкод + env как запасной) ───
-const COACH_TG = process.env.COACH_TG_ID || '1620615291';
+// ─── Telegram ID тренера ───
+const COACH_TG = process.env.COACH_TG_ID || '1457231359';
 
 // ─── FIREBASE ───
 let db, bucket;
@@ -65,7 +67,7 @@ async function tgSend(chatId, text) {
 // ─── MULTER ───
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits:  { fileSize: 15 * 1024 * 1024 }
+  limits:  { fileSize: 25 * 1024 * 1024 } // 25MB для документов
 });
 
 async function uploadToStorage(buffer, destPath, mime) {
@@ -91,7 +93,6 @@ app.post('/api/login', async (req, res) => {
   try {
     const { login, password } = req.body;
     if (!login || !password) return res.status(400).json({ error: 'Нужен логин и пароль' });
-    // Получаем всех и фильтруем на сервере — не нужен составной индекс
     const snap = await db.collection('users').where('login', '==', login).get();
     if (snap.empty) return res.status(401).json({ error: 'Неверный логин или пароль' });
     const doc  = snap.docs.find(d => d.data().password === password);
@@ -138,7 +139,10 @@ app.post('/api/users', async (req, res) => {
     const ref = await db.collection('users').add({
       name, login, password, role: 'student',
       telegramId: telegramId || null, sessions: parseInt(sessions) || 0,
-      paymentDate: paymentDate || null, planUrl: planUrl || null,
+      paymentDate: paymentDate || null,
+      planUrl: planUrl || null,
+      planFileName: null,   // имя загруженного файла
+      planFileType: null,   // тип: 'url' | 'file'
       createdAt: new Date().toISOString()
     });
     res.json({ success: true, id: ref.id });
@@ -173,11 +177,55 @@ app.post('/api/users/:id/attendance', async (req, res) => {
 });
 
 // ══════════════════════════════════════════════
+// ПЛАН ТРЕНИРОВОК — загрузка файла (Excel, PDF, Word)
+// POST /api/users/:id/plan  — multipart, field: planFile
+// ══════════════════════════════════════════════
+app.post('/api/users/:id/plan', upload.single('planFile'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!req.file) return res.status(400).json({ error: 'Файл обязателен' });
+
+    const allowedMimes = [
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel.sheet.macroEnabled.12',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/csv'
+    ];
+
+    const mime = req.file.mimetype;
+    const origName = req.file.originalname;
+    const ext = path.extname(origName).toLowerCase();
+
+    // Определяем тип файла для отображения
+    let fileCategory = 'document';
+    if (['.xlsx', '.xls', '.csv'].includes(ext)) fileCategory = 'excel';
+    else if (ext === '.pdf') fileCategory = 'pdf';
+    else if (['.doc', '.docx'].includes(ext)) fileCategory = 'word';
+
+    const dest = `plans/${id}/${Date.now()}${ext}`;
+    const url  = await uploadToStorage(req.file.buffer, dest, mime);
+
+    await db.collection('users').doc(id).update({
+      planUrl:      url,
+      planFileName: origName,
+      planFileType: fileCategory
+    });
+
+    res.json({ success: true, url, fileName: origName, fileType: fileCategory });
+  } catch (e) {
+    console.error('/api/users/:id/plan:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ══════════════════════════════════════════════
 // ТРЕНИРОВКИ
 // ══════════════════════════════════════════════
 app.get('/api/workouts', async (req, res) => {
   try {
-    // Сортируем на сервере без составного индекса — просто по datetime
     const snap = await db.collection('workouts').orderBy('datetime', 'asc').get();
     let list   = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     if (req.query.userId) {
@@ -218,17 +266,15 @@ app.delete('/api/workouts/:id', async (req, res) => {
 });
 
 // ══════════════════════════════════════════════
-// ПРОГРЕСС — FIX: убираем .orderBy('date') чтобы не нужен индекс
-// Сортируем результат в памяти на сервере
+// ПРОГРЕСС
 // ══════════════════════════════════════════════
 app.get('/api/progress/:userId', async (req, res) => {
   try {
-    // Только фильтр по userId — без orderBy — не нужен составной индекс!
     const snap = await db.collection('progress')
       .where('userId', '==', req.params.userId).get();
     const list = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => (a.date || '').localeCompare(b.date || '')); // сортировка в памяти
+      .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
     res.json(list);
   } catch (e) {
     console.error('/api/progress GET:', e.message);
@@ -266,19 +312,6 @@ app.post('/api/progress/photo', upload.single('photo'), async (req, res) => {
 // ══════════════════════════════════════════════
 // ПОСТЫ (с опросами и реакциями)
 // ══════════════════════════════════════════════
-/**
- * Структура поста:
- * {
- *   text: string,
- *   link: string|null,
- *   hasPoll: boolean,
- *   pollOptions: ['Да','Нет'] или любые варианты,
- *   reactions: { '👍': ['userId1',...], '❤️': [...], ... },
- *   votes: { 'Да': [{userId, userName}], 'Нет': [...] },
- *   createdAt: ISO
- * }
- */
-
 app.get('/api/posts', async (req, res) => {
   try {
     const snap = await db.collection('posts').orderBy('createdAt', 'desc').limit(30).get();
@@ -297,8 +330,8 @@ app.post('/api/posts', async (req, res) => {
       text, link: link || null,
       hasPoll: hasPoll && opts.length > 0,
       pollOptions: opts,
-      votes,                        // { 'Да': [{userId,userName}], ... }
-      reactions: {},                // { '👍': ['uid1','uid2'], ... }
+      votes,
+      reactions: {},  // { '👍': [{userId, userName}], ... }  — теперь объекты а не строки
       createdAt: new Date().toISOString()
     });
     res.json({ success: true, id: ref.id });
@@ -312,20 +345,31 @@ app.delete('/api/posts/:id', async (req, res) => {
 
 /**
  * POST /api/posts/:id/react
- * Body: { userId, emoji }  — добавляет/убирает реакцию (toggle)
+ * Body: { userId, userName, emoji }
+ * Реакции теперь хранят объекты {userId, userName} — тренер видит имена
  */
 app.post('/api/posts/:id/react', async (req, res) => {
   try {
-    const { userId, emoji } = req.body;
+    const { userId, userName, emoji } = req.body;
     if (!userId || !emoji) return res.status(400).json({ error: 'userId и emoji обязательны' });
     const ref = db.collection('posts').doc(req.params.id);
     const doc = await ref.get();
     if (!doc.exists) return res.status(404).json({ error: 'Пост не найден' });
+
     const reactions = doc.data().reactions || {};
     if (!reactions[emoji]) reactions[emoji] = [];
-    const idx = reactions[emoji].indexOf(userId);
-    if (idx === -1) reactions[emoji].push(userId);
-    else            reactions[emoji].splice(idx, 1);
+
+    // Поддерживаем как старый формат (строки) так и новый (объекты)
+    const idx = reactions[emoji].findIndex(r =>
+      typeof r === 'string' ? r === userId : r.userId === userId
+    );
+
+    if (idx === -1) {
+      reactions[emoji].push({ userId, userName: userName || 'Пользователь' });
+    } else {
+      reactions[emoji].splice(idx, 1);
+    }
+
     await ref.update({ reactions });
     res.json({ success: true, reactions });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -333,7 +377,7 @@ app.post('/api/posts/:id/react', async (req, res) => {
 
 /**
  * POST /api/posts/:id/vote
- * Body: { userId, userName, option }  — голосование в опросе
+ * Body: { userId, userName, option }
  */
 app.post('/api/posts/:id/vote', async (req, res) => {
   try {
@@ -343,15 +387,11 @@ app.post('/api/posts/:id/vote', async (req, res) => {
     const doc = await ref.get();
     if (!doc.exists) return res.status(404).json({ error: 'Пост не найден' });
     const votes = doc.data().votes || {};
-
-    // Снимаем старый голос
     Object.keys(votes).forEach(opt => {
       votes[opt] = votes[opt].filter(v => v.userId !== userId);
     });
-    // Ставим новый
     if (!votes[option]) votes[option] = [];
     votes[option].push({ userId, userName });
-
     await ref.update({ votes });
     res.json({ success: true, votes });
   } catch (e) { res.status(500).json({ error: e.message }); }
