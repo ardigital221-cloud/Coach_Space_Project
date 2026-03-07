@@ -1,5 +1,5 @@
 /**
- * server.js — Coach Space v4.1
+ * server.js — Coach Space v4.2
  * Изменения:
  * 1) COACH_TG обновлён на 1457231359
  * 2) Загрузка Excel/PDF/документов в план тренировок (вместо ссылки)
@@ -15,6 +15,8 @@ const path         = require('path');
 const admin        = require('firebase-admin');
 const { Telegraf } = require('telegraf');
 const cron         = require('node-cron');
+// xlsx — парсинг Excel файлов (добавьте: npm install xlsx)
+let XLSX; try { XLSX = require('xlsx'); } catch(e) { console.warn('⚠️  xlsx не установлен: npm install xlsx'); }
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -177,48 +179,76 @@ app.post('/api/users/:id/attendance', async (req, res) => {
 });
 
 // ══════════════════════════════════════════════
-// ПЛАН ТРЕНИРОВОК — загрузка файла (Excel, PDF, Word)
+// ПЛАН ТРЕНИРОВОК — загрузка Excel + парсинг в JSON
 // POST /api/users/:id/plan  — multipart, field: planFile
+// GET  /api/users/:id/plan  — возвращает { sheets: [{name, rows: [[...], ...]}] }
 // ══════════════════════════════════════════════
 app.post('/api/users/:id/plan', upload.single('planFile'), async (req, res) => {
   try {
     const { id } = req.params;
     if (!req.file) return res.status(400).json({ error: 'Файл обязателен' });
 
-    const allowedMimes = [
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-excel.sheet.macroEnabled.12',
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/csv'
-    ];
-
-    const mime = req.file.mimetype;
     const origName = req.file.originalname;
     const ext = path.extname(origName).toLowerCase();
 
-    // Определяем тип файла для отображения
     let fileCategory = 'document';
     if (['.xlsx', '.xls', '.csv'].includes(ext)) fileCategory = 'excel';
     else if (ext === '.pdf') fileCategory = 'pdf';
     else if (['.doc', '.docx'].includes(ext)) fileCategory = 'word';
 
-    const dest = `plans/${id}/${Date.now()}${ext}`;
-    const url  = await uploadToStorage(req.file.buffer, dest, mime);
+    // Для Excel — парсим в JSON и сохраняем данные в Firestore
+    let planData = null;
+    if (fileCategory === 'excel') {
+      try {
+        if (!XLSX) throw new Error('xlsx не установлен');
+        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+        const sheets = workbook.SheetNames.map(name => {
+          const ws = workbook.Sheets[name];
+          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+          // Убираем полностью пустые строки
+          const cleaned = rows.filter(r => r.some(c => c !== '' && c !== null && c !== undefined));
+          return { name, rows: cleaned };
+        });
+        planData = { sheets };
+      } catch (parseErr) {
+        console.warn('Excel parse warning:', parseErr.message);
+      }
+    }
 
-    await db.collection('users').doc(id).update({
+    // Загружаем файл в Storage (для скачивания)
+    const dest = `plans/${id}/${Date.now()}${ext}`;
+    const url  = await uploadToStorage(req.file.buffer, dest, req.file.mimetype);
+
+    const updateData = {
       planUrl:      url,
       planFileName: origName,
-      planFileType: fileCategory
-    });
+      planFileType: fileCategory,
+    };
+    // Если распарсили Excel — сохраняем данные прямо в документ пользователя
+    if (planData) updateData.planData = planData;
 
-    res.json({ success: true, url, fileName: origName, fileType: fileCategory });
+    await db.collection('users').doc(id).update(updateData);
+
+    res.json({ success: true, url, fileName: origName, fileType: fileCategory, planData });
   } catch (e) {
     console.error('/api/users/:id/plan:', e.message);
     res.status(500).json({ error: e.message });
   }
+});
+
+// GET план (таблица)
+app.get('/api/users/:id/plan', async (req, res) => {
+  try {
+    const doc = await db.collection('users').doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Не найден' });
+    const u = doc.data();
+    res.json({
+      planUrl:      u.planUrl      || null,
+      planFileName: u.planFileName || null,
+      planFileType: u.planFileType || null,
+      planData:     u.planData     || null,
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // ══════════════════════════════════════════════
