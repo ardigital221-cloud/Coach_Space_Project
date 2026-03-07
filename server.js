@@ -1,568 +1,421 @@
 /**
- * server.js — Основной серверный файл фитнес-приложения
- * Стек: Express.js + Firebase Firestore + Telegraf (Telegram-бот) + node-cron
+ * server.js — Coach Space
+ * Стек: Express + Firebase Firestore + Firebase Storage + Telegraf + node-cron + multer
  */
 
 require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+const express    = require('express');
+const cors       = require('cors');
 const bodyParser = require('body-parser');
-const admin = require('firebase-admin');
+const multer     = require('multer');
+const path       = require('path');
+const admin      = require('firebase-admin');
 const { Telegraf } = require('telegraf');
-const cron = require('node-cron');
-const path = require('path');
+const cron       = require('node-cron');
 
-const app = express();
+const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// ────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 // ИНИЦИАЛИЗАЦИЯ FIREBASE
-// ────────────────────────────────────────────────────────────
-// Для работы необходим файл serviceAccountKey.json в корне проекта
-// или переменная окружения FIREBASE_SERVICE_ACCOUNT с JSON-строкой
-let db;
+// ─────────────────────────────────────────
+let db, bucket;
 try {
-  let serviceAccount;
-  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-  } else {
-    serviceAccount = require('./serviceAccountKey.json');
-  }
+  const sa = process.env.FIREBASE_SERVICE_ACCOUNT
+    ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+    : require('./serviceAccountKey.json');
 
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: process.env.FIREBASE_DATABASE_URL
+    credential:  admin.credential.cert(sa),
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || `${sa.project_id}.appspot.com`
   });
 
-  db = admin.firestore();
-  console.log('✅ Firebase Firestore подключён');
-} catch (err) {
-  console.warn('⚠️  Firebase не инициализирован — работаем в режиме DEMO (данные в памяти)');
-  console.warn('   Создайте файл serviceAccountKey.json или задайте FIREBASE_SERVICE_ACCOUNT');
-  db = null;
+  db     = admin.firestore();
+  bucket = admin.storage().bucket();
+  console.log('✅ Firebase подключён');
+} catch (e) {
+  console.error('❌ Ошибка Firebase:', e.message);
+  process.exit(1);
 }
 
-// ────────────────────────────────────────────────────────────
-// DEMO-ХРАНИЛИЩЕ (если Firebase не подключён)
-// ────────────────────────────────────────────────────────────
-const demoData = {
-  users: [
-    {
-      id: 'admin',
-      name: 'Тренер Александр',
-      phone: 'admin',
-      role: 'admin',
-      telegramId: null,
-      sessions: 0,
-      paymentDate: null,
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 'user1',
-      name: 'Иван Петров',
-      phone: '79001234567',
-      role: 'student',
-      telegramId: null,
-      sessions: 8,
-      paymentDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: 'user2',
-      name: 'Мария Сидорова',
-      phone: '79007654321',
-      role: 'student',
-      telegramId: null,
-      sessions: 3,
-      paymentDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      createdAt: new Date().toISOString()
-    }
-  ],
-  schedule: []
-};
-
-// ────────────────────────────────────────────────────────────
-// ИНИЦИАЛИЗАЦИЯ TELEGRAM-БОТА
-// ────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
+// TELEGRAM БОТ
+// ─────────────────────────────────────────
 let bot = null;
-if (process.env.TELEGRAM_BOT_TOKEN) {
-  bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
+const COACH_TG = process.env.COACH_TG_ID;
+
+if (process.env.BOT_TOKEN) {
+  bot = new Telegraf(process.env.BOT_TOKEN);
   bot.launch().then(() => console.log('✅ Telegram-бот запущен'));
-  process.once('SIGINT', () => bot.stop('SIGINT'));
+  process.once('SIGINT',  () => bot.stop('SIGINT'));
   process.once('SIGTERM', () => bot.stop('SIGTERM'));
 } else {
-  console.warn('⚠️  TELEGRAM_BOT_TOKEN не задан — Telegram-уведомления отключены');
+  console.warn('⚠️  BOT_TOKEN не задан');
 }
+
+async function tgSend(chatId, text) {
+  if (!bot || !chatId) return;
+  try { await bot.telegram.sendMessage(chatId, text, { parse_mode: 'HTML' }); }
+  catch (e) { console.error('TG ошибка:', e.message); }
+}
+
+// ─────────────────────────────────────────
+// MULTER — загрузка в память
+// ─────────────────────────────────────────
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits:  { fileSize: 10 * 1024 * 1024 } // 10 MB
+});
 
 /**
- * Отправляет сообщение в Telegram конкретному пользователю
- * @param {string|number} telegramId - ID пользователя в Telegram
- * @param {string} message - текст сообщения
+ * Загружает файл в Firebase Storage и возвращает публичный URL
+ * @param {Buffer} buffer
+ * @param {string} destPath — путь внутри bucket, напр. 'shop/123.jpg'
+ * @param {string} mime
  */
-async function sendTelegramMessage(telegramId, message) {
-  if (!bot || !telegramId) return;
-  try {
-    await bot.telegram.sendMessage(telegramId, message, { parse_mode: 'HTML' });
-    console.log(`📨 Telegram отправлен пользователю ${telegramId}`);
-  } catch (err) {
-    console.error(`❌ Ошибка отправки Telegram: ${err.message}`);
-  }
+async function uploadToStorage(buffer, destPath, mime) {
+  const file = bucket.file(destPath);
+  await file.save(buffer, { metadata: { contentType: mime } });
+  await file.makePublic();
+  return `https://storage.googleapis.com/${bucket.name}/${destPath}`;
 }
 
-// ────────────────────────────────────────────────────────────
-// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ FIRESTORE / DEMO
-// ────────────────────────────────────────────────────────────
-
-/** Получить всех пользователей */
-async function getAllUsers() {
-  if (db) {
-    const snap = await db.collection('users').get();
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  }
-  return [...demoData.users];
-}
-
-/** Получить пользователя по ID */
-async function getUserById(id) {
-  if (db) {
-    const doc = await db.collection('users').doc(id).get();
-    return doc.exists ? { id: doc.id, ...doc.data() } : null;
-  }
-  return demoData.users.find(u => u.id === id) || null;
-}
-
-/** Получить пользователя по телефону */
-async function getUserByPhone(phone) {
-  if (db) {
-    const snap = await db.collection('users').where('phone', '==', phone).limit(1).get();
-    if (snap.empty) return null;
-    const doc = snap.docs[0];
-    return { id: doc.id, ...doc.data() };
-  }
-  return demoData.users.find(u => u.phone === phone) || null;
-}
-
-/** Создать пользователя */
-async function createUser(data) {
-  if (db) {
-    const ref = await db.collection('users').add({ ...data, createdAt: new Date().toISOString() });
-    return { id: ref.id, ...data };
-  }
-  const newUser = { id: 'user_' + Date.now(), ...data, createdAt: new Date().toISOString() };
-  demoData.users.push(newUser);
-  return newUser;
-}
-
-/** Обновить пользователя */
-async function updateUser(id, data) {
-  if (db) {
-    await db.collection('users').doc(id).update(data);
-    return { id, ...data };
-  }
-  const idx = demoData.users.findIndex(u => u.id === id);
-  if (idx !== -1) demoData.users[idx] = { ...demoData.users[idx], ...data };
-  return demoData.users[idx];
-}
-
-/** Удалить пользователя */
-async function deleteUser(id) {
-  if (db) {
-    await db.collection('users').doc(id).delete();
-    return;
-  }
-  demoData.users = demoData.users.filter(u => u.id !== id);
-}
-
-/** Получить всё расписание */
-async function getAllSchedule() {
-  if (db) {
-    const snap = await db.collection('schedule').orderBy('datetime').get();
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  }
-  return [...demoData.schedule].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
-}
-
-/** Получить слот по ID */
-async function getSlotById(id) {
-  if (db) {
-    const doc = await db.collection('schedule').doc(id).get();
-    return doc.exists ? { id: doc.id, ...doc.data() } : null;
-  }
-  return demoData.schedule.find(s => s.id === id) || null;
-}
-
-/** Создать слот расписания */
-async function createSlot(data) {
-  if (db) {
-    const ref = await db.collection('schedule').add(data);
-    return { id: ref.id, ...data };
-  }
-  const slot = { id: 'slot_' + Date.now(), ...data };
-  demoData.schedule.push(slot);
-  return slot;
-}
-
-/** Обновить слот */
-async function updateSlot(id, data) {
-  if (db) {
-    await db.collection('schedule').doc(id).update(data);
-    return;
-  }
-  const idx = demoData.schedule.findIndex(s => s.id === id);
-  if (idx !== -1) demoData.schedule[idx] = { ...demoData.schedule[idx], ...data };
-}
-
-/** Удалить слот */
-async function deleteSlot(id) {
-  if (db) {
-    await db.collection('schedule').doc(id).delete();
-    return;
-  }
-  demoData.schedule = demoData.schedule.filter(s => s.id !== id);
-}
-
-// ────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 // MIDDLEWARE
-// ────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '5mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 // API: АВТОРИЗАЦИЯ
-// ────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 
 /**
  * POST /api/login
- * Вход по ID или номеру телефона
- * Body: { login: string }
+ * Body: { login, password }
+ * Ищет пользователя по полю login + password в Firestore
  */
 app.post('/api/login', async (req, res) => {
   try {
-    const { login } = req.body;
-    if (!login) return res.status(400).json({ error: 'Укажите ID или номер телефона' });
+    const { login, password } = req.body;
+    if (!login || !password) return res.status(400).json({ error: 'Нужен логин и пароль' });
 
-    // Сначала ищем по ID, затем по телефону
-    let user = await getUserById(login);
-    if (!user) user = await getUserByPhone(login);
-    if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
+    const snap = await db.collection('users')
+      .where('login', '==', login)
+      .where('password', '==', password)
+      .limit(1).get();
 
-    // Возвращаем данные пользователя (без пароля — авторизация по ID/телефону)
+    if (snap.empty) return res.status(401).json({ error: 'Неверный логин или пароль' });
+
+    const doc  = snap.docs[0];
+    const user = { id: doc.id, ...doc.data() };
+    delete user.password; // не отдаём пароль клиенту
     res.json({ success: true, user });
-  } catch (err) {
-    console.error('Ошибка входа:', err);
+  } catch (e) {
+    console.error('login:', e);
     res.status(500).json({ error: 'Ошибка сервера' });
   }
 });
 
-// ────────────────────────────────────────────────────────────
-// API: ПОЛЬЗОВАТЕЛИ (только для тренера)
-// ────────────────────────────────────────────────────────────
-
-/** GET /api/users — список всех учеников */
-app.get('/api/users', async (req, res) => {
+/**
+ * GET /api/me/:id
+ * Автовход по сохранённому ID
+ */
+app.get('/api/me/:id', async (req, res) => {
   try {
-    const users = await getAllUsers();
-    // Возвращаем только учеников (не admin)
-    res.json(users.filter(u => u.role === 'student'));
-  } catch (err) {
-    res.status(500).json({ error: 'Ошибка получения пользователей' });
+    const doc = await db.collection('users').doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Не найден' });
+    const user = { id: doc.id, ...doc.data() };
+    delete user.password;
+    res.json(user);
+  } catch (e) {
+    res.status(500).json({ error: 'Ошибка сервера' });
   }
 });
 
+// ─────────────────────────────────────────
+// API: ПОЛЬЗОВАТЕЛИ
+// ─────────────────────────────────────────
+
+/** GET /api/users — все ученики */
+app.get('/api/users', async (req, res) => {
+  try {
+    const snap = await db.collection('users').where('role', '==', 'student').get();
+    const users = snap.docs.map(d => {
+      const u = { id: d.id, ...d.data() };
+      delete u.password;
+      return u;
+    });
+    res.json(users);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/** GET /api/users/:id — один пользователь */
+app.get('/api/users/:id', async (req, res) => {
+  try {
+    const doc = await db.collection('users').doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Не найден' });
+    const u = { id: doc.id, ...doc.data() };
+    delete u.password;
+    res.json(u);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 /**
- * POST /api/users — создать нового ученика
- * Body: { name, phone, telegramId, sessions, paymentDate }
+ * POST /api/users — создать ученика
+ * Body: { name, login, password, telegramId, sessions, paymentDate, planUrl }
  */
 app.post('/api/users', async (req, res) => {
   try {
-    const { name, phone, telegramId, sessions, paymentDate } = req.body;
-    if (!name || !phone) return res.status(400).json({ error: 'Имя и телефон обязательны' });
+    const { name, login, password, telegramId, sessions, paymentDate, planUrl } = req.body;
+    if (!name || !login || !password) return res.status(400).json({ error: 'Имя, логин и пароль обязательны' });
 
-    // Проверяем, нет ли уже такого телефона
-    const existing = await getUserByPhone(phone);
-    if (existing) return res.status(409).json({ error: 'Пользователь с таким телефоном уже существует' });
+    // Проверяем уникальность логина
+    const exists = await db.collection('users').where('login', '==', login).limit(1).get();
+    if (!exists.empty) return res.status(409).json({ error: 'Логин уже занят' });
 
-    const user = await createUser({
-      name,
-      phone,
-      telegramId: telegramId || null,
-      sessions: parseInt(sessions) || 0,
+    const ref = await db.collection('users').add({
+      name, login, password,
+      role:        'student',
+      telegramId:  telegramId || null,
+      sessions:    parseInt(sessions) || 0,
       paymentDate: paymentDate || null,
-      role: 'student'
+      planUrl:     planUrl || null,
+      createdAt:   new Date().toISOString()
     });
 
-    res.json({ success: true, user });
-  } catch (err) {
-    console.error('Ошибка создания пользователя:', err);
-    res.status(500).json({ error: 'Ошибка сервера' });
-  }
+    res.json({ success: true, id: ref.id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-/**
- * PUT /api/users/:id — обновить данные ученика
- */
+/** PUT /api/users/:id — обновить ученика */
 app.put('/api/users/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const data = req.body;
-    await updateUser(id, data);
+    const data = { ...req.body };
+    if (!data.password) delete data.password; // не затираем пароль пустой строкой
+    await db.collection('users').doc(req.params.id).update(data);
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: 'Ошибка обновления пользователя' });
-  }
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-/** DELETE /api/users/:id — удалить ученика */
+/** DELETE /api/users/:id */
 app.delete('/api/users/:id', async (req, res) => {
   try {
-    await deleteUser(req.params.id);
+    await db.collection('users').doc(req.params.id).delete();
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: 'Ошибка удаления пользователя' });
-  }
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-/**
- * POST /api/users/:id/mark-attendance — отметить присутствие (списать 1 занятие)
- */
-app.post('/api/users/:id/mark-attendance', async (req, res) => {
+/** POST /api/users/:id/attendance — −1 тренировка */
+app.post('/api/users/:id/attendance', async (req, res) => {
   try {
-    const user = await getUserById(req.params.id);
-    if (!user) return res.status(404).json({ error: 'Ученик не найден' });
-    if (user.sessions <= 0) return res.status(400).json({ error: 'Нет доступных занятий' });
+    const ref = db.collection('users').doc(req.params.id);
+    const doc = await ref.get();
+    if (!doc.exists) return res.status(404).json({ error: 'Не найден' });
+    const u = doc.data();
+    if (u.sessions <= 0) return res.status(400).json({ error: 'Нет занятий' });
 
-    await updateUser(req.params.id, { sessions: user.sessions - 1 });
+    const newSess = u.sessions - 1;
+    await ref.update({ sessions: newSess });
 
-    // Уведомление если осталось мало занятий
-    if (user.sessions - 1 <= 2 && user.telegramId) {
-      await sendTelegramMessage(
-        user.telegramId,
-        `⚠️ <b>Внимание!</b> У вас осталось <b>${user.sessions - 1}</b> занятий. Пора обновить абонемент!`
-      );
+    // Уведомление тренеру если 0
+    if (newSess === 0 && COACH_TG) {
+      await tgSend(COACH_TG, `⚠️ У ученика <b>${u.name}</b> закончились занятия!`);
     }
 
-    res.json({ success: true, sessionsLeft: user.sessions - 1 });
-  } catch (err) {
-    res.status(500).json({ error: 'Ошибка отметки присутствия' });
-  }
+    res.json({ success: true, sessions: newSess });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ────────────────────────────────────────────────────────────
-// API: РАСПИСАНИЕ
-// ────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
+// API: ПРОГРЕСС (вес + фото)
+// ─────────────────────────────────────────
 
-/** GET /api/schedule — получить всё расписание */
-app.get('/api/schedule', async (req, res) => {
+/** GET /api/progress/:userId */
+app.get('/api/progress/:userId', async (req, res) => {
   try {
-    const schedule = await getAllSchedule();
-    res.json(schedule);
-  } catch (err) {
-    res.status(500).json({ error: 'Ошибка получения расписания' });
-  }
-});
-
-/**
- * POST /api/schedule — создать тренировочный слот
- * Body: { datetime: ISO-строка, duration: минуты, maxStudents }
- */
-app.post('/api/schedule', async (req, res) => {
-  try {
-    const { datetime, duration, maxStudents, title } = req.body;
-    if (!datetime) return res.status(400).json({ error: 'Дата и время обязательны' });
-
-    const slot = await createSlot({
-      datetime,
-      duration: parseInt(duration) || 60,
-      maxStudents: parseInt(maxStudents) || 1,
-      title: title || 'Тренировка',
-      bookedBy: null,  // ID ученика, записавшегося на занятие
-      bookedByName: null
-    });
-
-    res.json({ success: true, slot });
-  } catch (err) {
-    res.status(500).json({ error: 'Ошибка создания слота' });
-  }
-});
-
-/** DELETE /api/schedule/:id — удалить слот */
-app.delete('/api/schedule/:id', async (req, res) => {
-  try {
-    await deleteSlot(req.params.id);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: 'Ошибка удаления слота' });
-  }
+    const snap = await db.collection('progress')
+      .where('userId', '==', req.params.userId)
+      .orderBy('date', 'asc').get();
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 /**
- * POST /api/schedule/:id/book — записаться на тренировку
- * Body: { userId: string }
+ * POST /api/progress — добавить запись веса
+ * Body: { userId, weight, date }
  */
-app.post('/api/schedule/:id/book', async (req, res) => {
+app.post('/api/progress', async (req, res) => {
   try {
-    const slot = await getSlotById(req.params.id);
-    if (!slot) return res.status(404).json({ error: 'Слот не найден' });
-    if (slot.bookedBy) return res.status(409).json({ error: 'Слот уже занят' });
-
-    const user = await getUserById(req.body.userId);
-    if (!user) return res.status(404).json({ error: 'Ученик не найден' });
-    if (user.sessions <= 0) return res.status(400).json({ error: 'Нет доступных занятий' });
-
-    await updateSlot(req.params.id, {
-      bookedBy: user.id,
-      bookedByName: user.name
+    const { userId, weight, date } = req.body;
+    if (!userId || !weight) return res.status(400).json({ error: 'userId и weight обязательны' });
+    const ref = await db.collection('progress').add({
+      userId, weight: parseFloat(weight),
+      date: date || new Date().toISOString().split('T')[0],
+      type: 'weight'
     });
+    res.json({ success: true, id: ref.id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
-    // Получаем Telegram ID тренера для уведомления
-    const allUsers = await getAllUsers();
-    const trainer = (await getAllUsers().catch(() => demoData.users)).find(u => u.role === 'admin') ||
-      demoData.users.find(u => u.role === 'admin');
+/**
+ * POST /api/progress/photo — загрузить фото прогресса
+ * multipart: userId, photo (file)
+ */
+app.post('/api/progress/photo', upload.single('photo'), async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId || !req.file) return res.status(400).json({ error: 'userId и фото обязательны' });
 
-    const dateStr = new Date(slot.datetime).toLocaleString('ru-RU', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-      hour: '2-digit', minute: '2-digit'
+    const ext      = req.file.originalname.split('.').pop();
+    const destPath = `progress/${userId}/${Date.now()}.${ext}`;
+    const url      = await uploadToStorage(req.file.buffer, destPath, req.file.mimetype);
+
+    const ref = await db.collection('progress').add({
+      userId, photoUrl: url, type: 'photo',
+      date: new Date().toISOString().split('T')[0]
     });
+    res.json({ success: true, id: ref.id, url });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
-    // Уведомление ученику
-    if (user.telegramId) {
-      await sendTelegramMessage(
-        user.telegramId,
-        `✅ <b>Запись подтверждена!</b>\n📅 ${slot.title} — ${dateStr}\n⏱ Длительность: ${slot.duration} мин.`
-      );
+// ─────────────────────────────────────────
+// API: МАГАЗИН
+// ─────────────────────────────────────────
+
+/** GET /api/shop — все товары */
+app.get('/api/shop', async (req, res) => {
+  try {
+    const snap = await db.collection('shop').orderBy('createdAt', 'desc').get();
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/**
+ * POST /api/shop — добавить товар (тренер)
+ * multipart: name, price, photo (file)
+ */
+app.post('/api/shop', upload.single('photo'), async (req, res) => {
+  try {
+    const { name, price } = req.body;
+    if (!name || !price) return res.status(400).json({ error: 'Название и цена обязательны' });
+
+    let photoUrl = null;
+    if (req.file) {
+      const ext  = req.file.originalname.split('.').pop();
+      const dest = `shop/${Date.now()}.${ext}`;
+      photoUrl   = await uploadToStorage(req.file.buffer, dest, req.file.mimetype);
     }
 
+    const ref = await db.collection('shop').add({
+      name, price: parseFloat(price), photoUrl,
+      createdAt: new Date().toISOString()
+    });
+    res.json({ success: true, id: ref.id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/** DELETE /api/shop/:id */
+app.delete('/api/shop/:id', async (req, res) => {
+  try {
+    await db.collection('shop').doc(req.params.id).delete();
     res.json({ success: true });
-  } catch (err) {
-    console.error('Ошибка записи:', err);
-    res.status(500).json({ error: 'Ошибка записи на тренировку' });
-  }
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 /**
- * POST /api/schedule/:id/cancel — отменить запись
- * Body: { userId: string }
+ * POST /api/shop/:id/order — заказ товара
+ * Body: { userId, userName }
  */
-app.post('/api/schedule/:id/cancel', async (req, res) => {
+app.post('/api/shop/:id/order', async (req, res) => {
   try {
-    const slot = await getSlotById(req.params.id);
-    if (!slot) return res.status(404).json({ error: 'Слот не найден' });
-    if (slot.bookedBy !== req.body.userId) {
-      return res.status(403).json({ error: 'Это не ваша запись' });
-    }
+    const doc = await db.collection('shop').doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Товар не найден' });
 
-    await updateSlot(req.params.id, { bookedBy: null, bookedByName: null });
+    const item = doc.data();
+    const { userName } = req.body;
 
-    // Уведомление ученику об отмене
-    const user = await getUserById(req.body.userId);
-    if (user && user.telegramId) {
-      const dateStr = new Date(slot.datetime).toLocaleString('ru-RU', {
-        day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
-      });
-      await sendTelegramMessage(
-        user.telegramId,
-        `❌ <b>Запись отменена</b>\n📅 ${slot.title} — ${dateStr}`
+    // Уведомление тренеру
+    if (COACH_TG) {
+      await tgSend(COACH_TG,
+        `🛒 <b>Новый заказ!</b>\n👤 От: <b>${userName}</b>\n📦 Товар: <b>${item.name}</b>\n💰 Цена: ${item.price} ₽`
       );
     }
 
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: 'Ошибка отмены записи' });
-  }
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ────────────────────────────────────────────────────────────
-// CRON: АВТОМАТИЧЕСКИЕ УВЕДОМЛЕНИЯ
-// ────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
+// API: ПОСТЫ (новости тренера)
+// ─────────────────────────────────────────
 
-/**
- * Каждые 15 минут проверяем занятия, которые начнутся через ~2 часа
- * и отправляем напоминание записавшемуся ученику
- */
-cron.schedule('*/15 * * * *', async () => {
+/** GET /api/posts */
+app.get('/api/posts', async (req, res) => {
   try {
-    const schedule = await getAllSchedule();
-    const now = Date.now();
-    const twoHours = 2 * 60 * 60 * 1000;
-    const window = 15 * 60 * 1000; // окно 15 минут
-
-    for (const slot of schedule) {
-      if (!slot.bookedBy || !slot.datetime) continue;
-
-      const slotTime = new Date(slot.datetime).getTime();
-      const diff = slotTime - now;
-
-      // Отправляем напоминание если до занятия осталось от 1:45 до 2:00
-      if (diff > twoHours - window && diff <= twoHours) {
-        const user = await getUserById(slot.bookedBy);
-        if (user && user.telegramId) {
-          const dateStr = new Date(slot.datetime).toLocaleString('ru-RU', {
-            hour: '2-digit', minute: '2-digit'
-          });
-          await sendTelegramMessage(
-            user.telegramId,
-            `⏰ <b>Напоминание!</b>\nЧерез 2 часа (в ${dateStr}) у вас тренировка: <b>${slot.title}</b>.\nНе забудьте взять воду и форму! 💪`
-          );
-        }
-      }
-    }
-  } catch (err) {
-    console.error('Cron (напоминания):', err.message);
-  }
+    const snap = await db.collection('posts').orderBy('createdAt', 'desc').limit(20).get();
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 /**
- * Каждый день в 09:00 проверяем даты оплаты
- * Если сегодня дата оплаты — уведомляем тренера и ученика
+ * POST /api/posts
+ * Body: { text, link }
  */
-cron.schedule('0 9 * * *', async () => {
+app.post('/api/posts', async (req, res) => {
   try {
-    const users = await getAllUsers();
-    const today = new Date().toISOString().split('T')[0];
+    const { text, link } = req.body;
+    if (!text) return res.status(400).json({ error: 'Текст поста обязателен' });
+    const ref = await db.collection('posts').add({
+      text, link: link || null,
+      createdAt: new Date().toISOString()
+    });
+    res.json({ success: true, id: ref.id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
-    // Находим тренера для уведомления
-    const trainer = users.find(u => u.role === 'admin');
+/** DELETE /api/posts/:id */
+app.delete('/api/posts/:id', async (req, res) => {
+  try {
+    await db.collection('posts').doc(req.params.id).delete();
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
-    for (const user of users) {
-      if (user.role !== 'student' || !user.paymentDate) continue;
-      if (user.paymentDate !== today) continue;
+// ─────────────────────────────────────────
+// CRON: УВЕДОМЛЕНИЯ
+// ─────────────────────────────────────────
 
-      // Уведомление ученику
-      if (user.telegramId) {
-        await sendTelegramMessage(
-          user.telegramId,
-          `💳 <b>Сегодня дата оплаты!</b>\nНе забудьте оплатить абонемент для продолжения тренировок.\nОстаток занятий: <b>${user.sessions}</b>`
-        );
-      }
+// Каждый день в 10:00 — проверяем дату оплаты
+cron.schedule('0 10 * * *', async () => {
+  try {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tStr = tomorrow.toISOString().split('T')[0];
 
-      // Уведомление тренеру
-      if (trainer && trainer.telegramId) {
-        await sendTelegramMessage(
-          trainer.telegramId,
-          `💳 <b>Дата оплаты ученика</b>\nУченик <b>${user.name}</b> (${user.phone}) должен оплатить абонемент сегодня.\nОстаток занятий: <b>${user.sessions}</b>`
+    const snap = await db.collection('users')
+      .where('role', '==', 'student')
+      .where('paymentDate', '==', tStr).get();
+
+    for (const doc of snap.docs) {
+      const u = doc.data();
+      // Ученику
+      if (u.telegramId) {
+        await tgSend(u.telegramId,
+          `💳 <b>Напоминание об оплате!</b>\nЗавтра истекает ваш абонемент. Свяжитесь с тренером для продления. 🏋️`
         );
       }
     }
-  } catch (err) {
-    console.error('Cron (дата оплаты):', err.message);
-  }
+    console.log(`Cron: проверка оплат — ${snap.size} уведомлений`);
+  } catch (e) { console.error('Cron оплата:', e.message); }
 });
 
-console.log('⏰ Cron-задачи запущены (напоминания каждые 15 мин, оплата в 09:00)');
-
-// ────────────────────────────────────────────────────────────
-// SPA: все остальные маршруты отдают index.html
-// ────────────────────────────────────────────────────────────
+// SPA fallback
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ────────────────────────────────────────────────────────────
-// ЗАПУСК СЕРВЕРА
-// ────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`\n🚀 Сервер запущен на http://localhost:${PORT}`);
-  console.log('📌 Для входа тренера: ID = "admin"');
-  console.log('📌 Для входа ученика: телефон или ID\n');
+  console.log(`\n🚀 Coach Space запущен: http://localhost:${PORT}\n`);
 });
