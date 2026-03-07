@@ -1,12 +1,25 @@
 {
-  "name": "money-bot-ai",
-  "version": "1.3.0",
+  "name": "Проект Coach Space",
+  "version": "1.0.0",
+  "description": "Веб-приложение для управления тренировками",
   "main": "server.js",
-  "scripts": { "start": "node server.js" },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
   "dependencies": {
     "express": "^4.18.2",
-    "telegraf": "^4.12.0",
-    "firebase-admin": "^11.0.0",
-    "axios": "^1.6.0"
+    "firebase-admin": "^11.11.0",
+    "telegraf": "^4.15.3",
+    "node-cron": "^3.0.3",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
