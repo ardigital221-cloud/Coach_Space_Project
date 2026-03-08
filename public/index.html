@@ -551,27 +551,6 @@
     <div class="fg"><label class="fl">Дата оплаты</label><input class="fi" id="uPd" type="date"/></div>
   </div>
 
-  <!-- ПЛАН: вкладки ссылка / файл -->
-  <div class="fg">
-    <label class="fl">План тренировок</label>
-    <div class="plan-upload-section">
-      <div class="plan-tabs">
-        <div class="plan-tab active" id="addTab-url" onclick="switchPlanTab('add','url')">🔗 Ссылка</div>
-        <div class="plan-tab" id="addTab-file" onclick="switchPlanTab('add','file')">📁 Файл (Excel, PDF…)</div>
-      </div>
-      <div class="plan-tab-content show" id="addTabC-url">
-        <input class="fi" id="uPl" placeholder="https://docs.google.com/..."/>
-      </div>
-      <div class="plan-tab-content" id="addTabC-file">
-        <label class="upbtn" id="addPlanUpLbl">
-          <input type="file" id="addPlanFile" accept=".xlsx,.xls,.csv,.pdf,.doc,.docx" onchange="prevPlanFile(event,'add')"/>
-          <span style="font-size:26px;opacity:.5">📎</span>
-          <span style="font-size:13px;color:var(--mu2)">Excel, PDF, Word (до 25 МБ)</span>
-        </label>
-        <div id="addPlanFileName" style="font-size:12px;color:var(--ac);margin-top:7px;display:none"></div>
-      </div>
-    </div>
-  </div>
 
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mAddU')">Отмена</button><button class="btn btn-p" onclick="addUser()">Сохранить</button></div>
 </div></div>
@@ -590,28 +569,6 @@
     <div class="fg"><label class="fl">Дата оплаты</label><input class="fi" id="ePd" type="date"/></div>
   </div>
 
-  <!-- ПЛАН: вкладки ссылка / файл (edit) -->
-  <div class="fg">
-    <label class="fl">План тренировок</label>
-    <div class="plan-upload-section">
-      <div class="plan-tabs">
-        <div class="plan-tab active" id="editTab-url" onclick="switchPlanTab('edit','url')">🔗 Ссылка</div>
-        <div class="plan-tab" id="editTab-file" onclick="switchPlanTab('edit','file')">📁 Загрузить файл</div>
-      </div>
-      <div class="plan-tab-content show" id="editTabC-url">
-        <input class="fi" id="ePl" placeholder="https://..."/>
-        <div style="font-size:11px;color:var(--mu2);margin-top:5px">Оставьте пустым, чтобы не менять</div>
-      </div>
-      <div class="plan-tab-content" id="editTabC-file">
-        <label class="upbtn" id="editPlanUpLbl">
-          <input type="file" id="editPlanFile" accept=".xlsx,.xls,.csv,.pdf,.doc,.docx" onchange="prevPlanFile(event,'edit')"/>
-          <span style="font-size:26px;opacity:.5">📎</span>
-          <span style="font-size:13px;color:var(--mu2)">Excel, PDF, Word (до 25 МБ)</span>
-        </label>
-        <div id="editPlanFileName" style="font-size:12px;color:var(--ac);margin-top:7px;display:none"></div>
-      </div>
-    </div>
-  </div>
 
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mEditU')">Отмена</button><button class="btn btn-p" onclick="saveEditUser()">Сохранить</button></div>
 </div></div>
@@ -889,17 +846,7 @@ function planIcon(fileType) {
   return '📋';
 }
 
-function switchPlanTab(prefix, tab) {
-  ['url','file'].forEach(t => {
-    document.getElementById(`${prefix}Tab-${t}`).classList.toggle('active', t===tab);
-    document.getElementById(`${prefix}TabC-${t}`).classList.toggle('show', t===tab);
-  });
-}
-function prevPlanFile(e, prefix) {
-  const file = e.target.files[0]; if (!file) return;
-  const nameEl = document.getElementById(`${prefix}PlanFileName`);
-  nameEl.textContent = `📎 ${file.name}`; nameEl.style.display = 'block';
-}
+
 
 // ═══════════════════════════════════════════════════════
 // ТРЕНЕР: РЕДАКТОР ПЛАНА ТРЕНИРОВОК
@@ -1436,35 +1383,12 @@ document.addEventListener('click',e=>{if(!e.target.closest('.react-wrap'))closeE
 async function addUser(){
   const name=v('uN'),login=v('uL'),pwd=v('uPw'),tg=v('uTg'),sess=v('uSe'),pd=v('uPd');
   if(!name||!login||!pwd){toast('Имя, логин и пароль обязательны','e');return;}
-
-  // Определяем тип плана
-  const activeTab = document.getElementById('addTabC-url').classList.contains('show') ? 'url' : 'file';
-  let planUrl = null;
-  if (activeTab === 'url') {
-    planUrl = v('uPl') || null;
-  }
-
   try{
-    const r = await api('/api/users','POST',{name,login,password:pwd,telegramId:tg||null,sessions:parseInt(sess)||0,paymentDate:pd||null,planUrl});
-    const userId = r.id;
-
-    // Если выбран файл — загружаем отдельным запросом
-    if (activeTab === 'file') {
-      const file = document.getElementById('addPlanFile').files[0];
-      if (file) {
-        toast('⏳ Загрузка плана...','w');
-        const fd = new FormData(); fd.append('planFile', file);
-        const resp = await fetch(`/api/users/${userId}/plan`, {method:'POST',body:fd});
-        const d = await resp.json();
-        if (!resp.ok) throw new Error(d.error);
-      }
-    }
-
-    toast(`✅ Ученик ${name} добавлен`,'s');closeMo('mAddU');
-    clr(['uN','uL','uPw','uTg','uPd','uPl']);
+    await api('/api/users','POST',{name,login,password:pwd,telegramId:tg||null,sessions:parseInt(sess)||0,paymentDate:pd||null});
+    toast(`✅ Ученик ${name} добавлен`,'s');
+    closeMo('mAddU');
+    clr(['uN','uL','uPw','uTg','uPd']);
     document.getElementById('uSe').value='8';
-    document.getElementById('addPlanFile').value='';
-    document.getElementById('addPlanFileName').style.display='none';
     allStudents=[];loadAdminHome();
   }catch(e){toast(e.message,'e');}
 }
@@ -1478,14 +1402,6 @@ async function openEditUser(id){
     document.getElementById('eTg').value=u.telegramId||'';
     document.getElementById('eSe').value=u.sessions;
     document.getElementById('ePd').value=u.paymentDate||'';
-    const ePlEl = document.getElementById('ePl');
-    if(ePlEl) ePlEl.value = u.planUrl||'';
-    const editPlanFN = document.getElementById('editPlanFileName');
-    if(editPlanFN) editPlanFN.style.display='none';
-    const editPlanFile = document.getElementById('editPlanFile');
-    if(editPlanFile) editPlanFile.value='';
-    // Сбрасываем вкладку
-    switchPlanTab('edit','url');
     openMo('mEditU');
   }catch(e){toast(e.message,'e');}
 }
@@ -1495,27 +1411,8 @@ async function saveEditUser(){
   const d={name:v('eN'),telegramId:v('eTg')||null,sessions:parseInt(v('eSe'))||0,paymentDate:v('ePd')||null};
   const np=v('ePw');if(np)d.password=np;
 
-  const activeTab = document.getElementById('editTabC-url').classList.contains('show') ? 'url' : 'file';
-  if (activeTab === 'url') {
-    const pl = v('ePl');
-    if (pl) { d.planUrl = pl; d.planFileType = 'url'; d.planFileName = null; }
-  }
-
   try{
     await api('/api/users/'+id,'PUT',d);
-
-    // Загрузка файла плана
-    if (activeTab === 'file') {
-      const file = document.getElementById('editPlanFile').files[0];
-      if (file) {
-        toast('⏳ Загрузка плана...','w');
-        const fd = new FormData(); fd.append('planFile', file);
-        const resp = await fetch(`/api/users/${id}/plan`, {method:'POST',body:fd});
-        const dd = await resp.json();
-        if (!resp.ok) throw new Error(dd.error);
-      }
-    }
-
     toast('✅ Сохранено','s');closeMo('mEditU');allStudents=[];loadAdminHome();
   }
   catch(e){toast(e.message,'e');}
