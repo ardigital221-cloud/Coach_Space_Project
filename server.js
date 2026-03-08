@@ -539,3 +539,237 @@ cron.schedule('*/30 * * * *', async () => {
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 app.listen(PORT, () => console.log(`\n🚀 Coach Space → http://localhost:${PORT}\n`));
+
+// ══════════════════════════════════════════════
+// 📊 ДНЕВНИК ТРЕНИРОВОК
+// POST /api/diary/:userId       — сохранить запись дня
+// GET  /api/diary/:userId       — получить все записи
+// GET  /api/diary/:userId/:date — запись за конкретный день
+// ══════════════════════════════════════════════
+app.post('/api/diary/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { date, workoutId, exercises, note, rating } = req.body;
+    if (!date) return res.status(400).json({ error: 'date обязателен' });
+    const docId = `${userId}_${date}`;
+    await db.collection('diary').doc(docId).set({
+      userId, date, workoutId: workoutId || null,
+      exercises: exercises || [], // [{name, sets:[{reps,weight}]}]
+      note: note || '', rating: rating || null,
+      savedAt: new Date().toISOString()
+    }, { merge: true });
+    // Обновляем личные рекорды
+    for (const ex of (exercises || [])) {
+      for (const s of (ex.sets || [])) {
+        if (!s.weight || !s.reps) continue;
+        const prRef = db.collection('records').doc(`${userId}_${ex.name}`);
+        const prDoc = await prRef.get();
+        const cur = prDoc.exists ? prDoc.data() : {};
+        if (!cur.weight || parseFloat(s.weight) > parseFloat(cur.weight)) {
+          await prRef.set({ userId, exercise: ex.name, weight: parseFloat(s.weight), reps: parseInt(s.reps), date, updatedAt: new Date().toISOString() }, { merge: true });
+        }
+      }
+    }
+    res.json({ success: true, id: docId });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/diary/:userId', async (req, res) => {
+  try {
+    const snap = await db.collection('diary').where('userId','==',req.params.userId).orderBy('date','desc').limit(60).get();
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/diary/:userId/:date', async (req, res) => {
+  try {
+    const doc = await db.collection('diary').doc(`${req.params.userId}_${req.params.date}`).get();
+    res.json(doc.exists ? { id: doc.id, ...doc.data() } : null);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ══════════════════════════════════════════════
+// 💪 ЛИЧНЫЕ РЕКОРДЫ
+// GET /api/records/:userId
+// ══════════════════════════════════════════════
+app.get('/api/records/:userId', async (req, res) => {
+  try {
+    const snap = await db.collection('records').where('userId','==',req.params.userId).get();
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ══════════════════════════════════════════════
+// 🎯 ЦЕЛИ
+// GET/POST /api/goals/:userId
+// PUT /api/goals/:userId/:goalId
+// ══════════════════════════════════════════════
+app.get('/api/goals/:userId', async (req, res) => {
+  try {
+    const snap = await db.collection('goals').where('userId','==',req.params.userId).orderBy('createdAt','desc').get();
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/goals/:userId', async (req, res) => {
+  try {
+    const { title, target, current, unit, deadline } = req.body;
+    if (!title) return res.status(400).json({ error: 'title обязателен' });
+    const ref = await db.collection('goals').add({
+      userId: req.params.userId, title, target: parseFloat(target)||0,
+      current: parseFloat(current)||0, unit: unit||'', deadline: deadline||null,
+      done: false, createdAt: new Date().toISOString()
+    });
+    res.json({ success: true, id: ref.id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.put('/api/goals/:userId/:goalId', async (req, res) => {
+  try {
+    const { current, done } = req.body;
+    const upd = {};
+    if (current !== undefined) upd.current = parseFloat(current);
+    if (done    !== undefined) upd.done    = Boolean(done);
+    await db.collection('goals').doc(req.params.goalId).update(upd);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/goals/:userId/:goalId', async (req, res) => {
+  try { await db.collection('goals').doc(req.params.goalId).delete(); res.json({ success: true }); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ══════════════════════════════════════════════
+// 💬 КОММЕНТАРИИ ТРЕНЕРА К УЧЕНИКУ
+// GET/POST /api/notes/:userId
+// DELETE   /api/notes/:userId/:noteId
+// ══════════════════════════════════════════════
+app.get('/api/notes/:userId', async (req, res) => {
+  try {
+    const snap = await db.collection('notes').where('userId','==',req.params.userId).orderBy('createdAt','desc').limit(30).get();
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/notes/:userId', async (req, res) => {
+  try {
+    const { text, date } = req.body;
+    if (!text) return res.status(400).json({ error: 'text обязателен' });
+    const ref = await db.collection('notes').add({
+      userId: req.params.userId, text, date: date || new Date().toISOString().split('T')[0],
+      createdAt: new Date().toISOString()
+    });
+    res.json({ success: true, id: ref.id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/notes/:userId/:noteId', async (req, res) => {
+  try { await db.collection('notes').doc(req.params.noteId).delete(); res.json({ success: true }); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ══════════════════════════════════════════════
+// ⭐ ОТЗЫВЫ
+// POST /api/reviews          — ученик пишет отзыв
+// GET  /api/reviews          — тренер читает все отзывы
+// GET  /api/reviews/:userId  — отзывы конкретного ученика
+// ══════════════════════════════════════════════
+app.post('/api/reviews', async (req, res) => {
+  try {
+    const { userId, userName, rating, text, workoutId } = req.body;
+    if (!userId || !rating) return res.status(400).json({ error: 'userId и rating обязательны' });
+    const ref = await db.collection('reviews').add({
+      userId, userName: userName||'Ученик', rating: parseInt(rating),
+      text: text||'', workoutId: workoutId||null,
+      createdAt: new Date().toISOString()
+    });
+    await tgSend(COACH_TG, `⭐ <b>Новый отзыв от ${userName}!</b>\nОценка: ${'⭐'.repeat(parseInt(rating))}\n${text ? '💬 '+text : ''}`);
+    res.json({ success: true, id: ref.id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/reviews', async (req, res) => {
+  try {
+    const snap = await db.collection('reviews').orderBy('createdAt','desc').limit(50).get();
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ══════════════════════════════════════════════
+// 📤 ЭКСПОРТ В EXCEL (тренер)
+// GET /api/export/students
+// ══════════════════════════════════════════════
+app.get('/api/export/students', async (req, res) => {
+  try {
+    if (!XLSX) return res.status(500).json({ error: 'xlsx не установлен' });
+
+    const [usersSnap, diarySnap, reviewsSnap] = await Promise.all([
+      db.collection('users').where('role','==','student').get(),
+      db.collection('diary').orderBy('date','desc').get(),
+      db.collection('reviews').get()
+    ]);
+
+    const users    = usersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const diaryAll = diarySnap.docs.map(d => d.data());
+    const reviews  = reviewsSnap.docs.map(d => d.data());
+
+    const wb = XLSX.utils.book_new();
+
+    // Лист 1: Ученики
+    const studentsData = users.map(u => ({
+      'Имя':           u.name,
+      'Логин':         u.login,
+      'Занятий':       u.sessions,
+      'Дата оплаты':   u.paymentDate || '',
+      'Telegram':      u.telegramId  || '',
+      'Тренировок (дневник)': diaryAll.filter(d => d.userId === u.id).length,
+      'Средний рейтинг': (() => {
+        const r = reviews.filter(rv => rv.userId === u.id);
+        return r.length ? (r.reduce((s,rv) => s + rv.rating, 0) / r.length).toFixed(1) : '';
+      })()
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(studentsData), 'Ученики');
+
+    // Лист 2: Дневник тренировок (последние 90 дней)
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 90);
+    const recentDiary = diaryAll
+      .filter(d => new Date(d.date) >= cutoff)
+      .sort((a,b) => b.date.localeCompare(a.date));
+
+    const diaryRows = [];
+    for (const entry of recentDiary) {
+      const user = users.find(u => u.id === entry.userId);
+      for (const ex of (entry.exercises || [])) {
+        for (const s of (ex.sets || [])) {
+          diaryRows.push({
+            'Дата':       entry.date,
+            'Ученик':     user ? user.name : entry.userId,
+            'Упражнение': ex.name,
+            'Подходы':    ex.sets.indexOf(s) + 1,
+            'Повторения': s.reps || '',
+            'Вес (кг)':   s.weight || '',
+            'Оценка дня': entry.rating || '',
+            'Заметка':    entry.note || ''
+          });
+        }
+      }
+    }
+    if (diaryRows.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(diaryRows), 'Дневник тренировок');
+
+    // Лист 3: Отзывы
+    const reviewRows = reviews.map(r => ({
+      'Дата':    new Date(r.createdAt).toLocaleDateString('ru-RU'),
+      'Ученик':  r.userName,
+      'Оценка':  r.rating,
+      'Отзыв':   r.text || ''
+    }));
+    if (reviewRows.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(reviewRows), 'Отзывы');
+
+    const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+    const filename = `coach_space_export_${new Date().toISOString().split('T')[0]}.xlsx`;
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buf);
+  } catch (e) { console.error('Export:', e.message); res.status(500).json({ error: e.message }); }
+});
