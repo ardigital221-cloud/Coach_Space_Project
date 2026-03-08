@@ -207,6 +207,33 @@
     .plan-tab.active{border-color:var(--ac);color:var(--ac);background:var(--acd);}
     .plan-tab-content{display:none;}.plan-tab-content.show{display:block;}
 
+    /* ПЛАН ТРЕНИРОВОК — вкладка ученика */
+    .week-switcher{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+    .week-btn{flex:1;min-width:60px;padding:10px 6px;border-radius:var(--r2);border:1px solid var(--b);font-size:12px;font-weight:700;text-align:center;cursor:pointer;background:rgba(255,255,255,.03);color:var(--mu2);transition:all .2s;font-family:'Unbounded',sans-serif;}
+    .week-btn.active{border-color:var(--ac);color:var(--ac);background:rgba(110,231,183,.1);}
+    .plan-block{margin-bottom:22px;}
+    .plan-block-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--ac);padding:8px 14px;background:rgba(110,231,183,.07);border-radius:var(--r3);margin-bottom:10px;border-left:3px solid var(--ac);}
+    /* Таблица — широкий экран */
+    .ex-table{width:100%;border-collapse:collapse;font-size:13px;}
+    .ex-table th{padding:10px 14px;text-align:left;color:var(--ac);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--ba);background:rgba(110,231,183,.05);}
+    .ex-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--tx);}
+    .ex-table tr:last-child td{border-bottom:none;}
+    .ex-table tr:hover td{background:rgba(255,255,255,.02);}
+    .ex-num{font-size:11px;color:var(--mu);width:32px;}
+    .ex-sets{font-family:'Unbounded',sans-serif;font-size:14px;color:var(--ac);font-weight:700;}
+    .ex-reps{font-family:'Unbounded',sans-serif;font-size:14px;color:var(--yel);font-weight:700;}
+    /* Карточки — мобильный */
+    .ex-cards{display:none;}
+    .ex-card{background:rgba(255,255,255,.03);border:1px solid var(--b);border-radius:var(--r2);padding:14px;margin-bottom:9px;display:flex;align-items:center;gap:14px;}
+    .ex-card-num{width:28px;height:28px;border-radius:50%;background:var(--acd);border:1px solid var(--ba);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ac);font-weight:700;flex-shrink:0;}
+    .ex-card-name{font-size:14px;font-weight:600;flex:1;}
+    .ex-card-meta{display:flex;gap:10px;align-items:center;}
+    .ex-card-sets{font-family:'Unbounded',sans-serif;font-size:13px;color:var(--ac);font-weight:700;}
+    .ex-card-reps{font-family:'Unbounded',sans-serif;font-size:13px;color:var(--yel);font-weight:700;}
+    @media(max-width:520px){.ex-table{display:none;}.ex-cards{display:block;}}
+    .plan-empty{text-align:center;padding:40px 20px;color:var(--mu2);}
+    .plan-upload-hint{background:rgba(110,231,183,.06);border:1px dashed var(--ba);border-radius:var(--r);padding:20px;text-align:center;color:var(--mu2);font-size:13px;}
+
     .mo{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(8px);z-index:500;display:none;align-items:flex-end;justify-content:center;}
     @media(min-width:600px){.mo{align-items:center;padding:20px;}}
     .mo.open{display:flex;animation:fadeIn .2s ease;}
@@ -347,6 +374,12 @@
       <div class="card card-a"><div class="ct">График веса</div><div class="chart-w"><canvas id="wChart"></canvas></div></div>
       <div class="sh" style="margin-top:6px"><div class="st">📸 Фото прогресса</div><button class="btn btn-g sm" onclick="openMo('mAddPh')">+ Фото</button></div>
       <div class="ph-g" id="phGrid"></div>
+    </div>
+
+    <!-- УЧЕНИК: ПЛАН ТРЕНИРОВОК -->
+    <div class="panel" id="p-uplan">
+      <div class="sh"><div class="st">📋 План тренировок</div><span id="planUpdatedAt" style="font-size:11px;color:var(--mu2)"></span></div>
+      <div id="uPlanContent"></div>
     </div>
 
     <!-- УЧЕНИК: МАГАЗИН -->
@@ -519,19 +552,23 @@
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mAddPh')">Отмена</button><button class="btn btn-p" onclick="uploadPhoto()">Загрузить</button></div>
 </div></div>
 
-<!-- Просмотр плана тренировок -->
-<div class="mo" id="mPlan"><div class="modal">
+<!-- Загрузка плана тренером -->
+<div class="mo" id="mUploadPlan"><div class="modal">
   <div class="mh"></div>
-  <div style="margin-bottom:16px">
-    <div class="mt" style="margin-bottom:0">📋 План тренировок</div>
+  <div class="mt">📊 Загрузить план</div>
+  <input type="hidden" id="uploadPlanUserId"/>
+  <div style="font-size:14px;font-weight:600;margin-bottom:14px;color:var(--ac)" id="uploadPlanUserName"></div>
+  <div class="fg">
+    <label class="fl">Excel файл (.xlsx / .xls)</label>
+    <label class="upbtn" id="planUpLbl">
+      <input type="file" id="planUpFile" accept=".xlsx,.xls" onchange="onPlanFileSelect(event)"/>
+      <span style="font-size:30px;opacity:.5">📊</span>
+      <span style="font-size:13px;color:var(--mu2)">Выберите файл плана</span>
+      <span style="font-size:11px;color:var(--mu);margin-top:4px">Шаблон: A,B,C = Нед.1 | E,F,G = Нед.2 | I,J,K = Нед.3 | M,N,O = Нед.4</span>
+    </label>
+    <div id="planUpSelected" style="font-size:13px;color:var(--ac);margin-top:8px;display:none"></div>
   </div>
-  <div class="plan-sheet-tabs" id="planSheetTabs"></div>
-  <div class="plan-table-scroll">
-    <div class="plan-table-wrap">
-      <table class="plan-table" id="planTable"></table>
-    </div>
-  </div>
-  <div class="mf"><button class="btn btn-g" onclick="closeMo('mPlan')">Закрыть</button></div>
+  <div class="mf"><button class="btn btn-g" onclick="closeMo('mUploadPlan')">Отмена</button><button class="btn btn-p" id="planUpSaveBtn" onclick="savePlanUpload()">💾 Сохранить план</button></div>
 </div></div>
 
 <div class="toasts" id="toasts"></div>
@@ -589,7 +626,7 @@ function startApp(){
 
 const TABS={
   admin:[{id:'ah',icon:'🏠',lbl:'Главная'},{id:'aw',icon:'🏋️',lbl:'Тренировки'},{id:'aprog',icon:'📈',lbl:'Прогресс'},{id:'ashop',icon:'🛒',lbl:'Магазин'}],
-  user: [{id:'uh',icon:'🏠',lbl:'Главная'},{id:'uw',icon:'🏋️',lbl:'Тренировки'},{id:'uprog',icon:'📈',lbl:'Прогресс'},{id:'ushop',icon:'🛒',lbl:'Магазин'}]
+  user: [{id:'uh',icon:'🏠',lbl:'Главная'},{id:'uplan',icon:'📋',lbl:'План'},{id:'uw',icon:'🏋️',lbl:'Тренировки'},{id:'uprog',icon:'📈',lbl:'Прогресс'},{id:'ushop',icon:'🛒',lbl:'Магазин'}]
 };
 function buildNav(){
   const nav=document.getElementById('bnav'),tabs=ME.role==='admin'?TABS.admin:TABS.user;
@@ -609,10 +646,11 @@ function showTab(id,btn){
   if(id==='uw')    loadUserWorkouts();
   if(id==='uprog') loadUserProgress();
   if(id==='ushop') loadUserShop();
+  if(id==='uplan') loadUserPlan();
 }
 
 // ═══════════════════════════════════════════
-// ПЛАН — вспомогательные функции
+// ПЛАН — утилиты для форм тренера
 // ═══════════════════════════════════════════
 function switchPlanTab(prefix, tab) {
   ['url','file'].forEach(t => {
@@ -620,104 +658,145 @@ function switchPlanTab(prefix, tab) {
     document.getElementById(`${prefix}TabC-${t}`).classList.toggle('show', t===tab);
   });
 }
-
 function prevPlanFile(e, prefix) {
-  const file = e.target.files[0];
-  if (!file) return;
+  const file = e.target.files[0]; if (!file) return;
   const nameEl = document.getElementById(`${prefix}PlanFileName`);
-  nameEl.textContent = `📎 ${file.name}`;
-  nameEl.style.display = 'block';
+  nameEl.textContent = `📎 ${file.name}`; nameEl.style.display = 'block';
 }
 
-// Иконка по типу файла
-function planIcon(fileType) {
-  if (fileType === 'excel') return '📊';
-  if (fileType === 'pdf')   return '📄';
-  if (fileType === 'word')  return '📝';
-  return '📋';
+// ═══════════════════════════════════════════
+// ТРЕНЕР: ЗАГРУЗКА ПЛАНА
+// ═══════════════════════════════════════════
+function openUploadPlan(userId, userName) {
+  document.getElementById('uploadPlanUserId').value = userId;
+  document.getElementById('uploadPlanUserName').textContent = '👤 ' + userName;
+  document.getElementById('planUpFile').value = '';
+  document.getElementById('planUpSelected').style.display = 'none';
+  document.getElementById('planUpLbl').style.display = 'flex';
+  openMo('mUploadPlan');
+}
+function onPlanFileSelect(e) {
+  const file = e.target.files[0]; if (!file) return;
+  document.getElementById('planUpSelected').textContent = '📎 ' + file.name;
+  document.getElementById('planUpSelected').style.display = 'block';
+}
+async function savePlanUpload() {
+  const userId = document.getElementById('uploadPlanUserId').value;
+  const file   = document.getElementById('planUpFile').files[0];
+  if (!file) { toast('Выберите файл Excel','e'); return; }
+  const btn = document.getElementById('planUpSaveBtn');
+  btn.textContent = '⏳ Загрузка...'; btn.disabled = true;
+  const fd = new FormData(); fd.append('planFile', file);
+  try {
+    const r = await fetch(`/api/users/${userId}/plan`, { method:'POST', body: fd });
+    const d = await r.json(); if (!r.ok) throw new Error(d.error);
+    toast(`✅ План загружен: ${d.totalExercises} упражнений`, 's');
+    closeMo('mUploadPlan');
+  } catch(e) { toast('Ошибка: ' + e.message, 'e'); }
+  finally { btn.textContent = '💾 Сохранить план'; btn.disabled = false; }
 }
 
-// Кнопка "Посмотреть план" — открывает модалку с таблицей
-function renderPlanBtn(planUrl, planFileName, planFileType) {
-  if (!planUrl) return '';
-  const icon = planIcon(planFileType);
-  const name = planFileName || 'План тренировок';
-  return `
-    <button class="plan-btn" onclick="showPlanModal()">
-      <span style="font-size:30px">${icon}</span>
-      <div style="flex:1">
-        <b style="font-size:14px">Посмотреть план тренировок</b>
-        <div style="font-size:12px;color:var(--mu2);margin-top:2px">${esc(name)}</div>
-      </div>
-      <span style="font-size:20px">→</span>
-    </button>`;
-}
+// ═══════════════════════════════════════════
+// УЧЕНИК: ПЛАН ТРЕНИРОВОК — вкладка
+// ═══════════════════════════════════════════
+let _trainingPlan = null;
+let _currentWeek  = 1;
 
-// Открытие модалки с таблицей плана
-let _planData = null;
-async function showPlanModal() {
-  openMo('mPlan');
-  const tabsEl  = document.getElementById('planSheetTabs');
-  const tableEl = document.getElementById('planTable');
-  tabsEl.innerHTML  = '';
-  tableEl.innerHTML = '<tr><td style="padding:20px;color:var(--mu2)"><div class="sp-ring" style="margin:0 auto 10px"></div>Загрузка...</td></tr>';
-
+async function loadUserPlan() {
+  const box = document.getElementById('uPlanContent');
+  box.innerHTML = `<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>`;
   try {
     const data = await api('/api/users/' + ME.id + '/plan');
-    if (data.planData && data.planData.sheets && data.planData.sheets.length) {
-      _planData = data.planData;
-      const sheets = _planData.sheets;
-      // Вкладки листов
-      if (sheets.length > 1) {
-        tabsEl.innerHTML = sheets.map((s,i) =>
-          `<span class="sheet-tab${i===0?' active':''}" onclick="showSheet(${i},this)">${esc(s.name)}</span>`
-        ).join('');
-      }
-      showSheetData(sheets[0]);
-    } else if (data.planUrl) {
-      // Нет данных Excel — показываем ссылку
-      tableEl.innerHTML = `<tr><td style="padding:24px;text-align:center;color:var(--mu2)">
-        <div style="font-size:36px;margin-bottom:10px">${planIcon(data.planFileType)}</div>
-        <div style="margin-bottom:14px">Предпросмотр недоступен</div>
-        <a href="${data.planUrl}" target="_blank" class="btn btn-p">↗ Открыть файл</a>
-      </td></tr>`;
+    if (!data.trainingPlan) {
+      box.innerHTML = `<div class="plan-upload-hint">
+        <div style="font-size:36px;margin-bottom:10px">📋</div>
+        <div style="font-weight:600;margin-bottom:6px">План тренировок ещё не загружен</div>
+        <div>Тренер загрузит ваш персональный план — он появится здесь автоматически</div>
+      </div>`;
+      return;
     }
+    _trainingPlan = data.trainingPlan;
+    if (data.planUpdatedAt) {
+      const d = new Date(data.planUpdatedAt);
+      document.getElementById('planUpdatedAt').textContent =
+        'обновлён ' + d.toLocaleDateString('ru-RU');
+    }
+    // Определяем текущую неделю (можно сохранить выбор)
+    renderPlanWeek(_currentWeek);
   } catch(e) {
-    tableEl.innerHTML = `<tr><td style="padding:20px;color:var(--red)">${e.message}</td></tr>`;
+    box.innerHTML = `<div class="empty">${e.message}</div>`;
   }
 }
 
-function showSheet(idx, btn) {
-  document.querySelectorAll('.sheet-tab').forEach(t => t.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  if (_planData && _planData.sheets[idx]) showSheetData(_planData.sheets[idx]);
-}
+function renderPlanWeek(week) {
+  _currentWeek = week;
+  const box = document.getElementById('uPlanContent');
+  if (!_trainingPlan) return;
 
-function showSheetData(sheet) {
-  const tableEl = document.getElementById('planTable');
-  if (!sheet.rows || !sheet.rows.length) {
-    tableEl.innerHTML = '<tr><td style="padding:20px;color:var(--mu2)">Лист пустой</td></tr>';
+  const exercises = _trainingPlan[week] || [];
+
+  // Шапка с переключателем недель
+  let html = `<div class="week-switcher">`;
+  for (let w = 1; w <= 4; w++) {
+    const cnt = (_trainingPlan[w] || []).length;
+    html += `<button class="week-btn${w===week?' active':''}" onclick="renderPlanWeek(${w})">
+      Неделя ${w}<br><span style="font-size:10px;opacity:.6">${cnt} упр.</span>
+    </button>`;
+  }
+  html += `</div>`;
+
+  if (!exercises.length) {
+    html += `<div class="plan-empty"><div style="font-size:36px;margin-bottom:8px">🏖</div>Неделя ${week} пока пустая</div>`;
+    box.innerHTML = html;
     return;
   }
-  const maxCols = Math.max(...sheet.rows.map(r => r.length));
-  const header  = sheet.rows[0];
-  const body    = sheet.rows.slice(1);
 
-  let html = '<thead><tr>';
-  header.forEach(cell => { html += `<th>${esc(String(cell ?? ''))}</th>`; });
-  // добавляем пустые столбцы если в строках больше
-  for (let i = header.length; i < maxCols; i++) html += '<th></th>';
-  html += '</tr></thead><tbody>';
-
-  body.forEach(row => {
-    html += '<tr>';
-    for (let i = 0; i < maxCols; i++) {
-      html += `<td>${esc(String(row[i] ?? ''))}</td>`;
-    }
-    html += '</tr>';
+  // Группируем по блокам
+  const blocks = {};
+  exercises.forEach((ex, idx) => {
+    const b = ex.block || 'Общее';
+    if (!blocks[b]) blocks[b] = [];
+    blocks[b].push({ ...ex, num: idx + 1 });
   });
-  html += '</tbody>';
-  tableEl.innerHTML = html;
+
+  for (const [blockName, exList] of Object.entries(blocks)) {
+    html += `<div class="plan-block">`;
+    if (blockName && blockName !== 'Общее') {
+      html += `<div class="plan-block-title">💪 ${esc(blockName)}</div>`;
+    }
+
+    // Таблица (десктоп)
+    html += `<div class="ex-table-wrap"><table class="ex-table">
+      <thead><tr><th>#</th><th>Упражнение</th><th>Подходы</th><th>Повторения</th></tr></thead>
+      <tbody>`;
+    exList.forEach(ex => {
+      html += `<tr>
+        <td class="ex-num">${ex.num}</td>
+        <td style="font-weight:500">${esc(ex.exercise)}</td>
+        <td><span class="ex-sets">${esc(ex.sets) || '—'}</span></td>
+        <td><span class="ex-reps">${esc(ex.reps) || '—'}</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+
+    // Карточки (мобильный)
+    html += `<div class="ex-cards">`;
+    exList.forEach(ex => {
+      html += `<div class="ex-card">
+        <div class="ex-card-num">${ex.num}</div>
+        <div class="ex-card-name">${esc(ex.exercise)}</div>
+        <div class="ex-card-meta">
+          <div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase;letter-spacing:.5px">Подх.</div><div class="ex-card-sets">${esc(ex.sets)||'—'}</div></div>
+          <div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase;letter-spacing:.5px">Повт.</div><div class="ex-card-reps">${esc(ex.reps)||'—'}</div></div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+
+    html += `</div>`; // .plan-block
+  }
+
+  box.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════
@@ -764,6 +843,7 @@ async function loadAdminStudents(){
           </div>
           <div class="sc-btns">
             <button class="mark-btn" onclick="markAtt('${u.id}','${esc(u.name)}')">✓ Отметить тренировку</button>
+            <button class="btn btn-g sm" onclick="openUploadPlan('${u.id}','${esc(u.name)}')">📊 Загрузить план</button>
             <button class="btn btn-g sm" onclick="openEditUser('${u.id}')">✏️ Изменить</button>
             <button class="btn btn-d sm" onclick="delUser('${u.id}')">🗑</button>
           </div>
@@ -1157,12 +1237,7 @@ async function loadUserHome(){
   document.getElementById('streak').style.display=ME.sessions>0?'flex':'none';
 
   const pb=document.getElementById('planBtn');
-  if (ME.planUrl) {
-    const fileType = ME.planFileType || 'url';
-    pb.innerHTML = renderPlanBtn(ME.planUrl, ME.planFileName, fileType);
-  } else {
-    pb.innerHTML = '';
-  }
+  if (pb) pb.innerHTML = ''; // план теперь в отдельной вкладке
 
   loadUserPosts();
 }
