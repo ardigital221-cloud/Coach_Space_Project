@@ -180,77 +180,21 @@ app.post('/api/users/:id/attendance', async (req, res) => {
 });
 
 // ══════════════════════════════════════════════
-// ПЛАН ТРЕНИРОВОК — умный парсинг Excel по шаблону тренера
-// Колонки: A,B,C=Неделя1 | E,F,G=Неделя2 | I,J,K=Неделя3 | M,N,O=Неделя4
+// ПЛАН ТРЕНИРОВОК — редактор (JSON, без Excel)
+// POST /api/users/:id/plan  — { trainingPlan: {1:[],2:[],3:[],4:[]} }
+// GET  /api/users/:id/plan
 // ══════════════════════════════════════════════
 
-function parseTrainingPlan(buffer) {
-  if (!XLSX) throw new Error('xlsx не установлен: npm install xlsx');
-  const wb  = XLSX.read(buffer, { type: 'buffer' });
-  const ws  = wb.Sheets[wb.SheetNames[0]];
-  const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-
-  // Индексы колонок (0-based): A=0,B=1,C=2 | E=4,F=5,G=6 | I=8,J=9,K=10 | M=12,N=13,O=14
-  const WEEK_COLS = [
-    { week: 1, ex: 0,  sets: 1,  reps: 2  },
-    { week: 2, ex: 4,  sets: 5,  reps: 6  },
-    { week: 3, ex: 8,  sets: 9,  reps: 10 },
-    { week: 4, ex: 12, sets: 13, reps: 14 },
-  ];
-
-  const plan = { 1: [], 2: [], 3: [], 4: [] };
-  let currentBlock = '';
-
-  for (const row of raw) {
-    if (row.every(c => String(c).trim() === '')) continue;
-
-    const cellA = String(row[0] || '').trim();
-    const cellB = String(row[1] || '').trim();
-    const cellE = String(row[4] || '').trim();
-
-    // Строка-заголовок блока: есть текст в A, нет данных в B и E
-    const isBlockHeader = cellA !== '' && cellB === '' && cellE === '';
-    if (isBlockHeader) {
-      currentBlock = cellA;
-      continue;
-    }
-
-    for (const { week, ex, sets, reps } of WEEK_COLS) {
-      const exName  = String(row[ex]  || '').trim();
-      const setsVal = String(row[sets] || '').trim();
-      const repsVal = String(row[reps] || '').trim();
-      const skip    = ['упражнение','exercise','название','name',''];
-      if (exName && !skip.includes(exName.toLowerCase())) {
-        plan[week].push({ block: currentBlock, exercise: exName, sets: setsVal, reps: repsVal });
-      }
-    }
-  }
-  return plan;
-}
-
-app.post('/api/users/:id/plan', upload.single('planFile'), async (req, res) => {
+app.post('/api/users/:id/plan', async (req, res) => {
   try {
-    const { id } = req.params;
-    if (!req.file) return res.status(400).json({ error: 'Файл обязателен' });
-    const ext = path.extname(req.file.originalname).toLowerCase();
-    if (!['.xlsx', '.xls'].includes(ext))
-      return res.status(400).json({ error: 'Нужен .xlsx или .xls файл' });
-
-    let trainingPlan;
-    try {
-      trainingPlan = parseTrainingPlan(req.file.buffer);
-    } catch (e) {
-      return res.status(400).json({ error: 'Ошибка парсинга: ' + e.message });
-    }
-
-    const totalEx = Object.values(trainingPlan).reduce((s, w) => s + w.length, 0);
-    await db.collection('users').doc(id).update({
+    const { trainingPlan } = req.body;
+    if (!trainingPlan) return res.status(400).json({ error: 'trainingPlan обязателен' });
+    const totalEx = Object.values(trainingPlan).reduce((s, w) => s + (w||[]).length, 0);
+    await db.collection('users').doc(req.params.id).update({
       trainingPlan,
-      planFileName:  req.file.originalname,
       planUpdatedAt: new Date().toISOString(),
     });
-
-    res.json({ success: true, totalExercises: totalEx, trainingPlan });
+    res.json({ success: true, totalExercises: totalEx });
   } catch (e) {
     console.error('/api/users/:id/plan POST:', e.message);
     res.status(500).json({ error: e.message });
@@ -265,11 +209,12 @@ app.get('/api/users/:id/plan', async (req, res) => {
     const u = doc.data();
     res.json({
       trainingPlan:  u.trainingPlan  || null,
-      planFileName:  u.planFileName  || null,
       planUpdatedAt: u.planUpdatedAt || null,
     });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
+
+
 // ══════════════════════════════════════════════
 // ТРЕНИРОВКИ
 // ══════════════════════════════════════════════
