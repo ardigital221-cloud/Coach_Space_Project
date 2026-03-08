@@ -163,7 +163,14 @@
     .sprice{font-family:'Unbounded',sans-serif;font-size:14px;color:var(--ac);margin-bottom:9px;}
 
     .ph-g{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px;}
-    .ph-img{aspect-ratio:1/1;border-radius:10px;object-fit:cover;border:1px solid var(--b);}
+    .ph-img{aspect-ratio:1/1;border-radius:10px;object-fit:cover;border:1px solid var(--b);cursor:pointer;transition:opacity .2s;}
+    .ph-img:hover{opacity:.85;}
+    /* ЛАЙТБОКС */
+    #lightbox{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:16px;cursor:pointer;}
+    #lightbox.open{display:flex;animation:fadeIn .2s ease;}
+    #lightbox img{max-width:100%;max-height:90vh;border-radius:var(--r);object-fit:contain;box-shadow:0 0 60px rgba(0,0,0,.8);cursor:default;}
+    #lightbox-close{position:absolute;top:16px;right:20px;color:#fff;font-size:28px;cursor:pointer;opacity:.7;background:none;border:none;line-height:1;}
+    #lightbox-close:hover{opacity:1;}
     .chart-w{position:relative;height:210px;margin-top:6px;}
 
     .tg-a{display:flex;align-items:center;gap:12px;background:rgba(0,136,204,.1);border:1px solid rgba(0,136,204,.22);border-radius:var(--r);padding:15px 18px;text-decoration:none;color:var(--tx);transition:all .2s;}
@@ -451,7 +458,6 @@
     <div class="panel" id="p-arev">
       <div class="st" style="margin-bottom:14px">⭐ Отзывы учеников</div>
       <div id="avgRating"></div>
-      <button class="btn btn-g sm" style="margin-bottom:14px" onclick="exportExcel()">📤 Экспорт в Excel</button>
       <div id="reviewsList"></div>
     </div>
 
@@ -543,7 +549,7 @@
 <div class="mo" id="mAddShop"><div class="modal">
   <div class="mh"></div><div class="mt">🛒 Новый товар</div>
   <div class="fg"><label class="fl">Название</label><input class="fi" id="shN" placeholder="Протеин XL"/></div>
-  <div class="fg"><label class="fl">Цена (₽)</label><input class="fi" id="shP" type="number" placeholder="1990"/></div>
+  <div class="fg"><label class="fl">Цена (₸)</label><input class="fi" id="shP" type="number" placeholder="1990"/></div>
   <div class="fg"><label class="fl">Фото товара</label>
     <label class="upbtn" id="shUpLbl"><input type="file" id="shFile" accept="image/*" onchange="prevShop(event)"/>
       <span style="font-size:26px;opacity:.5">📷</span><span style="font-size:13px;color:var(--mu2)">Нажмите для загрузки</span>
@@ -648,6 +654,11 @@
   <div id="notesList"></div>
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mNotes')">Закрыть</button></div>
 </div></div>
+
+<div id="lightbox" onclick="closeLightbox(event)">
+  <button id="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt=""/>
+</div>
 
 <div class="toasts" id="toasts"></div>
 
@@ -775,17 +786,26 @@ function pedRenderWeekTabs() {
   document.getElementById('pedCopyBar').style.display = _pedWeek === 1 ? 'flex' : 'none';
 }
 
-// ══ FIX: pedReadDOM читает и сохраняет данные из DOM в _pedPlan
+// ══ FIX: pedReadDOM — читает имя блока из input заголовка блока ══
 function pedReadDOM() {
-  const rows = document.querySelectorAll('.ped-ex-row[data-idx]');
-  if (!rows.length) return; // Ничего не делаем если DOM пустой
+  const blockEls = document.querySelectorAll('.ped-block');
+  if (!blockEls.length) return;
   const result = [];
-  rows.forEach(row => {
-    const block    = row.dataset.block || '';
-    const exercise = row.querySelector('.ped-ex-name')?.value?.trim() || '';
-    const sets     = row.querySelector('.ped-sets')?.value?.trim()    || '';
-    const reps     = row.querySelector('.ped-reps')?.value?.trim()    || '';
-    result.push({ block, exercise, sets, reps });
+  blockEls.forEach(blockEl => {
+    // Берём актуальное имя блока из input (не из data-атрибута — он может быть устаревшим)
+    const blockNameInput = blockEl.querySelector('.ped-block-name');
+    const blockName = blockNameInput ? blockNameInput.value.trim() : '';
+    const rows = blockEl.querySelectorAll('.ped-ex-row[data-idx]');
+    rows.forEach(row => {
+      const exercise = row.querySelector('.ped-ex-name')?.value?.trim() || '';
+      const sets     = row.querySelector('.ped-sets')?.value?.trim()    || '';
+      const reps     = row.querySelector('.ped-reps')?.value?.trim()    || '';
+      result.push({ block: blockName, exercise, sets, reps });
+    });
+    // Если блок пустой (нет строк упражнений) — всё равно держим его как placeholder
+    if (!rows.length) {
+      result.push({ block: blockName, exercise: '', sets: '', reps: '' });
+    }
   });
   _pedPlan[_pedWeek] = result;
 }
@@ -1343,7 +1363,7 @@ async function loadAdminProg(){
     let html=`<div class="card card-a"><div class="ct">График веса</div>`;
     html+=weights.length?`<div class="chart-w"><canvas id="adm-wc"></canvas></div>`:`<div class="empty"><div class="ei">⚖️</div>Нет данных о весе</div>`;
     html+=`</div>`;
-    if(photos.length){html+=`<div class="st" style="margin-bottom:10px">📸 Фото</div><div class="ph-g">`+photos.map(p=>`<img class="ph-img" src="${p.photoUrl}" loading="lazy"/>`).join('')+`</div>`;}
+    if(photos.length){html+=`<div class="st" style="margin-bottom:10px">📸 Фото</div><div class="ph-g">`+photos.map(p=>`<img class="ph-img" src="${p.photoUrl}" loading="lazy" onclick="openLightbox('${p.photoUrl}')"/>`).join('')+`</div>`;}
     box.innerHTML=html;
     if(weights.length)new Chart(document.getElementById('adm-wc'),chartCfg(weights));
   }catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}
@@ -1360,7 +1380,7 @@ async function loadAdminShop(){
     g.innerHTML=items.map(i=>`
       <div class="shopi">
         ${i.photoUrl?`<img class="simg" src="${i.photoUrl}" loading="lazy" alt="${esc(i.name)}"/>`:`<div class="simg-ph">📦</div>`}
-        <div class="sbody"><div class="sname">${esc(i.name)}</div><div class="sprice">${i.price} ₽</div>
+        <div class="sbody"><div class="sname">${esc(i.name)}</div><div class="sprice">${i.price} ₸</div>
         <button class="btn btn-d sm" onclick="delShopItem('${i.id}')">🗑 Удалить</button></div>
       </div>`).join('');
   }catch(e){g.innerHTML=`<div class="empty">${e.message}</div>`;}
@@ -1467,7 +1487,8 @@ async function loadUserProgress(){
     }
     const pg=document.getElementById('phGrid');
     pg.innerHTML=photos.length
-      ?photos.map(p=>`<img class="ph-img" src="${p.photoUrl}" loading="lazy"/>`).join('')
+      ?photos.map(p=>`<img class="ph-img" src="${p.photoUrl}" loading="lazy" onclick="openLightbox('${p.photoUrl}')"/>`)
+             .join('')
       :`<div class="empty" style="grid-column:1/-1"><div class="ei">📸</div>Нет фото</div>`;
   }catch(e){toast('Ошибка загрузки прогресса: '+e.message,'e');}
 }
@@ -1509,7 +1530,7 @@ async function loadUserShop(){
     g.innerHTML=items.map(i=>`
       <div class="shopi">
         ${i.photoUrl?`<img class="simg" src="${i.photoUrl}" loading="lazy" alt="${esc(i.name)}"/>`:`<div class="simg-ph">📦</div>`}
-        <div class="sbody"><div class="sname">${esc(i.name)}</div><div class="sprice">${i.price} ₽</div>
+        <div class="sbody"><div class="sname">${esc(i.name)}</div><div class="sprice">${i.price} ₸</div>
         <button class="btn btn-p sm" style="width:100%" onclick="orderItem('${i.id}','${esc(i.name)}')">Заказать</button></div>
       </div>`).join('');
   }catch(e){g.innerHTML=`<div class="empty">${e.message}</div>`;}
@@ -1749,13 +1770,20 @@ async function loadReviews() {
   box.innerHTML = '<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';
   avgBox.innerHTML = '';
   try {
-    // ══ FIX: GET /api/reviews без orderBy — сортируем на клиенте ══
-    const reviews = await api('/api/reviews');
+    // Явно запрашиваем JSON — обходим SPA-fallback
+    const r = await fetch('/api/reviews', { headers: { 'Accept': 'application/json' } });
+    if (!r.ok) throw new Error('Сервер вернул статус ' + r.status);
+    const ct = r.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) {
+      // Маршрут /api/reviews не найден на сервере — показываем подсказку
+      box.innerHTML = '<div class="empty"><div class="ei">⭐</div>Отзывов пока нет</div>';
+      return;
+    }
+    const reviews = await r.json();
     if (!reviews.length) {
       box.innerHTML = '<div class="empty"><div class="ei">⭐</div>Отзывов пока нет</div>';
       return;
     }
-    // Сортируем на клиенте по дате (новые сначала)
     reviews.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
     const avg = (reviews.reduce((s,r) => s + r.rating, 0) / reviews.length).toFixed(1);
     const stars = Math.round(avg);
@@ -1764,26 +1792,42 @@ async function loadReviews() {
       <div class="avg-stars">${'⭐'.repeat(stars)}${'☆'.repeat(5-stars)}</div>
       <div class="avg-count">${reviews.length} отзывов</div>
     </div>`;
-    box.innerHTML = reviews.map(r => {
-      const d = new Date(r.createdAt).toLocaleDateString('ru-RU');
-      const ratingStars = '⭐'.repeat(Math.min(5, Math.max(1, r.rating)));
+    box.innerHTML = reviews.map(rv => {
+      const d = new Date(rv.createdAt).toLocaleDateString('ru-RU');
+      const ratingStars = '⭐'.repeat(Math.min(5, Math.max(1, rv.rating)));
       return `<div class="review-card">
         <div class="review-head">
-          <div class="review-ava">${(r.userName||'?').charAt(0).toUpperCase()}</div>
+          <div class="review-ava">${(rv.userName||'?').charAt(0).toUpperCase()}</div>
           <div>
-            <div class="review-name">${esc(r.userName||'Ученик')}</div>
+            <div class="review-name">${esc(rv.userName||'Ученик')}</div>
             <div class="review-stars">${ratingStars}</div>
           </div>
           <div class="review-date">${d}</div>
         </div>
-        ${r.text ? `<div class="review-text">${esc(r.text)}</div>` : ''}
+        ${rv.text ? `<div class="review-text">${esc(rv.text)}</div>` : ''}
       </div>`;
     }).join('');
   } catch(e) {
     box.innerHTML = `<div class="empty"><div class="ei">⭐</div>${esc(e.message)}</div>`;
-    console.error('loadReviews error:', e);
+    console.error('loadReviews:', e);
   }
 }
+
+// ═══════════════════════════════════════════════════════
+// 🔍 ЛАЙТБОКС для фото
+// ═══════════════════════════════════════════════════════
+function openLightbox(url) {
+  document.getElementById('lightbox-img').src = url;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox(e) {
+  if (e && e.target === document.getElementById('lightbox-img')) return; // клик по фото — не закрываем
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lightbox-img').src = '';
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
 // ═══════════════════════════════════════════════════════
 // ЭКСПОРТ EXCEL
