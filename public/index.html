@@ -251,9 +251,18 @@
     .cal-cell{aspect-ratio:1;border-radius:var(--r3);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:background .15s;position:relative;background:rgba(255,255,255,.02);border:1px solid transparent;}
     .cal-cell:hover{background:rgba(255,255,255,.05);}
     .cal-cell.today{border-color:var(--ac);color:var(--ac);font-weight:700;}
-    .cal-cell.has-workout{background:rgba(110,231,183,.1);}
-    .cal-cell.has-workout::after{content:'';position:absolute;bottom:4px;width:4px;height:4px;border-radius:50%;background:var(--ac);}
+    .cal-cell.has-workout{background:rgba(110,231,183,.07);}
+    .cal-cell.has-payment{background:rgba(251,191,36,.07);}
+    .cal-cell.has-workout.has-payment{background:rgba(110,231,183,.07);}
+    .cal-dots{display:flex;gap:2px;position:absolute;bottom:3px;left:50%;transform:translateX(-50%);}
+    .cal-dot{width:4px;height:4px;border-radius:50%;}
+    .cal-dot-w{background:var(--ac);}
+    .cal-dot-p{background:var(--yel);}
     .cal-cell.other-month{opacity:.3;}
+    /* Легенда календаря */
+    .cal-legend{display:flex;gap:14px;margin-bottom:12px;flex-wrap:wrap;}
+    .cal-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--mu2);}
+    .cal-legend-dot{width:8px;height:8px;border-radius:50%;}
     .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
     .cal-month{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;}
     .cal-day-events{margin-top:12px;}
@@ -387,7 +396,11 @@
       <div id="diaryList"></div>
     </div>
     <div class="panel" id="p-acal">
-      <div class="st" style="margin-bottom:14px">📅 Календарь тренировок</div>
+      <div class="st" style="margin-bottom:10px">📅 Календарь тренировок</div>
+      <div class="cal-legend">
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--ac)"></div>Тренировка</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--yel)"></div>Дата оплаты</div>
+      </div>
       <div class="cal-nav">
         <button class="btn btn-g sm" onclick="calPrev()">‹</button>
         <div class="cal-month" id="calMonthLabel"></div>
@@ -926,6 +939,7 @@ async function loadAdminStudents(){
           <button class="mark-btn" onclick="markAtt('${u.id}','${esc(u.name)}')">✓ Отметить тренировку</button>
           <button class="btn btn-g sm" onclick="openUploadPlan('${u.id}','${esc(u.name)}')">📋 Редактировать план</button>
           <button class="btn btn-g sm" onclick="openNotes('${u.id}','${esc(u.name)}')">💬 Заметки</button>
+          <button class="btn btn-w sm" onclick="resetWeight('${u.id}','${esc(u.name)}')">⚖️ Сбросить вес</button>
           <button class="btn btn-g sm" onclick="openEditUser('${u.id}')">✏️ Изменить</button>
           <button class="btn btn-d sm" onclick="delUser('${u.id}')">🗑</button>
         </div>
@@ -1558,7 +1572,18 @@ let _calYear=new Date().getFullYear(),_calMonth=new Date().getMonth(),_calWorkou
 const RU_MONTHS=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const RU_DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 
-async function loadCalendar(){try{_calWorkouts=await api('/api/workouts');renderCalendar();}catch(e){console.error(e);}}
+async function loadCalendar(){
+  try{
+    // Грузим тренировки и учеников параллельно
+    const [ws, students] = await Promise.all([
+      api('/api/workouts'),
+      allStudents.length ? Promise.resolve(allStudents) : api('/api/users')
+    ]);
+    _calWorkouts = ws;
+    if(students.length) allStudents = students;
+    renderCalendar();
+  }catch(e){console.error(e);}
+}
 function calPrev(){_calMonth--;if(_calMonth<0){_calMonth=11;_calYear--;}renderCalendar();}
 function calNext(){_calMonth++;if(_calMonth>11){_calMonth=0;_calYear++;}renderCalendar();}
 
@@ -1566,35 +1591,100 @@ function renderCalendar(){
   document.getElementById('calMonthLabel').textContent=RU_MONTHS[_calMonth]+' '+_calYear;
   const grid=document.getElementById('calGrid');
   const today=new Date().toISOString().split('T')[0];
+
+  // Собираем Set дат оплат из учеников
+  const paymentDates=new Set(allStudents.map(s=>s.paymentDate).filter(Boolean));
+  // Карта дата → ученики с оплатой
+  const paymentMap={};
+  allStudents.forEach(s=>{
+    if(!s.paymentDate) return;
+    if(!paymentMap[s.paymentDate]) paymentMap[s.paymentDate]=[];
+    paymentMap[s.paymentDate].push(s.name);
+  });
+
   let html=RU_DAYS.map(d=>`<div class="cal-head-cell">${d}</div>`).join('');
   const firstDay=new Date(_calYear,_calMonth,1);
   const startDow=(firstDay.getDay()+6)%7;
   const daysInMonth=new Date(_calYear,_calMonth+1,0).getDate();
   const daysInPrevM=new Date(_calYear,_calMonth,0).getDate();
-  for(let i=0;i<startDow;i++)html+=`<div class="cal-cell other-month">${daysInPrevM-startDow+1+i}</div>`;
+
+  for(let i=0;i<startDow;i++) html+=`<div class="cal-cell other-month">${daysInPrevM-startDow+1+i}</div>`;
+
   for(let d=1;d<=daysInMonth;d++){
     const dateStr=`${_calYear}-${String(_calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const hasW=_calWorkouts.some(w=>w.datetime&&w.datetime.startsWith(dateStr));
+    const hasP=paymentDates.has(dateStr);
     const isToday=dateStr===today;
-    html+=`<div class="cal-cell${hasW?' has-workout':''}${isToday?' today':''}" onclick="showCalDay('${dateStr}')">${d}</div>`;
+    let cls='cal-cell';
+    if(hasW) cls+=' has-workout';
+    if(hasP) cls+=' has-payment';
+    if(isToday) cls+=' today';
+    // Точки-маркеры
+    let dots='';
+    if(hasW||hasP){
+      dots='<div class="cal-dots">';
+      if(hasW) dots+=`<div class="cal-dot cal-dot-w"></div>`;
+      if(hasP) dots+=`<div class="cal-dot cal-dot-p"></div>`;
+      dots+='</div>';
+    }
+    html+=`<div class="${cls}" onclick="showCalDay('${dateStr}')">${d}${dots}</div>`;
   }
+
   const total=startDow+daysInMonth;
   const remain=total%7===0?0:7-(total%7);
-  for(let i=1;i<=remain;i++)html+=`<div class="cal-cell other-month">${i}</div>`;
+  for(let i=1;i<=remain;i++) html+=`<div class="cal-cell other-month">${i}</div>`;
+
   grid.innerHTML=html;
   document.getElementById('calEvents').innerHTML='';
 }
 
 function showCalDay(dateStr){
   const ws=_calWorkouts.filter(w=>w.datetime&&w.datetime.startsWith(dateStr));
+  // Ученики с оплатой в этот день
+  const payers=allStudents.filter(s=>s.paymentDate===dateStr);
   const evBox=document.getElementById('calEvents');
   const d=new Date(dateStr).toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
-  if(!ws.length){evBox.innerHTML=`<div style="color:var(--mu2);font-size:13px;padding:10px 0">${d} — тренировок нет</div>`;return;}
-  evBox.innerHTML=`<div style="font-size:12px;font-weight:700;color:var(--mu2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">${d}</div>`+
-    ws.map(w=>{
+
+  if(!ws.length && !payers.length){
+    evBox.innerHTML=`<div style="color:var(--mu2);font-size:13px;padding:10px 0">${d} — событий нет</div>`;
+    return;
+  }
+
+  let html=`<div style="font-size:12px;font-weight:700;color:var(--mu2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">${d}</div>`;
+
+  // Тренировки
+  if(ws.length){
+    ws.forEach(w=>{
       const t=new Date(w.datetime).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
-      return `<div class="cal-event"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">🏋️</span><div><div style="font-weight:600;font-size:13px">${esc(w.title)}</div><div style="font-size:12px;color:var(--mu2)">${t} · ${w.type==='group'?'👥 Группа':'👤 Личная'}</div></div></div></div>`;
-    }).join('');
+      html+=`<div class="cal-event" style="border-left:3px solid var(--ac)">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">🏋️</span>
+          <div>
+            <div style="font-weight:600;font-size:13px">${esc(w.title)}</div>
+            <div style="font-size:12px;color:var(--mu2)">${t} · ${w.type==='group'?'👥 Группа':'👤 Личная'} · ${w.duration} мин</div>
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+
+  // Оплаты
+  if(payers.length){
+    payers.forEach(s=>{
+      const sessColor=s.sessions<=0?'var(--red)':s.sessions<=2?'var(--yel)':'var(--ac)';
+      html+=`<div class="cal-event" style="border-left:3px solid var(--yel);background:rgba(251,191,36,.06)">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">💳</span>
+          <div>
+            <div style="font-weight:600;font-size:13px">${esc(s.name)}</div>
+            <div style="font-size:12px;color:var(--mu2)">Дата оплаты · <span style="color:${sessColor};font-weight:600">${s.sessions} занятий</span></div>
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+
+  evBox.innerHTML=html;
 }
 
 let _reviewRating=0;
@@ -1641,6 +1731,15 @@ async function loadReviews(){
       </div>`;
     }).join('');
   }catch(e){box.innerHTML=`<div class="empty"><div class="ei">⭐</div>${esc(e.message)}</div>`;console.error('loadReviews:',e);}
+}
+
+// ✅ НОВОЕ: сброс записей веса ученика тренером
+async function resetWeight(userId, userName){
+  if(!confirm(`Удалить все записи веса «${userName}»?\n\nЭто действие нельзя отменить — все точки графика веса будут стёрты.`)) return;
+  try{
+    const r = await api(`/api/progress/${userId}/weight`, 'DELETE');
+    toast(`⚖️ График веса «${userName}» очищен (удалено ${r.deleted} записей)`, 'w');
+  }catch(e){ toast('Ошибка: '+e.message, 'e'); }
 }
 
 // ✅ НОВОЕ: удаление отзыва тренером
