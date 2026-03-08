@@ -1,9 +1,10 @@
 /**
- * server.js — Coach Space v4.2
- * Изменения:
- * 1) COACH_TG обновлён на 1457231359
- * 2) Загрузка Excel/PDF/документов в план тренировок (вместо ссылки)
- * 3) Реакции: тренер видит кто поставил реакцию
+ * server.js — Coach Space v5.0
+ * Умный парсинг Excel-плана по шаблону тренера:
+ *   A,B,C  = Неделя 1 (Упражнение, Подходы, Повторения)
+ *   E,F,G  = Неделя 2
+ *   I,J,K  = Неделя 3
+ *   M,N,O  = Неделя 4
  */
 
 require('dotenv').config();
@@ -179,78 +180,96 @@ app.post('/api/users/:id/attendance', async (req, res) => {
 });
 
 // ══════════════════════════════════════════════
-// ПЛАН ТРЕНИРОВОК — загрузка Excel + парсинг в JSON
-// POST /api/users/:id/plan  — multipart, field: planFile
-// GET  /api/users/:id/plan  — возвращает { sheets: [{name, rows: [[...], ...]}] }
+// ПЛАН ТРЕНИРОВОК — умный парсинг Excel по шаблону тренера
+// Колонки: A,B,C=Неделя1 | E,F,G=Неделя2 | I,J,K=Неделя3 | M,N,O=Неделя4
 // ══════════════════════════════════════════════
+
+function parseTrainingPlan(buffer) {
+  if (!XLSX) throw new Error('xlsx не установлен: npm install xlsx');
+  const wb  = XLSX.read(buffer, { type: 'buffer' });
+  const ws  = wb.Sheets[wb.SheetNames[0]];
+  const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+  // Индексы колонок (0-based): A=0,B=1,C=2 | E=4,F=5,G=6 | I=8,J=9,K=10 | M=12,N=13,O=14
+  const WEEK_COLS = [
+    { week: 1, ex: 0,  sets: 1,  reps: 2  },
+    { week: 2, ex: 4,  sets: 5,  reps: 6  },
+    { week: 3, ex: 8,  sets: 9,  reps: 10 },
+    { week: 4, ex: 12, sets: 13, reps: 14 },
+  ];
+
+  const plan = { 1: [], 2: [], 3: [], 4: [] };
+  let currentBlock = '';
+
+  for (const row of raw) {
+    if (row.every(c => String(c).trim() === '')) continue;
+
+    const cellA = String(row[0] || '').trim();
+    const cellB = String(row[1] || '').trim();
+    const cellE = String(row[4] || '').trim();
+
+    // Строка-заголовок блока: есть текст в A, нет данных в B и E
+    const isBlockHeader = cellA !== '' && cellB === '' && cellE === '';
+    if (isBlockHeader) {
+      currentBlock = cellA;
+      continue;
+    }
+
+    for (const { week, ex, sets, reps } of WEEK_COLS) {
+      const exName  = String(row[ex]  || '').trim();
+      const setsVal = String(row[sets] || '').trim();
+      const repsVal = String(row[reps] || '').trim();
+      const skip    = ['упражнение','exercise','название','name',''];
+      if (exName && !skip.includes(exName.toLowerCase())) {
+        plan[week].push({ block: currentBlock, exercise: exName, sets: setsVal, reps: repsVal });
+      }
+    }
+  }
+  return plan;
+}
+
 app.post('/api/users/:id/plan', upload.single('planFile'), async (req, res) => {
   try {
     const { id } = req.params;
     if (!req.file) return res.status(400).json({ error: 'Файл обязателен' });
+    const ext = path.extname(req.file.originalname).toLowerCase();
+    if (!['.xlsx', '.xls'].includes(ext))
+      return res.status(400).json({ error: 'Нужен .xlsx или .xls файл' });
 
-    const origName = req.file.originalname;
-    const ext = path.extname(origName).toLowerCase();
-
-    let fileCategory = 'document';
-    if (['.xlsx', '.xls', '.csv'].includes(ext)) fileCategory = 'excel';
-    else if (ext === '.pdf') fileCategory = 'pdf';
-    else if (['.doc', '.docx'].includes(ext)) fileCategory = 'word';
-
-    // Для Excel — парсим в JSON и сохраняем данные в Firestore
-    let planData = null;
-    if (fileCategory === 'excel') {
-      try {
-        if (!XLSX) throw new Error('xlsx не установлен');
-        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
-        const sheets = workbook.SheetNames.map(name => {
-          const ws = workbook.Sheets[name];
-          const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-          // Убираем полностью пустые строки
-          const cleaned = rows.filter(r => r.some(c => c !== '' && c !== null && c !== undefined));
-          return { name, rows: cleaned };
-        });
-        planData = { sheets };
-      } catch (parseErr) {
-        console.warn('Excel parse warning:', parseErr.message);
-      }
+    let trainingPlan;
+    try {
+      trainingPlan = parseTrainingPlan(req.file.buffer);
+    } catch (e) {
+      return res.status(400).json({ error: 'Ошибка парсинга: ' + e.message });
     }
 
-    // Загружаем файл в Storage (для скачивания)
-    const dest = `plans/${id}/${Date.now()}${ext}`;
-    const url  = await uploadToStorage(req.file.buffer, dest, req.file.mimetype);
+    const totalEx = Object.values(trainingPlan).reduce((s, w) => s + w.length, 0);
+    await db.collection('users').doc(id).update({
+      trainingPlan,
+      planFileName:  req.file.originalname,
+      planUpdatedAt: new Date().toISOString(),
+    });
 
-    const updateData = {
-      planUrl:      url,
-      planFileName: origName,
-      planFileType: fileCategory,
-    };
-    // Если распарсили Excel — сохраняем данные прямо в документ пользователя
-    if (planData) updateData.planData = planData;
-
-    await db.collection('users').doc(id).update(updateData);
-
-    res.json({ success: true, url, fileName: origName, fileType: fileCategory, planData });
+    res.json({ success: true, totalExercises: totalEx, trainingPlan });
   } catch (e) {
-    console.error('/api/users/:id/plan:', e.message);
+    console.error('/api/users/:id/plan POST:', e.message);
     res.status(500).json({ error: e.message });
   }
 });
 
-// GET план (таблица)
+// GET план
 app.get('/api/users/:id/plan', async (req, res) => {
   try {
     const doc = await db.collection('users').doc(req.params.id).get();
     if (!doc.exists) return res.status(404).json({ error: 'Не найден' });
     const u = doc.data();
     res.json({
-      planUrl:      u.planUrl      || null,
-      planFileName: u.planFileName || null,
-      planFileType: u.planFileType || null,
-      planData:     u.planData     || null,
+      trainingPlan:  u.trainingPlan  || null,
+      planFileName:  u.planFileName  || null,
+      planUpdatedAt: u.planUpdatedAt || null,
     });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
-
 // ══════════════════════════════════════════════
 // ТРЕНИРОВКИ
 // ══════════════════════════════════════════════
