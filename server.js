@@ -47,6 +47,31 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ═══════════════════════════════════════════
+// ПРОКСИ ДЛЯ ИЗОБРАЖЕНИЙ Firebase Storage
+// Решает CORS — браузер грузит фото с того же
+// домена Render, а не с firebasestorage.googleapis.com
+// ═══════════════════════════════════════════
+app.get('/api/img/:filePath(*)', async (req, res) => {
+  try {
+    const filePath = decodeURIComponent(req.params.filePath);
+    const file = bucket.file(filePath);
+    const [exists] = await file.exists();
+    if (!exists) return res.status(404).send('Not found');
+    const [metadata] = await file.getMetadata();
+    const contentType = (metadata.contentType) || 'image/jpeg';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    file.createReadStream()
+      .on('error', (e) => { console.error('Stream error:', e.message); res.status(500).end(); })
+      .pipe(res);
+  } catch (e) {
+    console.error('IMG PROXY:', e.message);
+    res.status(500).send('Error');
+  }
+});
+
+// ═══════════════════════════════════════════
 // АВТОРИЗАЦИЯ
 // ═══════════════════════════════════════════
 app.post('/api/login', async (req, res) => {
@@ -265,9 +290,8 @@ app.post('/api/progress/photo', upload.single('photo'), async (req, res) => {
         cacheControl: 'public, max-age=31536000',
       }
     });
-    await file.makePublic();
-    // ✅ ИСПРАВЛЕНО: новый формат URL для Firebase Storage
-    const photoUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileName)}?alt=media`;
+    // Сохраняем путь к файлу — отдаём через прокси /api/img/ чтобы избежать CORS
+    const photoUrl = `/api/img/${encodeURIComponent(fileName)}`;
     const ref = await db.collection('progress').add({
       userId, type: 'photo', photoUrl,
       date: new Date().toISOString().split('T')[0],
@@ -405,9 +429,8 @@ app.post('/api/shop', upload.single('photo'), async (req, res) => {
           cacheControl: 'public, max-age=31536000',
         }
       });
-      await file.makePublic();
-      // ✅ ИСПРАВЛЕНО: новый формат URL для Firebase Storage
-      photoUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileName)}?alt=media`;
+      // Сохраняем путь — отдаём через прокси /api/img/ чтобы избежать CORS
+      photoUrl = `/api/img/${encodeURIComponent(fileName)}`;
     }
     const ref = await db.collection('shop').add({
       name, price: parseFloat(price), photoUrl,
