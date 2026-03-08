@@ -297,6 +297,11 @@
     .ped-col-heads{display:grid;grid-template-columns:1fr 72px 72px 32px;gap:8px;padding:4px 14px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);}
     #mPlanEditor .modal{max-width:96vw;width:100%;}
     @media(min-width:700px){#mPlanEditor .modal{max-width:860px;}}
+    /* Тест уведомлений блок */
+    .tg-status{background:rgba(110,231,183,.06);border:1px solid var(--ba);border-radius:var(--r);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
+    .tg-status-icon{font-size:22px;}
+    .tg-status-text{font-size:13px;color:var(--mu2);flex:1;}
+    .tg-status-text b{color:var(--tx);}
   </style>
 </head>
 <body>
@@ -391,11 +396,17 @@
       <div class="cal-grid" id="calGrid"></div>
       <div class="cal-day-events" id="calEvents"></div>
     </div>
+
+    <!-- ✅ ИЗМЕНЕНО: добавлена кнопка теста уведомлений -->
     <div class="panel" id="p-arev">
-      <div class="st" style="margin-bottom:14px">⭐ Отзывы учеников</div>
+      <div class="sh">
+        <div class="st">⭐ Отзывы учеников</div>
+        <button class="btn btn-g sm" onclick="testNotifications()">🔔 Тест уведомлений</button>
+      </div>
       <div id="avgRating"></div>
       <div id="reviewsList"></div>
     </div>
+
     <div class="panel" id="p-ushop">
       <div class="st" style="margin-bottom:14px">🛒 Магазин</div>
       <div class="shop-g" id="uShopGrid"></div>
@@ -520,18 +531,11 @@
   <div class="ped-copy-bar" id="pedCopyBar">
     <span style="font-size:12px;color:var(--mu2);flex-shrink:0">Копировать Нед.</span>
     <select class="fsel" id="pedCopyFrom" style="width:auto;padding:5px 10px;font-size:12px;flex-shrink:0">
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
+      <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
     </select>
     <span style="font-size:12px;color:var(--mu2);flex-shrink:0">→</span>
     <select class="fsel" id="pedCopyTo" style="width:auto;padding:5px 10px;font-size:12px;flex-shrink:0">
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="all">Все</option>
+      <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="all">Все</option>
     </select>
     <button class="btn btn-g sm" onclick="copyWeekAny()">Копировать</button>
   </div>
@@ -600,6 +604,7 @@
 </div>
 
 <div class="toasts" id="toasts"></div>
+
 <script>
 let ME = null;
 let wChartInst = null;
@@ -818,11 +823,6 @@ function copyWeekAny(){
     toast(`✅ Неделя ${from} → Неделя ${to}`,'s');
   }
   pedRenderWeekTabs();
-}
-
-function copyWeekTo(target){
-  // legacy — оставлен для совместимости
-  copyWeekAny();
 }
 
 async function savePlanEditor(){
@@ -1185,7 +1185,6 @@ async function loadAdminProg(){
   }catch(e){box.innerHTML=`<div class="empty">${esc(e.message)}</div>`;}
 }
 
-// ✅ ИСПРАВЛЕНО: убран loading="lazy" — Edge блокировал загрузку картинок магазина
 async function loadAdminShop(){
   const g=document.getElementById('aShopGrid');
   try{
@@ -1319,7 +1318,6 @@ async function uploadPhoto(){
   }catch(e){toast('Ошибка: '+e.message,'e');}
 }
 
-// ✅ ИСПРАВЛЕНО: убран loading="lazy" — Edge блокировал загрузку картинок магазина
 async function loadUserShop(){
   const g=document.getElementById('uShopGrid');
   try{
@@ -1491,14 +1489,12 @@ async function editDiary(entryId){
     const entries=await r.json();
     const e=entries.find(x=>x.id===entryId);
     if(!e){toast('Запись не найдена','e');return;}
-    // Заполняем модалку данными записи
     _diaryRating=e.rating||0;
     _diaryExCount=0;
     document.getElementById('diaryDate').value=e.date;
     document.getElementById('diaryNote').value=e.note||'';
     document.getElementById('diaryExList').innerHTML='';
     document.querySelectorAll('#starRow .star-btn').forEach((b,i)=>b.classList.toggle('active',i<_diaryRating));
-    // Восстанавливаем упражнения
     (e.exercises||[]).forEach(ex=>{
       _diaryExCount++;
       const id=_diaryExCount;
@@ -1511,7 +1507,6 @@ async function editDiary(entryId){
         <div id="exSets_${id}"></div>
         <button class="add-set-btn" onclick="addSet(${id})">+ Добавить подход</button>`;
       document.getElementById('diaryExList').appendChild(div);
-      // Восстанавливаем подходы
       (ex.sets||[]).forEach(s=>{
         const container=document.getElementById('exSets_'+id);
         const n=container.children.length+1;
@@ -1525,7 +1520,6 @@ async function editDiary(entryId){
         container.appendChild(row);
       });
     });
-    // Меняем кнопку сохранения на обновление
     document.querySelector('#mDiary .mf .btn-p').setAttribute('onclick',`saveDiaryEdit('${entryId}')`);
     document.querySelector('#mDiary .mt').textContent='✏️ Редактировать запись';
     openMo('mDiary');
@@ -1554,7 +1548,6 @@ async function saveDiaryEdit(entryId){
   try{
     await api('/api/diary/'+ME.id+'/'+entryId,'PUT',{date,exercises,note,rating:_diaryRating||null});
     toast('✅ Запись обновлена!','s');
-    // Сбрасываем кнопку обратно
     document.querySelector('#mDiary .mf .btn-p').setAttribute('onclick','saveDiary()');
     document.querySelector('#mDiary .mt').textContent='📊 Запись тренировки';
     closeMo('mDiary');loadDiary();
@@ -1616,6 +1609,7 @@ async function submitReview(){
   }catch(e){toast(e.message,'e');}
 }
 
+// ✅ ИЗМЕНЕНО: добавлена кнопка удаления для admin
 async function loadReviews(){
   const box=document.getElementById('reviewsList'),avgBox=document.getElementById('avgRating');
   box.innerHTML='<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';avgBox.innerHTML='';
@@ -1633,9 +1627,41 @@ async function loadReviews(){
     box.innerHTML=reviews.map(rv=>{
       const d=new Date(rv.createdAt).toLocaleDateString('ru-RU');
       const ratingStars='⭐'.repeat(Math.min(5,Math.max(1,rv.rating)));
-      return `<div class="review-card"><div class="review-head"><div class="review-ava">${(rv.userName||'?').charAt(0).toUpperCase()}</div><div><div class="review-name">${esc(rv.userName||'Ученик')}</div><div class="review-stars">${ratingStars}</div></div><div class="review-date">${d}</div></div>${rv.text?`<div class="review-text">${esc(rv.text)}</div>`:''}</div>`;
+      const delBtn=ME?.role==='admin'
+        ?`<button class="btn btn-d sm" style="margin-top:8px" onclick="delReview('${rv.id}')">🗑 Удалить</button>`
+        :'';
+      return `<div class="review-card">
+        <div class="review-head">
+          <div class="review-ava">${(rv.userName||'?').charAt(0).toUpperCase()}</div>
+          <div><div class="review-name">${esc(rv.userName||'Ученик')}</div><div class="review-stars">${ratingStars}</div></div>
+          <div class="review-date">${d}</div>
+        </div>
+        ${rv.text?`<div class="review-text">${esc(rv.text)}</div>`:''}
+        ${delBtn}
+      </div>`;
     }).join('');
   }catch(e){box.innerHTML=`<div class="empty"><div class="ei">⭐</div>${esc(e.message)}</div>`;console.error('loadReviews:',e);}
+}
+
+// ✅ НОВОЕ: удаление отзыва тренером
+async function delReview(id){
+  if(!confirm('Удалить этот отзыв?'))return;
+  try{
+    await api('/api/reviews/'+id,'DELETE');
+    toast('🗑 Отзыв удалён','w');
+    loadReviews();
+  }catch(e){toast(e.message,'e');}
+}
+
+// ✅ НОВОЕ: тест Telegram уведомлений
+async function testNotifications(){
+  const chatId=prompt('Telegram ID для теста (оставьте пустым = отправить тренеру):');
+  if(chatId===null)return; // нажали Отмена
+  try{
+    const r=await api('/api/notifications/test','POST',{chatId:chatId||null});
+    if(r.success)toast('✅ Тест отправлен → '+r.sentTo,'s');
+    else toast('❌ Уведомления не работают: '+r.reason,'e');
+  }catch(e){toast(e.message,'e');}
 }
 
 function openLightbox(url){document.getElementById('lightbox-img').src=url;document.getElementById('lightbox').classList.add('open');document.body.style.overflow='hidden';}
