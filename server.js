@@ -259,9 +259,15 @@ app.post('/api/progress/photo', upload.single('photo'), async (req, res) => {
     if (!userId || !req.file) return res.status(400).json({ error: 'userId и фото обязательны' });
     const fileName = `progress/${userId}/${Date.now()}_${req.file.originalname}`;
     const file = bucket.file(fileName);
-    await file.save(req.file.buffer, { metadata: { contentType: req.file.mimetype } });
+    await file.save(req.file.buffer, {
+      metadata: {
+        contentType: req.file.mimetype,
+        cacheControl: 'public, max-age=31536000',
+      }
+    });
     await file.makePublic();
-    const photoUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+    // ✅ ИСПРАВЛЕНО: новый формат URL для Firebase Storage
+    const photoUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileName)}?alt=media`;
     const ref = await db.collection('progress').add({
       userId, type: 'photo', photoUrl,
       date: new Date().toISOString().split('T')[0],
@@ -320,7 +326,6 @@ app.post('/api/posts/:id/react', async (req, res) => {
     if (!doc.exists) return res.status(404).json({ error: 'Пост не найден' });
     const reactions = doc.data().reactions || {};
     if (single) {
-      // Убираем предыдущую реакцию этого юзера
       for (const em of Object.keys(reactions)) {
         reactions[em] = (reactions[em] || []).filter(r =>
           typeof r === 'string' ? r !== userId : r.userId !== userId
@@ -343,7 +348,6 @@ app.post('/api/posts/:id/vote', async (req, res) => {
     const doc = await ref.get();
     if (!doc.exists) return res.status(404).json({ error: 'Пост не найден' });
     const votes = doc.data().votes || {};
-    // Убираем предыдущий голос
     for (const opt of Object.keys(votes)) {
       votes[opt] = (votes[opt] || []).filter(v => v.userId !== userId);
     }
@@ -374,9 +378,15 @@ app.post('/api/shop', upload.single('photo'), async (req, res) => {
     if (req.file) {
       const fileName = `shop/${Date.now()}_${req.file.originalname}`;
       const file = bucket.file(fileName);
-      await file.save(req.file.buffer, { metadata: { contentType: req.file.mimetype } });
+      await file.save(req.file.buffer, {
+        metadata: {
+          contentType: req.file.mimetype,
+          cacheControl: 'public, max-age=31536000',
+        }
+      });
       await file.makePublic();
-      photoUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+      // ✅ ИСПРАВЛЕНО: новый формат URL для Firebase Storage
+      photoUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileName)}?alt=media`;
     }
     const ref = await db.collection('shop').add({
       name, price: parseFloat(price), photoUrl,
