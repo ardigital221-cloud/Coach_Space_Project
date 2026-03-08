@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
   <title>Coach Space</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
@@ -62,9 +62,9 @@
     .rs{background:rgba(251,191,36,.15);color:var(--yel);}
     .btn-out{background:none;color:var(--mu);font-size:18px;padding:6px;transition:color .2s;}
     .btn-out:hover{color:var(--red);}
-    .bnav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(8,12,20,.94);backdrop-filter:blur(24px);border-top:1px solid var(--b);display:flex;overflow-x:auto;overflow-y:hidden;padding-bottom:env(safe-area-inset-bottom);scrollbar-width:none;-ms-overflow-style:none;}
+    .bnav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(8,12,20,.94);backdrop-filter:blur(24px);border-top:1px solid var(--b);display:flex;overflow-x:auto;overflow-y:hidden;padding-bottom:env(safe-area-inset-bottom);scrollbar-width:none;-ms-overflow-style:none;justify-content:stretch;}
     .bnav::-webkit-scrollbar{display:none;}
-    .nb{flex:0 0 auto;min-width:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 6px;background:none;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--mu);transition:color .2s;}
+    .nb{flex:1;min-width:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 4px;background:none;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--mu);transition:color .2s;}
     .nb .ni{font-size:19px;}.nb.active{color:var(--ac);}
     .content{max-width:680px;margin:0 auto;padding:18px 14px;}
     .panel{display:none;animation:fadeUp .3s ease;}.panel.active{display:block;}
@@ -145,8 +145,11 @@
     .sname{font-weight:600;font-size:13px;margin-bottom:3px;}
     .sprice{font-family:'Unbounded',sans-serif;font-size:14px;color:var(--ac);margin-bottom:9px;}
     .ph-g{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px;}
-    .ph-img{aspect-ratio:1/1;border-radius:10px;object-fit:cover;border:1px solid var(--b);cursor:pointer;transition:opacity .2s;}
+    .ph-wrap{position:relative;}
+    .ph-img{width:100%;aspect-ratio:1/1;border-radius:10px;object-fit:cover;border:1px solid var(--b);cursor:pointer;transition:opacity .2s;display:block;}
     .ph-img:hover{opacity:.85;}
+    .ph-del{position:absolute;top:5px;right:5px;background:rgba(0,0,0,.65);border:none;color:#fff;border-radius:50%;width:24px;height:24px;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .2s;line-height:1;}
+    .ph-wrap:hover .ph-del{opacity:1;}
     #lightbox{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:16px;cursor:pointer;}
     #lightbox.open{display:flex;animation:fadeIn .2s ease;}
     #lightbox img{max-width:100%;max-height:90vh;border-radius:var(--r);object-fit:contain;box-shadow:0 0 60px rgba(0,0,0,.8);cursor:default;}
@@ -224,6 +227,7 @@
     @keyframes spin    {to{transform:rotate(360deg)}}
     @keyframes pulse   {0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
     .diary-day{background:var(--card);border:1px solid var(--b);border-radius:var(--r);padding:16px;margin-bottom:10px;transition:border .2s;}
+    .diary-day-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--b);}
     .diary-day:hover{border-color:var(--ba);}
     .diary-day-head{display:flex;align-items:center;gap:10px;}
     .diary-day-date{font-weight:700;font-size:13px;}
@@ -557,7 +561,7 @@
     <button class="btn btn-g sm" onclick="addDiaryEx()">+ Упражнение</button>
   </div>
   <div class="fg"><label class="fl">Заметка</label><textarea class="fta" id="diaryNote" placeholder="Как прошла тренировка?"></textarea></div>
-  <div class="mf"><button class="btn btn-g" onclick="closeMo('mDiary')">Отмена</button><button class="btn btn-p" onclick="saveDiary()">Сохранить</button></div>
+  <div class="mf"><button class="btn btn-g" onclick="resetDiaryModal();closeMo('mDiary')">Отмена</button><button class="btn btn-p" id="diarySaveBtn" onclick="saveDiary()">Сохранить</button></div>
 </div></div>
 
 <div class="mo" id="mReview"><div class="modal">
@@ -1287,7 +1291,7 @@ async function loadUserProgress(){
     }
     const pg=document.getElementById('phGrid');
     pg.innerHTML=photos.length
-      ?photos.map(p=>`<img class="ph-img" src="${p.photoUrl}" onclick="openLightbox('${p.photoUrl}')"/>`).join('')
+      ?photos.map(p=>`<div class="ph-wrap"><img class="ph-img" src="${p.photoUrl}" onclick="openLightbox('${p.photoUrl}')"/><button class="ph-del" onclick="deletePhoto('${p.id}',event)" title="Удалить">✕</button></div>`).join('')
       :`<div class="empty" style="grid-column:1/-1"><div class="ei">📸</div>Нет фото</div>`;
   }catch(e){toast('Ошибка загрузки прогресса: '+e.message,'e');}
 }
@@ -1330,6 +1334,16 @@ async function loadUserShop(){
   }catch(e){g.innerHTML=`<div class="empty">${e.message}</div>`;}
 }
 
+async function deletePhoto(photoId,e){
+  e.stopPropagation();
+  if(!confirm('Удалить это фото?'))return;
+  try{
+    await api('/api/progress/photo/'+photoId,'DELETE');
+    toast('🗑 Фото удалено','w');
+    loadUserProgress();
+  }catch(err){toast('Ошибка: '+err.message,'e');}
+}
+
 async function orderItem(id,name){
   if(!confirm(`Заказать «${name}»? Тренер получит уведомление в Telegram.`))return;
   try{await api('/api/shop/'+id+'/order','POST',{userId:ME.id,userName:ME.name});toast('✅ Заказ отправлен! Тренер свяжется с вами.','s');}
@@ -1358,6 +1372,7 @@ function chartCfg(weights){
 let _diaryRating=0,_diaryExCount=0;
 
 function openDiaryModal(){
+  resetDiaryModal();
   _diaryRating=0;_diaryExCount=0;
   document.getElementById('diaryDate').value=new Date().toISOString().split('T')[0];
   document.getElementById('diaryExList').innerHTML='';
@@ -1438,16 +1453,112 @@ async function loadDiary(){
       const stars=e.rating?'⭐'.repeat(e.rating):'';
       const exCount=(e.exercises||[]).length;
       const d=new Date(e.date).toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short'});
-      return `<div class="diary-day">
+      return `<div class="diary-day" id="diary-${e.id}">
         <div class="diary-day-head">
           <span style="font-size:18px">🏋️</span>
           <div><div class="diary-day-date">${d}</div><div class="diary-day-excount">${exCount} упражнений${e.note?' · '+esc(e.note.slice(0,40)):''}</div></div>
           <div class="diary-day-rating">${stars}</div>
         </div>
         ${(e.exercises||[]).length?`<div style="margin-top:10px">`+e.exercises.map(ex=>{const chips=(ex.sets||[]).map(s=>`<span class="diary-set-chip">${s.weight?s.weight+'кг×':''}${s.reps}</span>`).join('');return`<div class="diary-ex-row"><span class="diary-ex-name">${esc(ex.name)}</span><div class="diary-ex-sets">${chips}</div></div>`;}).join('')+'</div>':''}
+        <div class="diary-day-actions">
+          <button class="btn btn-g sm" onclick="editDiary('${e.id}')">✏️ Редактировать</button>
+          <button class="btn btn-d sm" onclick="deleteDiary('${e.id}')">🗑 Удалить</button>
+        </div>
       </div>`;
     }).join('');
   }catch(e){box.innerHTML=`<div class="empty"><div class="ei">📊</div>${esc(e.message)}</div>`;console.error('loadDiary:',e);}
+}
+
+function resetDiaryModal(){
+  const btn=document.querySelector('#mDiary .mf .btn-p');
+  if(btn){btn.setAttribute('onclick','saveDiary()');}
+  const title=document.querySelector('#mDiary .mt');
+  if(title){title.textContent='📊 Запись тренировки';}
+}
+
+async function deleteDiary(entryId){
+  if(!confirm('Удалить запись тренировки?'))return;
+  try{
+    await api('/api/diary/'+ME.id+'/'+entryId,'DELETE');
+    toast('🗑 Запись удалена','w');
+    loadDiary();
+  }catch(e){toast('Ошибка: '+e.message,'e');}
+}
+
+async function editDiary(entryId){
+  try{
+    const r=await fetch('/api/diary/'+ME.id,{headers:{'Accept':'application/json'}});
+    const entries=await r.json();
+    const e=entries.find(x=>x.id===entryId);
+    if(!e){toast('Запись не найдена','e');return;}
+    // Заполняем модалку данными записи
+    _diaryRating=e.rating||0;
+    _diaryExCount=0;
+    document.getElementById('diaryDate').value=e.date;
+    document.getElementById('diaryNote').value=e.note||'';
+    document.getElementById('diaryExList').innerHTML='';
+    document.querySelectorAll('#starRow .star-btn').forEach((b,i)=>b.classList.toggle('active',i<_diaryRating));
+    // Восстанавливаем упражнения
+    (e.exercises||[]).forEach(ex=>{
+      _diaryExCount++;
+      const id=_diaryExCount;
+      const div=document.createElement('div');div.className='ex-block';div.id='diaryEx_'+id;
+      div.innerHTML=`
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+          <input class="fi" style="flex:1" placeholder="Название упражнения" id="exName_${id}" value="${esc(ex.name)}"/>
+          <button class="btn btn-d sm" onclick="this.closest('.ex-block').remove()">✕</button>
+        </div>
+        <div id="exSets_${id}"></div>
+        <button class="add-set-btn" onclick="addSet(${id})">+ Добавить подход</button>`;
+      document.getElementById('diaryExList').appendChild(div);
+      // Восстанавливаем подходы
+      (ex.sets||[]).forEach(s=>{
+        const container=document.getElementById('exSets_'+id);
+        const n=container.children.length+1;
+        const row=document.createElement('div');row.className='set-inputs';
+        row.innerHTML=`
+          <span style="font-size:11px;color:var(--mu2);width:20px;flex-shrink:0">${n}</span>
+          <input class="fi" placeholder="Кг" type="number" step="0.5" style="width:70px;padding:8px 10px" value="${s.weight||''}"/>
+          <span style="font-size:12px;color:var(--mu2)">×</span>
+          <input class="fi" placeholder="Повт" type="number" style="width:70px;padding:8px 10px" value="${s.reps||''}"/>
+          <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px">✕</button>`;
+        container.appendChild(row);
+      });
+    });
+    // Меняем кнопку сохранения на обновление
+    document.querySelector('#mDiary .mf .btn-p').setAttribute('onclick',`saveDiaryEdit('${entryId}')`);
+    document.querySelector('#mDiary .mt').textContent='✏️ Редактировать запись';
+    openMo('mDiary');
+  }catch(err){toast('Ошибка: '+err.message,'e');}
+}
+
+async function saveDiaryEdit(entryId){
+  const date=document.getElementById('diaryDate').value;
+  if(!date){toast('Укажите дату','e');return;}
+  const exercises=[];
+  document.querySelectorAll('.ex-block').forEach(block=>{
+    const idMatch=block.id.match(/diaryEx_(\d+)/);if(!idMatch)return;
+    const exId=idMatch[1];
+    const nameEl=document.getElementById('exName_'+exId);
+    const name=nameEl?.value?.trim();if(!name)return;
+    const sets=[];
+    block.querySelectorAll('.set-inputs').forEach(row=>{
+      const inputs=row.querySelectorAll('input[type="number"]');
+      const weight=inputs[0]?.value,reps=inputs[1]?.value;
+      if(reps)sets.push({weight:weight||'',reps:parseInt(reps)});
+    });
+    if(sets.length)exercises.push({name,sets});
+  });
+  if(!exercises.length){toast('Добавьте хотя бы одно упражнение с подходами','e');return;}
+  const note=document.getElementById('diaryNote').value;
+  try{
+    await api('/api/diary/'+ME.id+'/'+entryId,'PUT',{date,exercises,note,rating:_diaryRating||null});
+    toast('✅ Запись обновлена!','s');
+    // Сбрасываем кнопку обратно
+    document.querySelector('#mDiary .mf .btn-p').setAttribute('onclick','saveDiary()');
+    document.querySelector('#mDiary .mt').textContent='📊 Запись тренировки';
+    closeMo('mDiary');loadDiary();
+  }catch(e){toast(e.message,'e');}
 }
 
 let _calYear=new Date().getFullYear(),_calMonth=new Date().getMonth(),_calWorkouts=[];
