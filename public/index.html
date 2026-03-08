@@ -286,6 +286,82 @@
     @keyframes slideUp {from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
     @keyframes spin    {to{transform:rotate(360deg)}}
     @keyframes pulse   {0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
+
+    /* ═══ ДНЕВНИК ═══ */
+    .diary-day{background:var(--card);border:1px solid var(--b);border-radius:var(--r);padding:16px;margin-bottom:10px;cursor:pointer;transition:border .2s;}
+    .diary-day:hover{border-color:var(--ba);}
+    .diary-day-head{display:flex;align-items:center;gap:10px;}
+    .diary-day-date{font-weight:700;font-size:13px;}
+    .diary-day-rating{margin-left:auto;font-size:16px;}
+    .diary-day-excount{font-size:11px;color:var(--mu2);}
+    .diary-ex-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+    .diary-ex-row:last-child{border-bottom:none;}
+    .diary-ex-name{flex:1;font-size:13px;font-weight:500;}
+    .diary-ex-sets{display:flex;gap:5px;flex-wrap:wrap;}
+    .diary-set-chip{background:rgba(110,231,183,.1);border:1px solid var(--ba);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:600;color:var(--ac);}
+    .set-inputs{display:flex;gap:6px;align-items:center;margin-bottom:6px;}
+    .set-inputs .fi{width:70px;padding:8px 10px;font-size:13px;}
+    .set-inputs .fi:focus{border-color:var(--ac);}
+    .ex-block{background:rgba(255,255,255,.02);border:1px solid var(--b);border-radius:var(--r2);padding:12px;margin-bottom:10px;}
+    .ex-block-name{font-weight:700;font-size:13px;margin-bottom:10px;color:var(--ac);}
+    .add-set-btn{font-size:11px;color:var(--ac);background:none;border:none;cursor:pointer;padding:4px 0;}
+    .star-row{display:flex;gap:6px;margin:10px 0;}
+    .star-btn{font-size:24px;background:none;border:none;cursor:pointer;opacity:.4;transition:opacity .2s,transform .2s;}
+    .star-btn.active{opacity:1;transform:scale(1.15);}
+
+    /* ═══ РЕКОРДЫ ═══ */
+    .pr-card{background:var(--card);border:1px solid var(--b);border-radius:var(--r2);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+    .pr-medal{font-size:24px;flex-shrink:0;}
+    .pr-name{font-weight:600;font-size:13px;flex:1;}
+    .pr-val{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:700;color:var(--ac);}
+    .pr-meta{font-size:11px;color:var(--mu2);}
+    .pr-date{font-size:11px;color:var(--mu);margin-left:auto;}
+
+    /* ═══ ЦЕЛИ ═══ */
+    .goal-card{background:var(--card);border:1px solid var(--b);border-radius:var(--r);padding:16px;margin-bottom:10px;}
+    .goal-card.done{opacity:.5;}
+    .goal-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+    .goal-title{font-weight:700;font-size:14px;flex:1;}
+    .goal-pct{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;color:var(--ac);}
+    .goal-bar-wrap{background:rgba(255,255,255,.06);border-radius:99px;height:8px;overflow:hidden;margin-bottom:8px;}
+    .goal-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .6s ease;}
+    .goal-vals{display:flex;justify-content:space-between;font-size:12px;color:var(--mu2);}
+    .goal-deadline{font-size:11px;color:var(--yel);margin-top:6px;}
+
+    /* ═══ КАЛЕНДАРЬ ═══ */
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:16px;}
+    .cal-head-cell{text-align:center;font-size:10px;font-weight:700;color:var(--mu2);text-transform:uppercase;padding:6px 0;}
+    .cal-cell{aspect-ratio:1;border-radius:var(--r3);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:background .15s;position:relative;background:rgba(255,255,255,.02);border:1px solid transparent;}
+    .cal-cell:hover{background:rgba(255,255,255,.05);}
+    .cal-cell.today{border-color:var(--ac);color:var(--ac);font-weight:700;}
+    .cal-cell.has-workout{background:rgba(110,231,183,.1);}
+    .cal-cell.has-workout::after{content:'';position:absolute;bottom:4px;width:4px;height:4px;border-radius:50%;background:var(--ac);}
+    .cal-cell.other-month{opacity:.3;}
+    .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .cal-month{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;}
+    .cal-day-events{margin-top:12px;}
+    .cal-event{background:rgba(110,231,183,.08);border:1px solid var(--ba);border-radius:var(--r3);padding:10px 14px;margin-bottom:7px;}
+
+    /* ═══ ЗАМЕТКИ ТРЕНЕРА ═══ */
+    .note-item{background:rgba(255,255,255,.02);border-left:3px solid var(--ac);border-radius:0 var(--r3) var(--r3) 0;padding:10px 14px;margin-bottom:8px;position:relative;}
+    .note-date{font-size:11px;color:var(--mu2);margin-bottom:4px;}
+    .note-text{font-size:13px;}
+    .note-del{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--mu);font-size:14px;cursor:pointer;opacity:.5;}
+    .note-del:hover{opacity:1;color:var(--red);}
+
+    /* ═══ ОТЗЫВЫ ═══ */
+    .review-card{background:var(--card);border:1px solid var(--b);border-radius:var(--r2);padding:14px;margin-bottom:8px;}
+    .review-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+    .review-ava{width:32px;height:32px;border-radius:50%;background:var(--acd);border:1px solid var(--ba);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--ac);flex-shrink:0;}
+    .review-name{font-weight:600;font-size:13px;}
+    .review-stars{color:#fbbf24;font-size:14px;}
+    .review-date{font-size:11px;color:var(--mu2);margin-left:auto;}
+    .review-text{font-size:13px;color:var(--mu2);}
+    .avg-rating{text-align:center;padding:20px;background:rgba(110,231,183,.05);border-radius:var(--r);margin-bottom:16px;}
+    .avg-num{font-family:'Unbounded',sans-serif;font-size:42px;font-weight:700;color:var(--ac);}
+    .avg-stars{font-size:20px;margin:4px 0;}
+    .avg-count{font-size:12px;color:var(--mu2);}
+
   </style>
 </head>
 <body>
@@ -380,6 +456,47 @@
     <div class="panel" id="p-uplan">
       <div class="sh"><div class="st">📋 План тренировок</div><span id="planUpdatedAt" style="font-size:11px;color:var(--mu2)"></span></div>
       <div id="uPlanContent"></div>
+    </div>
+
+    <!-- УЧЕНИК: ДНЕВНИК ТРЕНИРОВОК -->
+    <div class="panel" id="p-udiary">
+      <div class="sh">
+        <div class="st">📊 Дневник тренировок</div>
+        <button class="btn btn-p sm" onclick="openMo('mDiary')">+ Запись</button>
+      </div>
+      <div id="diaryList"></div>
+    </div>
+
+    <!-- УЧЕНИК: ЦЕЛИ -->
+    <div class="panel" id="p-ugoals">
+      <div class="sh">
+        <div class="st">🎯 Мои цели</div>
+        <button class="btn btn-p sm" onclick="openMo('mAddGoal')">+ Цель</button>
+      </div>
+      <div id="goalsList"></div>
+      <div class="div" style="margin:20px 0"></div>
+      <div class="st" style="margin-bottom:14px">💪 Личные рекорды</div>
+      <div id="prList"></div>
+    </div>
+
+    <!-- ТРЕНЕР: КАЛЕНДАРЬ -->
+    <div class="panel" id="p-acal">
+      <div class="st" style="margin-bottom:14px">📅 Календарь тренировок</div>
+      <div class="cal-nav">
+        <button class="btn btn-g sm" onclick="calPrev()">‹</button>
+        <div class="cal-month" id="calMonthLabel"></div>
+        <button class="btn btn-g sm" onclick="calNext()">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-day-events" id="calEvents"></div>
+    </div>
+
+    <!-- ТРЕНЕР: ОТЗЫВЫ -->
+    <div class="panel" id="p-arev">
+      <div class="st" style="margin-bottom:14px">⭐ Отзывы учеников</div>
+      <div id="avgRating"></div>
+      <button class="btn btn-g sm" style="margin-bottom:14px" onclick="exportExcel()">📤 Экспорт в Excel</button>
+      <div id="reviewsList"></div>
     </div>
 
     <!-- УЧЕНИК: МАГАЗИН -->
@@ -571,6 +688,85 @@
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mUploadPlan')">Отмена</button><button class="btn btn-p" id="planUpSaveBtn" onclick="savePlanUpload()">💾 Сохранить план</button></div>
 </div></div>
 
+<!-- Дневник: добавить запись -->
+<div class="mo" id="mDiary"><div class="modal" style="max-width:520px">
+  <div class="mh"></div><div class="mt">📊 Запись тренировки</div>
+  <div class="g2">
+    <div class="fg"><label class="fl">Дата</label><input class="fi" id="diaryDate" type="date"/></div>
+    <div class="fg"><label class="fl">Оценка дня</label>
+      <div class="star-row" id="starRow">
+        <button class="star-btn" onclick="setStar(1)">⭐</button>
+        <button class="star-btn" onclick="setStar(2)">⭐</button>
+        <button class="star-btn" onclick="setStar(3)">⭐</button>
+        <button class="star-btn" onclick="setStar(4)">⭐</button>
+        <button class="star-btn" onclick="setStar(5)">⭐</button>
+      </div>
+    </div>
+  </div>
+  <div class="fg"><label class="fl">Упражнения</label><div id="diaryExList"></div>
+    <button class="btn btn-g sm" onclick="addDiaryEx()">+ Упражнение</button>
+  </div>
+  <div class="fg"><label class="fl">Заметка</label><textarea class="fta" id="diaryNote" placeholder="Как прошла тренировка?"></textarea></div>
+  <div class="mf"><button class="btn btn-g" onclick="closeMo('mDiary')">Отмена</button><button class="btn btn-p" onclick="saveDiary()">Сохранить</button></div>
+</div></div>
+
+<!-- Добавить цель -->
+<div class="mo" id="mAddGoal"><div class="modal">
+  <div class="mh"></div><div class="mt">🎯 Новая цель</div>
+  <div class="fg"><label class="fl">Название цели</label><input class="fi" id="goalTitle" placeholder="Пожать 100 кг"/></div>
+  <div class="g2">
+    <div class="fg"><label class="fl">Целевое значение</label><input class="fi" id="goalTarget" type="number" placeholder="100"/></div>
+    <div class="fg"><label class="fl">Единица</label><input class="fi" id="goalUnit" placeholder="кг"/></div>
+  </div>
+  <div class="g2">
+    <div class="fg"><label class="fl">Сейчас</label><input class="fi" id="goalCurrent" type="number" placeholder="70"/></div>
+    <div class="fg"><label class="fl">Дедлайн</label><input class="fi" id="goalDeadline" type="date"/></div>
+  </div>
+  <div class="mf"><button class="btn btn-g" onclick="closeMo('mAddGoal')">Отмена</button><button class="btn btn-p" onclick="saveGoal()">Создать</button></div>
+</div></div>
+
+<!-- Обновить прогресс цели -->
+<div class="mo" id="mUpdGoal"><div class="modal">
+  <div class="mh"></div><div class="mt">🎯 Обновить прогресс</div>
+  <input type="hidden" id="updGoalId"/>
+  <div class="fg"><label class="fl" id="updGoalLabel">Текущее значение</label>
+    <input class="fi" id="updGoalVal" type="number"/>
+  </div>
+  <div class="mf"><button class="btn btn-g" onclick="closeMo('mUpdGoal')">Отмена</button><button class="btn btn-p" onclick="updateGoalProgress()">Сохранить</button></div>
+</div></div>
+
+<!-- Написать отзыв (ученик) -->
+<div class="mo" id="mReview"><div class="modal">
+  <div class="mh"></div><div class="mt">⭐ Оставить отзыв</div>
+  <div class="fg"><label class="fl">Оценка тренировки</label>
+    <div class="star-row" id="reviewStarRow">
+      <button class="star-btn" onclick="setReviewStar(1)">⭐</button>
+      <button class="star-btn" onclick="setReviewStar(2)">⭐</button>
+      <button class="star-btn" onclick="setReviewStar(3)">⭐</button>
+      <button class="star-btn" onclick="setReviewStar(4)">⭐</button>
+      <button class="star-btn" onclick="setReviewStar(5)">⭐</button>
+    </div>
+  </div>
+  <div class="fg"><label class="fl">Комментарий (необязательно)</label>
+    <textarea class="fta" id="reviewText" placeholder="Поделитесь впечатлением..."></textarea>
+  </div>
+  <div class="mf"><button class="btn btn-g" onclick="closeMo('mReview')">Отмена</button><button class="btn btn-p" onclick="submitReview()">Отправить</button></div>
+</div></div>
+
+<!-- Заметки тренера к ученику -->
+<div class="mo" id="mNotes"><div class="modal">
+  <div class="mh"></div>
+  <div class="mt">💬 Заметки</div>
+  <div style="font-size:14px;font-weight:600;color:var(--ac);margin-bottom:14px" id="notesUserName"></div>
+  <input type="hidden" id="notesUserId"/>
+  <div class="fg">
+    <textarea class="fta" id="noteText" placeholder="Заметка о тренировке, прогрессе..."></textarea>
+  </div>
+  <div style="margin-bottom:14px"><button class="btn btn-p sm" onclick="saveNote()">Добавить заметку</button></div>
+  <div id="notesList"></div>
+  <div class="mf"><button class="btn btn-g" onclick="closeMo('mNotes')">Закрыть</button></div>
+</div></div>
+
 <div class="toasts" id="toasts"></div>
 
 <script>
@@ -625,8 +821,8 @@ function startApp(){
 }
 
 const TABS={
-  admin:[{id:'ah',icon:'🏠',lbl:'Главная'},{id:'aw',icon:'🏋️',lbl:'Тренировки'},{id:'aprog',icon:'📈',lbl:'Прогресс'},{id:'ashop',icon:'🛒',lbl:'Магазин'}],
-  user: [{id:'uh',icon:'🏠',lbl:'Главная'},{id:'uplan',icon:'📋',lbl:'План'},{id:'uw',icon:'🏋️',lbl:'Тренировки'},{id:'uprog',icon:'📈',lbl:'Прогресс'},{id:'ushop',icon:'🛒',lbl:'Магазин'}]
+  admin:[{id:'ah',icon:'🏠',lbl:'Главная'},{id:'acal',icon:'📅',lbl:'Календарь'},{id:'aw',icon:'🏋️',lbl:'Тренировки'},{id:'aprog',icon:'📈',lbl:'Прогресс'},{id:'arev',icon:'⭐',lbl:'Отзывы'},{id:'ashop',icon:'🛒',lbl:'Магазин'}],
+  user: [{id:'uh',icon:'🏠',lbl:'Главная'},{id:'uplan',icon:'📋',lbl:'План'},{id:'udiary',icon:'📊',lbl:'Дневник'},{id:'ugoals',icon:'🎯',lbl:'Цели'},{id:'uprog',icon:'📈',lbl:'Прогресс'},{id:'ushop',icon:'🛒',lbl:'Магазин'}]
 };
 function buildNav(){
   const nav=document.getElementById('bnav'),tabs=ME.role==='admin'?TABS.admin:TABS.user;
@@ -645,8 +841,12 @@ function showTab(id,btn){
   if(id==='uh')    loadUserHome();
   if(id==='uw')    loadUserWorkouts();
   if(id==='uprog') loadUserProgress();
-  if(id==='ushop') loadUserShop();
-  if(id==='uplan') loadUserPlan();
+  if(id==='ushop')  loadUserShop();
+  if(id==='uplan')  loadUserPlan();
+  if(id==='udiary') loadDiary();
+  if(id==='ugoals') loadGoals();
+  if(id==='acal')   loadCalendar();
+  if(id==='arev')   loadReviews();
 }
 
 // ═══════════════════════════════════════════
@@ -852,6 +1052,7 @@ async function loadAdminStudents(){
           <div class="sc-btns">
             <button class="mark-btn" onclick="markAtt('${u.id}','${esc(u.name)}')">✓ Отметить тренировку</button>
             <button class="btn btn-g sm" onclick="openUploadPlan('${u.id}','${esc(u.name)}')">📊 Загрузить план</button>
+            <button class="btn btn-g sm" onclick="openNotes('${u.id}','${esc(u.name)}')">💬 Заметки</button>
             <button class="btn btn-g sm" onclick="openEditUser('${u.id}')">✏️ Изменить</button>
             <button class="btn btn-d sm" onclick="delUser('${u.id}')">🗑</button>
           </div>
@@ -1251,6 +1452,7 @@ async function loadUserHome(){
   if (pb) pb.innerHTML = ''; // план теперь в отдельной вкладке
 
   loadUserPosts();
+  addReviewBtnToHome();
 }
 
 async function loadUserPosts(){
@@ -1387,6 +1589,417 @@ document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.
 function chartCfg(weights){
   return{type:'line',data:{labels:weights.map(w=>w.date),datasets:[{label:'Вес (кг)',data:weights.map(w=>w.weight),borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.07)',borderWidth:2.5,pointBackgroundColor:'#6ee7b7',pointRadius:5,tension:.35,fill:true}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748b',font:{size:11}},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#64748b',font:{size:11}},grid:{color:'rgba(255,255,255,.04)'}}}}}
+}
+
+
+// ═══════════════════════════════════════════════════════
+// 📊 ДНЕВНИК ТРЕНИРОВОК
+// ═══════════════════════════════════════════════════════
+let _diaryRating = 0;
+let _diaryExCount = 0;
+
+function setStar(n) {
+  _diaryRating = n;
+  document.querySelectorAll('#starRow .star-btn').forEach((b,i) => b.classList.toggle('active', i < n));
+}
+
+function addDiaryEx() {
+  _diaryExCount++;
+  const id = _diaryExCount;
+  const div = document.createElement('div');
+  div.className = 'ex-block'; div.id = 'diaryEx_' + id;
+  div.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+      <input class="fi" style="flex:1" placeholder="Название упражнения" id="exName_${id}"/>
+      <button class="btn btn-d sm" onclick="this.closest('.ex-block').remove()">✕</button>
+    </div>
+    <div id="exSets_${id}"></div>
+    <button class="add-set-btn" onclick="addSet(${id})">+ Добавить подход</button>`;
+  document.getElementById('diaryExList').appendChild(div);
+  addSet(id);
+}
+
+function addSet(exId) {
+  const container = document.getElementById('exSets_' + exId);
+  const n = container.children.length + 1;
+  const row = document.createElement('div');
+  row.className = 'set-inputs';
+  row.innerHTML = `
+    <span style="font-size:11px;color:var(--mu2);width:20px">${n}</span>
+    <input class="fi" placeholder="Кг" type="number" step="0.5" style="width:70px;padding:8px 10px"/>
+    <span style="font-size:12px;color:var(--mu2)">×</span>
+    <input class="fi" placeholder="Повт" type="number" style="width:70px;padding:8px 10px"/>
+    <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px">✕</button>`;
+  container.appendChild(row);
+}
+
+async function saveDiary() {
+  const date = document.getElementById('diaryDate').value;
+  if (!date) { toast('Укажите дату','e'); return; }
+  const exercises = [];
+  document.querySelectorAll('.ex-block').forEach(block => {
+    const idMatch = block.id.match(/diaryEx_(\d+)/);
+    if (!idMatch) return;
+    const exId = idMatch[1];
+    const name = document.getElementById('exName_' + exId)?.value?.trim();
+    if (!name) return;
+    const sets = [];
+    block.querySelectorAll('.set-inputs').forEach(row => {
+      const inputs = row.querySelectorAll('input');
+      const weight = inputs[0]?.value;
+      const reps   = inputs[1]?.value;
+      if (reps) sets.push({ weight: weight||'', reps: parseInt(reps) });
+    });
+    if (sets.length) exercises.push({ name, sets });
+  });
+  const note = document.getElementById('diaryNote').value;
+  try {
+    await api('/api/diary/' + ME.id, 'POST', { date, exercises, note, rating: _diaryRating || null });
+    toast('✅ Тренировка сохранена!', 's');
+    closeMo('mDiary');
+    loadDiary();
+    _diaryRating = 0;
+    setStar(0);
+  } catch(e) { toast(e.message, 'e'); }
+}
+
+async function loadDiary() {
+  const box = document.getElementById('diaryList');
+  box.innerHTML = '<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';
+  // Устанавливаем сегодняшнюю дату в форме
+  document.getElementById('diaryDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('diaryExList').innerHTML = '';
+  document.getElementById('diaryNote').value = '';
+  _diaryExCount = 0;
+  try {
+    const entries = await api('/api/diary/' + ME.id);
+    if (!entries.length) {
+      box.innerHTML = '<div class="empty"><div class="ei">📊</div>Начни записывать тренировки!<br><small style="color:var(--mu)">Нажми «+ Запись» чтобы добавить</small></div>';
+      return;
+    }
+    box.innerHTML = entries.map(e => {
+      const stars = e.rating ? '⭐'.repeat(e.rating) : '';
+      const exCount = (e.exercises||[]).length;
+      const d = new Date(e.date).toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short'});
+      return `<div class="diary-day">
+        <div class="diary-day-head">
+          <span style="font-size:18px">🏋️</span>
+          <div><div class="diary-day-date">${d}</div>
+            <div class="diary-day-excount">${exCount} упражнений${e.note?' · '+esc(e.note.slice(0,40)):''}</div>
+          </div>
+          <div class="diary-day-rating">${stars}</div>
+        </div>
+        ${(e.exercises||[]).length ? `<div style="margin-top:10px">` +
+          e.exercises.map(ex => {
+            const chips = ex.sets.map(s => `<span class="diary-set-chip">${s.weight?s.weight+'кг×':''}${s.reps}</span>`).join('');
+            return `<div class="diary-ex-row"><span class="diary-ex-name">${esc(ex.name)}</span><div class="diary-ex-sets">${chips}</div></div>`;
+          }).join('') + '</div>' : ''}
+      </div>`;
+    }).join('');
+  } catch(e) { box.innerHTML = '<div class="empty">' + e.message + '</div>'; }
+}
+
+// ═══════════════════════════════════════════════════════
+// 💪 ЛИЧНЫЕ РЕКОРДЫ
+// ═══════════════════════════════════════════════════════
+async function loadRecords() {
+  const box = document.getElementById('prList');
+  box.innerHTML = '<div class="sp-ring" style="margin:10px auto"></div>';
+  try {
+    const records = await api('/api/records/' + ME.id);
+    if (!records.length) { box.innerHTML = '<div style="color:var(--mu2);font-size:13px">Рекорды появятся после первых тренировок в дневнике 💪</div>'; return; }
+    records.sort((a,b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    const medals = ['🥇','🥈','🥉'];
+    box.innerHTML = records.map((r, i) => {
+      const d = new Date(r.updatedAt).toLocaleDateString('ru-RU');
+      return `<div class="pr-card">
+        <div class="pr-medal">${medals[i]||'🏅'}</div>
+        <div><div class="pr-name">${esc(r.exercise)}</div><div class="pr-meta">${r.reps} повт.</div></div>
+        <div><div class="pr-val">${r.weight} кг</div><div class="pr-date">${d}</div></div>
+      </div>`;
+    }).join('');
+  } catch(e) { box.innerHTML = '<div style="color:var(--red)">' + e.message + '</div>'; }
+}
+
+// ═══════════════════════════════════════════════════════
+// 🎯 ЦЕЛИ
+// ═══════════════════════════════════════════════════════
+async function loadGoals() {
+  loadRecords();
+  const box = document.getElementById('goalsList');
+  box.innerHTML = '<div class="sp-ring" style="margin:20px auto"></div>';
+  try {
+    const goals = await api('/api/goals/' + ME.id);
+    if (!goals.length) {
+      box.innerHTML = '<div class="empty"><div class="ei">🎯</div>Поставь первую цель!<br><small style="color:var(--mu)">Нажми «+ Цель»</small></div>';
+      return;
+    }
+    box.innerHTML = goals.map(g => {
+      const pct = g.target > 0 ? Math.min(100, Math.round((g.current / g.target) * 100)) : 0;
+      const dl = g.deadline ? `<div class="goal-deadline">📅 До: ${new Date(g.deadline).toLocaleDateString('ru-RU')}</div>` : '';
+      return `<div class="goal-card${g.done?' done':''}">
+        <div class="goal-head">
+          <span style="font-size:20px">${g.done?'✅':'🎯'}</span>
+          <div class="goal-title">${esc(g.title)}</div>
+          <div class="goal-pct">${pct}%</div>
+          <button class="btn btn-d sm" onclick="deleteGoal('${g.id}')">✕</button>
+        </div>
+        <div class="goal-bar-wrap"><div class="goal-bar" style="width:${pct}%"></div></div>
+        <div class="goal-vals">
+          <span>${g.current} ${esc(g.unit)}</span>
+          <span>${g.target} ${esc(g.unit)}</span>
+        </div>
+        ${dl}
+        ${!g.done ? `<div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn btn-g sm" onclick="openUpdGoal('${g.id}','${esc(g.title)}','${esc(g.unit)}',${g.current})">📝 Обновить</button>
+          <button class="btn btn-p sm" onclick="markGoalDone('${g.id}')">✅ Выполнено</button>
+        </div>` : ''}
+      </div>`;
+    }).join('');
+  } catch(e) { box.innerHTML = '<div class="empty">' + e.message + '</div>'; }
+}
+
+async function saveGoal() {
+  const title   = document.getElementById('goalTitle').value.trim();
+  const target  = document.getElementById('goalTarget').value;
+  const unit    = document.getElementById('goalUnit').value.trim();
+  const current = document.getElementById('goalCurrent').value;
+  const dl      = document.getElementById('goalDeadline').value;
+  if (!title) { toast('Введите название цели','e'); return; }
+  try {
+    await api('/api/goals/' + ME.id, 'POST', { title, target, unit, current, deadline: dl || null });
+    toast('🎯 Цель создана!','s'); closeMo('mAddGoal'); loadGoals();
+    ['goalTitle','goalTarget','goalUnit','goalCurrent','goalDeadline'].forEach(id => document.getElementById(id).value='');
+  } catch(e) { toast(e.message,'e'); }
+}
+
+function openUpdGoal(id, title, unit, current) {
+  document.getElementById('updGoalId').value   = id;
+  document.getElementById('updGoalLabel').textContent = title + (unit ? ' (' + unit + ')' : '');
+  document.getElementById('updGoalVal').value  = current;
+  openMo('mUpdGoal');
+}
+
+async function updateGoalProgress() {
+  const id  = document.getElementById('updGoalId').value;
+  const val = document.getElementById('updGoalVal').value;
+  try {
+    await api('/api/goals/' + ME.id + '/' + id, 'PUT', { current: val });
+    toast('✅ Прогресс обновлён','s'); closeMo('mUpdGoal'); loadGoals();
+  } catch(e) { toast(e.message,'e'); }
+}
+
+async function markGoalDone(id) {
+  try {
+    await api('/api/goals/' + ME.id + '/' + id, 'PUT', { done: true });
+    toast('🏆 Цель достигнута!','s'); loadGoals();
+  } catch(e) { toast(e.message,'e'); }
+}
+
+async function deleteGoal(id) {
+  if(!confirm('Удалить цель?')) return;
+  try { await api('/api/goals/' + ME.id + '/' + id, 'DELETE'); loadGoals(); } catch(e) { toast(e.message,'e'); }
+}
+
+// ═══════════════════════════════════════════════════════
+// 📅 КАЛЕНДАРЬ (тренер)
+// ═══════════════════════════════════════════════════════
+let _calYear  = new Date().getFullYear();
+let _calMonth = new Date().getMonth();
+let _calWorkouts = [];
+
+const RU_MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const RU_DAYS   = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+async function loadCalendar() {
+  try {
+    _calWorkouts = await api('/api/workouts');
+    renderCalendar();
+  } catch(e) { console.error(e); }
+}
+
+function calPrev() { _calMonth--; if(_calMonth < 0){ _calMonth=11; _calYear--; } renderCalendar(); }
+function calNext() { _calMonth++; if(_calMonth > 11){ _calMonth=0;  _calYear++; } renderCalendar(); }
+
+function renderCalendar() {
+  document.getElementById('calMonthLabel').textContent = RU_MONTHS[_calMonth] + ' ' + _calYear;
+  const grid = document.getElementById('calGrid');
+  const today = new Date().toISOString().split('T')[0];
+
+  // Заголовки дней
+  let html = RU_DAYS.map(d => `<div class="cal-head-cell">${d}</div>`).join('');
+
+  // Первый день месяца (0=Вс → сдвигаем под Пн)
+  const firstDay = new Date(_calYear, _calMonth, 1);
+  const startDow = (firstDay.getDay() + 6) % 7; // 0=Пн
+  const daysInMonth  = new Date(_calYear, _calMonth+1, 0).getDate();
+  const daysInPrevM  = new Date(_calYear, _calMonth, 0).getDate();
+
+  // Пустые ячейки из предыдущего месяца
+  for (let i = 0; i < startDow; i++) {
+    const d = daysInPrevM - startDow + 1 + i;
+    html += `<div class="cal-cell other-month">${d}</div>`;
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${_calYear}-${String(_calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasW = _calWorkouts.some(w => w.datetime && w.datetime.startsWith(dateStr));
+    const isToday = dateStr === today;
+    html += `<div class="cal-cell${hasW?' has-workout':''}${isToday?' today':''}" onclick="showCalDay('${dateStr}')">${d}</div>`;
+  }
+
+  // Добиваем до полных 6 рядов
+  const total = startDow + daysInMonth;
+  const remain = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let i = 1; i <= remain; i++) html += `<div class="cal-cell other-month">${i}</div>`;
+
+  grid.innerHTML = html;
+  document.getElementById('calEvents').innerHTML = '';
+}
+
+function showCalDay(dateStr) {
+  const ws = _calWorkouts.filter(w => w.datetime && w.datetime.startsWith(dateStr));
+  const evBox = document.getElementById('calEvents');
+  const d = new Date(dateStr).toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+  if (!ws.length) { evBox.innerHTML = `<div style="color:var(--mu2);font-size:13px;padding:10px 0">${d} — тренировок нет</div>`; return; }
+  evBox.innerHTML = `<div style="font-size:12px;font-weight:700;color:var(--mu2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">${d}</div>` +
+    ws.map(w => {
+      const t = new Date(w.datetime).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+      const badge = w.type==='group'?'👥 Группа':'👤 Личная';
+      return `<div class="cal-event">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">🏋️</span>
+          <div><div style="font-weight:600;font-size:13px">${esc(w.title)}</div>
+          <div style="font-size:12px;color:var(--mu2)">${t} · ${badge}</div></div>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// ⭐ ОТЗЫВЫ
+// ═══════════════════════════════════════════════════════
+let _reviewRating = 0;
+
+function setReviewStar(n) {
+  _reviewRating = n;
+  document.querySelectorAll('#reviewStarRow .star-btn').forEach((b,i) => b.classList.toggle('active', i < n));
+}
+
+async function submitReview() {
+  if (!_reviewRating) { toast('Выберите оценку','e'); return; }
+  const text = document.getElementById('reviewText').value.trim();
+  try {
+    await api('/api/reviews', 'POST', { userId: ME.id, userName: ME.name, rating: _reviewRating, text });
+    toast('⭐ Спасибо за отзыв!','s');
+    closeMo('mReview');
+    _reviewRating = 0; setReviewStar(0);
+    document.getElementById('reviewText').value = '';
+  } catch(e) { toast(e.message,'e'); }
+}
+
+async function loadReviews() {
+  const box = document.getElementById('reviewsList');
+  const avgBox = document.getElementById('avgRating');
+  box.innerHTML = '<div class="sp-ring" style="margin:20px auto"></div>';
+  try {
+    const reviews = await api('/api/reviews');
+    if (!reviews.length) {
+      avgBox.innerHTML = '';
+      box.innerHTML = '<div class="empty"><div class="ei">⭐</div>Отзывов пока нет</div>';
+      return;
+    }
+    const avg = (reviews.reduce((s,r) => s + r.rating, 0) / reviews.length).toFixed(1);
+    const stars = Math.round(avg);
+    avgBox.innerHTML = `<div class="avg-rating">
+      <div class="avg-num">${avg}</div>
+      <div class="avg-stars">${'⭐'.repeat(stars)}${'☆'.repeat(5-stars)}</div>
+      <div class="avg-count">${reviews.length} отзывов</div>
+    </div>`;
+    box.innerHTML = reviews.map(r => {
+      const d = new Date(r.createdAt).toLocaleDateString('ru-RU');
+      return `<div class="review-card">
+        <div class="review-head">
+          <div class="review-ava">${r.userName.charAt(0).toUpperCase()}</div>
+          <div><div class="review-name">${esc(r.userName)}</div>
+            <div class="review-stars">${'⭐'.repeat(r.rating)}</div></div>
+          <div class="review-date">${d}</div>
+        </div>
+        ${r.text ? `<div class="review-text">${esc(r.text)}</div>` : ''}
+      </div>`;
+    }).join('');
+  } catch(e) { box.innerHTML = '<div class="empty">' + e.message + '</div>'; }
+}
+
+// ═══════════════════════════════════════════════════════
+// 📤 ЭКСПОРТ В EXCEL
+// ═══════════════════════════════════════════════════════
+function exportExcel() {
+  toast('⏳ Подготовка файла...','w');
+  const a = document.createElement('a');
+  a.href = '/api/export/students';
+  a.download = '';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// ═══════════════════════════════════════════════════════
+// 🏠 КНОПКА «Оставить отзыв» на главной ученика
+// ═══════════════════════════════════════════════════════
+function addReviewBtnToHome() {
+  const tgBtn = document.querySelector('.tg-a');
+  if (tgBtn && !document.getElementById('reviewHomeBtn')) {
+    const btn = document.createElement('button');
+    btn.id = 'reviewHomeBtn';
+    btn.className = 'tg-a'; btn.style.cssText = 'cursor:pointer;border:none;text-align:left;width:100%';
+    btn.innerHTML = '<span style="font-size:26px">⭐</span><div><b style="font-size:14px">Оставить отзыв</b><br><span style="font-size:12px;color:var(--mu2)">Оцените тренировку</span></div>';
+    btn.onclick = () => openMo('mReview');
+    tgBtn.parentNode.insertBefore(btn, tgBtn.nextSibling);
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════
+// 💬 ЗАМЕТКИ ТРЕНЕРА
+// ═══════════════════════════════════════════════════════
+async function openNotes(userId, userName) {
+  document.getElementById('notesUserId').value = userId;
+  document.getElementById('notesUserName').textContent = '👤 ' + userName;
+  document.getElementById('noteText').value = '';
+  openMo('mNotes');
+  loadNotes(userId);
+}
+
+async function loadNotes(userId) {
+  const box = document.getElementById('notesList');
+  box.innerHTML = '<div class="sp-ring" style="margin:10px auto"></div>';
+  try {
+    const notes = await api('/api/notes/' + userId);
+    if (!notes.length) { box.innerHTML = '<div style="color:var(--mu2);font-size:13px">Заметок пока нет</div>'; return; }
+    box.innerHTML = notes.map(n => `<div class="note-item">
+      <div class="note-date">${new Date(n.createdAt).toLocaleDateString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+      <div class="note-text">${esc(n.text)}</div>
+      <button class="note-del" onclick="deleteNote('${n.id}','${userId}')">✕</button>
+    </div>`).join('');
+  } catch(e) { box.innerHTML = '<div style="color:var(--red)">' + e.message + '</div>'; }
+}
+
+async function saveNote() {
+  const userId = document.getElementById('notesUserId').value;
+  const text   = document.getElementById('noteText').value.trim();
+  if (!text) { toast('Введите текст заметки','e'); return; }
+  try {
+    await api('/api/notes/' + userId, 'POST', { text });
+    document.getElementById('noteText').value = '';
+    toast('✅ Заметка сохранена','s');
+    loadNotes(userId);
+  } catch(e) { toast(e.message,'e'); }
+}
+
+async function deleteNote(noteId, userId) {
+  try { await api('/api/notes/' + userId + '/' + noteId, 'DELETE'); loadNotes(userId); }
+  catch(e) { toast(e.message,'e'); }
 }
 
 // ИНИЦИАЛИЗАЦИЯ
