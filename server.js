@@ -30,13 +30,29 @@ const bucket  = admin.storage().bucket();
 
 // Telegram
 const COACH_TG = process.env.COACH_TG_ID || '1457231359';
-const bot = process.env.TELEGRAM_BOT_TOKEN ? new Telegraf(process.env.TELEGRAM_BOT_TOKEN) : null;
+
+// ── Диагностика Telegram при старте ──────────────────────────────
+let bot = null;
+if (process.env.TELEGRAM_BOT_TOKEN) {
+  bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
+  bot.telegram.getMe()
+    .then(me => console.log(`✅ Telegram бот подключён: @${me.username}`))
+    .catch(e  => console.error(`❌ Telegram бот НЕ подключён: ${e.message}`));
+} else {
+  console.warn('⚠️  TELEGRAM_BOT_TOKEN не задан — уведомления отключены');
+}
 
 async function tgSend(chatId, text) {
-  if (!bot || !chatId) return;
-  try { await bot.telegram.sendMessage(chatId, text, { parse_mode: 'HTML' }); }
-  catch (e) { console.error('TG send error:', e.message); }
+  if (!bot)    { console.log(`[TG-SKIP] bot=null | to=${chatId} | ${text.slice(0,60)}`); return; }
+  if (!chatId) { console.log('[TG-SKIP] chatId пустой'); return; }
+  try {
+    await bot.telegram.sendMessage(String(chatId), text, { parse_mode: 'HTML' });
+    console.log(`[TG-OK] → ${chatId} | ${text.slice(0,60)}`);
+  } catch (e) {
+    console.error(`[TG-ERR] → ${chatId} | ${e.message}`);
+  }
 }
+// ─────────────────────────────────────────────────────────────────
 
 // Multer — загрузка в память
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -48,8 +64,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ═══════════════════════════════════════════
 // ПРОКСИ ДЛЯ ИЗОБРАЖЕНИЙ Firebase Storage
-// Решает CORS — браузер грузит фото с того же
-// домена Render, а не с firebasestorage.googleapis.com
 // ═══════════════════════════════════════════
 app.get('/api/img/:filePath(*)', async (req, res) => {
   try {
@@ -233,7 +247,6 @@ app.post('/api/workouts', async (req, res) => {
       note: note || '',
       createdAt: new Date().toISOString()
     });
-    // Уведомить учеников
     for (const uid of (studentIds || [])) {
       const udoc = await db.collection('users').doc(uid).get();
       if (udoc.exists && udoc.data().telegramId) {
@@ -285,12 +298,8 @@ app.post('/api/progress/photo', upload.single('photo'), async (req, res) => {
     const fileName = `progress/${userId}/${Date.now()}_${req.file.originalname}`;
     const file = bucket.file(fileName);
     await file.save(req.file.buffer, {
-      metadata: {
-        contentType: req.file.mimetype,
-        cacheControl: 'public, max-age=31536000',
-      }
+      metadata: { contentType: req.file.mimetype, cacheControl: 'public, max-age=31536000' }
     });
-    // Сохраняем путь к файлу — отдаём через прокси /api/img/ чтобы избежать CORS
     const photoUrl = `/api/img/${encodeURIComponent(fileName)}`;
     const ref = await db.collection('progress').add({
       userId, type: 'photo', photoUrl,
@@ -301,13 +310,11 @@ app.post('/api/progress/photo', upload.single('photo'), async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Удалить фото прогресса
 app.delete('/api/progress/photo/:photoId', async (req, res) => {
   try {
     const doc = await db.collection('progress').doc(req.params.photoId).get();
     if (!doc.exists) return res.status(404).json({ error: 'Фото не найдено' });
     const { photoUrl } = doc.data();
-    // Удаляем файл из Storage
     if (photoUrl) {
       try {
         const match = photoUrl.match(/\/o\/(.+?)\?/);
@@ -345,7 +352,6 @@ app.post('/api/posts', async (req, res) => {
       votes: {}, reactions: {},
       createdAt: new Date().toISOString()
     });
-    // Уведомить всех учеников
     const students = await db.collection('users').where('role', '==', 'student').get();
     for (const s of students.docs) {
       if (s.data().telegramId) {
@@ -424,12 +430,8 @@ app.post('/api/shop', upload.single('photo'), async (req, res) => {
       const fileName = `shop/${Date.now()}_${req.file.originalname}`;
       const file = bucket.file(fileName);
       await file.save(req.file.buffer, {
-        metadata: {
-          contentType: req.file.mimetype,
-          cacheControl: 'public, max-age=31536000',
-        }
+        metadata: { contentType: req.file.mimetype, cacheControl: 'public, max-age=31536000' }
       });
-      // Сохраняем путь — отдаём через прокси /api/img/ чтобы избежать CORS
       photoUrl = `/api/img/${encodeURIComponent(fileName)}`;
     }
     const ref = await db.collection('shop').add({
@@ -496,7 +498,6 @@ app.post('/api/diary/:userId', async (req, res) => {
       rating: rating || null,
       savedAt: new Date().toISOString()
     }, { merge: true });
-    // Обновляем личные рекорды
     for (const ex of (exercises || [])) {
       for (const s of (ex.sets || [])) {
         if (!s.weight || !s.reps) continue;
@@ -520,7 +521,6 @@ app.post('/api/diary/:userId', async (req, res) => {
   }
 });
 
-// Удалить запись дневника
 app.delete('/api/diary/:userId/:entryId', async (req, res) => {
   try {
     const doc = await db.collection('diary').doc(req.params.entryId).get();
@@ -531,7 +531,6 @@ app.delete('/api/diary/:userId/:entryId', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Редактировать запись дневника
 app.put('/api/diary/:userId/:entryId', async (req, res) => {
   try {
     const { date, exercises, note, rating } = req.body;
@@ -586,6 +585,16 @@ app.post('/api/reviews', async (req, res) => {
     });
     await tgSend(COACH_TG, `⭐ <b>Новый отзыв от ${userName}!</b>\nОценка: ${'⭐'.repeat(parseInt(rating))}\n${text ? '💬 ' + text : ''}`);
     res.json({ success: true, id: ref.id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ✅ НОВЫЙ: удаление отзыва (только для тренера/admin)
+app.delete('/api/reviews/:id', async (req, res) => {
+  try {
+    const doc = await db.collection('reviews').doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Отзыв не найден' });
+    await db.collection('reviews').doc(req.params.id).delete();
+    res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -650,21 +659,40 @@ app.get('/api/export/students', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════
-// CRON — напоминания об оплате
+// ЭНДПОИНТ ПРОВЕРКИ УВЕДОМЛЕНИЙ (для тренера)
+// ═══════════════════════════════════════════
+app.post('/api/notifications/test', async (req, res) => {
+  const { chatId } = req.body;
+  const target = chatId || COACH_TG;
+  if (!bot) return res.json({ success: false, reason: 'TELEGRAM_BOT_TOKEN не задан в .env' });
+  try {
+    await tgSend(target, `🔔 <b>Тест уведомлений Coach Space</b>\n✅ Бот работает корректно!\n🕐 ${new Date().toLocaleString('ru-RU')}`);
+    res.json({ success: true, sentTo: target });
+  } catch (e) {
+    res.json({ success: false, reason: e.message });
+  }
+});
+
+// ═══════════════════════════════════════════
+// CRON — напоминания об оплате (каждый день в 9:00)
 // ═══════════════════════════════════════════
 cron.schedule('0 9 * * *', async () => {
   try {
     const today = new Date().toISOString().split('T')[0];
+    console.log(`[CRON] Проверка оплат на ${today}`);
     const snap  = await db.collection('users').where('role', '==', 'student').get();
+    let count = 0;
     for (const doc of snap.docs) {
       const u = doc.data();
       if (u.paymentDate === today) {
+        count++;
         await tgSend(COACH_TG, `💳 <b>Оплата сегодня!</b>\nУченик: <b>${u.name}</b>`);
         if (u.telegramId) {
           await tgSend(u.telegramId, `💳 <b>Напоминание об оплате!</b>\nСегодня дата оплаты абонемента. Свяжись с тренером 💪`);
         }
       }
     }
+    console.log(`[CRON] Оплат сегодня: ${count}`);
   } catch (e) { console.error('CRON error:', e.message); }
 });
 
@@ -672,7 +700,9 @@ cron.schedule('0 9 * * *', async () => {
 // ЗАПУСК
 // ═══════════════════════════════════════════
 app.listen(PORT, () => {
-  console.log(`\n🚀 Coach Space → http://localhost:${PORT}\n`);
+  console.log(`\n🚀 Coach Space → http://localhost:${PORT}`);
+  console.log(`📋 Telegram уведомления: ${bot ? '✅ включены' : '❌ отключены (нет TELEGRAM_BOT_TOKEN)'}`);
+  console.log(`📣 ID тренера (COACH_TG): ${COACH_TG}\n`);
 });
 
 // SPA fallback — СТРОГО ПОСЛЕДНЕЙ!
