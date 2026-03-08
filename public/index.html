@@ -362,6 +362,30 @@
     .avg-stars{font-size:20px;margin:4px 0;}
     .avg-count{font-size:12px;color:var(--mu2);}
 
+
+    /* ═══ РЕДАКТОР ПЛАНА (тренер) ═══ */
+    .ped-week-tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+    .ped-week-tab{flex:1;min-width:70px;padding:9px 6px;border-radius:var(--r2);border:1px solid var(--b);font-size:12px;font-weight:700;text-align:center;cursor:pointer;background:rgba(255,255,255,.03);color:var(--mu2);transition:all .2s;font-family:'Unbounded',sans-serif;}
+    .ped-week-tab.active{border-color:var(--ac);color:var(--ac);background:rgba(110,231,183,.1);}
+    .ped-block{background:rgba(255,255,255,.025);border:1px solid var(--b);border-radius:var(--r);margin-bottom:14px;overflow:hidden;}
+    .ped-block-head{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(110,231,183,.05);border-bottom:1px solid var(--b);}
+    .ped-block-name{flex:1;background:transparent;border:none;color:var(--ac);font-weight:700;font-size:13px;font-family:'Unbounded',sans-serif;outline:none;min-width:0;}
+    .ped-block-name::placeholder{color:rgba(110,231,183,.35);}
+    .ped-block-del{background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;transition:color .15s;}
+    .ped-block-del:hover{color:var(--red);}
+    .ped-ex-row{display:grid;grid-template-columns:1fr 72px 72px 32px;gap:8px;align-items:center;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.03);}
+    .ped-ex-row:last-of-type{border-bottom:none;}
+    .ped-fi{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--b);border-radius:var(--r3);color:var(--tx);padding:7px 10px;font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:border .15s;}
+    .ped-fi:focus{border-color:var(--ac);background:rgba(110,231,183,.04);}
+    .ped-fi::placeholder{color:var(--mu);}
+    .ped-fi.sm{text-align:center;font-weight:600;}
+    .ped-add-ex{display:flex;align-items:center;gap:6px;padding:9px 14px;color:var(--ac);font-size:12px;cursor:pointer;background:none;border:none;opacity:.7;transition:opacity .15s;width:100%;}
+    .ped-add-ex:hover{opacity:1;}
+    .ped-del-ex{background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:2px;border-radius:4px;transition:color .15s;line-height:1;}
+    .ped-del-ex:hover{color:var(--red);}
+    .ped-copy-bar{background:rgba(110,231,183,.06);border:1px solid var(--ba);border-radius:var(--r2);padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .ped-col-heads{display:grid;grid-template-columns:1fr 72px 72px 32px;gap:8px;padding:4px 14px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);}
+
   </style>
 </head>
 <body>
@@ -670,22 +694,27 @@
 </div></div>
 
 <!-- Загрузка плана тренером -->
-<div class="mo" id="mUploadPlan"><div class="modal">
+<div class="mo" id="mPlanEditor"><div class="modal" style="max-width:680px;width:96vw">
   <div class="mh"></div>
-  <div class="mt">📊 Загрузить план</div>
-  <input type="hidden" id="uploadPlanUserId"/>
-  <div style="font-size:14px;font-weight:600;margin-bottom:14px;color:var(--ac)" id="uploadPlanUserName"></div>
-  <div class="fg">
-    <label class="fl">Excel файл (.xlsx / .xls)</label>
-    <label class="upbtn" id="planUpLbl">
-      <input type="file" id="planUpFile" accept=".xlsx,.xls" onchange="onPlanFileSelect(event)"/>
-      <span style="font-size:30px;opacity:.5">📊</span>
-      <span style="font-size:13px;color:var(--mu2)">Выберите файл плана</span>
-      <span style="font-size:11px;color:var(--mu);margin-top:4px">Шаблон: A,B,C = Нед.1 | E,F,G = Нед.2 | I,J,K = Нед.3 | M,N,O = Нед.4</span>
-    </label>
-    <div id="planUpSelected" style="font-size:13px;color:var(--ac);margin-top:8px;display:none"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:8px">
+    <div class="mt" style="margin-bottom:0">📋 Редактор плана</div>
+    <div style="font-size:13px;font-weight:600;color:var(--ac)" id="pedUserName"></div>
   </div>
-  <div class="mf"><button class="btn btn-g" onclick="closeMo('mUploadPlan')">Отмена</button><button class="btn btn-p" id="planUpSaveBtn" onclick="savePlanUpload()">💾 Сохранить план</button></div>
+  <input type="hidden" id="pedUserId"/>
+  <div class="ped-week-tabs" id="pedWeekTabs"></div>
+  <div class="ped-copy-bar" id="pedCopyBar">
+    <span style="font-size:12px;color:var(--mu2)">Скопировать Неделю 1 на:</span>
+    <button class="btn btn-g sm" onclick="copyWeekTo(2)">→ Нед. 2</button>
+    <button class="btn btn-g sm" onclick="copyWeekTo(3)">→ Нед. 3</button>
+    <button class="btn btn-g sm" onclick="copyWeekTo(4)">→ Нед. 4</button>
+    <button class="btn btn-g sm" onclick="copyWeekTo('all')">→ Все</button>
+  </div>
+  <div id="pedWeekContent"></div>
+  <button class="btn btn-g sm" style="margin-bottom:16px;width:100%;justify-content:center" onclick="pedAddBlock()">+ Добавить блок</button>
+  <div class="mf">
+    <button class="btn btn-g" onclick="closeMo('mPlanEditor')">Отмена</button>
+    <button class="btn btn-p" onclick="savePlanEditor()">💾 Сохранить план</button>
+  </div>
 </div></div>
 
 <!-- Дневник: добавить запись -->
@@ -872,36 +901,204 @@ function prevPlanFile(e, prefix) {
   nameEl.textContent = `📎 ${file.name}`; nameEl.style.display = 'block';
 }
 
-// ═══════════════════════════════════════════
-// ТРЕНЕР: ЗАГРУЗКА ПЛАНА
-// ═══════════════════════════════════════════
-function openUploadPlan(userId, userName) {
-  document.getElementById('uploadPlanUserId').value = userId;
-  document.getElementById('uploadPlanUserName').textContent = '👤 ' + userName;
-  document.getElementById('planUpFile').value = '';
-  document.getElementById('planUpSelected').style.display = 'none';
-  document.getElementById('planUpLbl').style.display = 'flex';
-  openMo('mUploadPlan');
-}
-function onPlanFileSelect(e) {
-  const file = e.target.files[0]; if (!file) return;
-  document.getElementById('planUpSelected').textContent = '📎 ' + file.name;
-  document.getElementById('planUpSelected').style.display = 'block';
-}
-async function savePlanUpload() {
-  const userId = document.getElementById('uploadPlanUserId').value;
-  const file   = document.getElementById('planUpFile').files[0];
-  if (!file) { toast('Выберите файл Excel','e'); return; }
-  const btn = document.getElementById('planUpSaveBtn');
-  btn.textContent = '⏳ Загрузка...'; btn.disabled = true;
-  const fd = new FormData(); fd.append('planFile', file);
+// ═══════════════════════════════════════════════════════
+// ТРЕНЕР: РЕДАКТОР ПЛАНА ТРЕНИРОВОК
+// ═══════════════════════════════════════════════════════
+// Структура: _pedPlan = { 1:[{block,exercise,sets,reps},...], 2:[...], 3:[...], 4:[...] }
+let _pedPlan    = { 1:[], 2:[], 3:[], 4:[] };
+let _pedWeek    = 1;
+let _pedUserId  = '';
+
+// Открыть редактор для ученика
+async function openUploadPlan(userId, userName) {
+  _pedUserId = userId;
+  document.getElementById('pedUserId').value    = userId;
+  document.getElementById('pedUserName').textContent = '👤 ' + userName;
+  _pedWeek = 1;
+  // Загружаем существующий план если есть
   try {
-    const r = await fetch(`/api/users/${userId}/plan`, { method:'POST', body: fd });
-    const d = await r.json(); if (!r.ok) throw new Error(d.error);
-    toast(`✅ План загружен: ${d.totalExercises} упражнений`, 's');
-    closeMo('mUploadPlan');
+    const data = await api('/api/users/' + userId + '/plan');
+    _pedPlan = data.trainingPlan
+      ? { 1: data.trainingPlan[1]||[], 2: data.trainingPlan[2]||[], 3: data.trainingPlan[3]||[], 4: data.trainingPlan[4]||[] }
+      : { 1:[], 2:[], 3:[], 4:[] };
+  } catch { _pedPlan = { 1:[], 2:[], 3:[], 4:[] }; }
+  // Если план пустой — добавляем базовые блоки
+  if (!_pedPlan[1].length) {
+    _pedPlan[1] = [
+      { block:'Верх',  exercise:'', sets:'', reps:'' },
+      { block:'Ноги',  exercise:'', sets:'', reps:'' },
+      { block:'Руки',  exercise:'', sets:'', reps:'' },
+    ];
+  }
+  pedRenderWeekTabs();
+  pedRenderWeek();
+  openMo('mPlanEditor');
+}
+
+// Рендер вкладок недель
+function pedRenderWeekTabs() {
+  const tabs = document.getElementById('pedWeekTabs');
+  tabs.innerHTML = [1,2,3,4].map(w => {
+    const cnt = (_pedPlan[w]||[]).filter(e => e.exercise).length;
+    return `<button class="ped-week-tab${w===_pedWeek?' active':''}" onclick="pedSwitchWeek(${w})">
+      Неделя ${w}<br><span style="font-size:10px;opacity:.6">${cnt} упр.</span>
+    </button>`;
+  }).join('');
+  // Показываем кнопку копирования только на неделе 1
+  document.getElementById('pedCopyBar').style.display = _pedWeek === 1 ? 'flex' : 'none';
+}
+
+// Переключить неделю (сначала читаем текущее состояние DOM)
+function pedSwitchWeek(w) {
+  pedReadDOM();
+  _pedWeek = w;
+  pedRenderWeekTabs();
+  pedRenderWeek();
+}
+
+// Читаем текущее состояние DOM → записываем в _pedPlan[_pedWeek]
+function pedReadDOM() {
+  const rows = document.querySelectorAll('.ped-ex-row[data-idx]');
+  const result = [];
+  rows.forEach(row => {
+    const block    = row.dataset.block || '';
+    const exercise = row.querySelector('.ped-ex-name')?.value?.trim() || '';
+    const sets     = row.querySelector('.ped-sets')?.value?.trim()    || '';
+    const reps     = row.querySelector('.ped-reps')?.value?.trim()    || '';
+    result.push({ block, exercise, sets, reps });
+  });
+  _pedPlan[_pedWeek] = result;
+}
+
+// Рендер содержимого текущей недели
+function pedRenderWeek() {
+  const box   = document.getElementById('pedWeekContent');
+  const items = _pedPlan[_pedWeek] || [];
+
+  if (!items.length) {
+    box.innerHTML = `<div style="text-align:center;padding:24px;color:var(--mu2);font-size:13px">
+      Нажми «+ Добавить блок» чтобы начать</div>`;
+    return;
+  }
+
+  // Группируем по блокам сохраняя порядок
+  const blockOrder = [];
+  const blockMap   = {};
+  items.forEach((item, idx) => {
+    const b = item.block || '';
+    if (!blockMap[b]) { blockMap[b] = []; blockOrder.push(b); }
+    blockMap[b].push({ ...item, _globalIdx: idx });
+  });
+
+  let html = '';
+  for (const blockName of blockOrder) {
+    const bItems = blockMap[blockName];
+    html += `<div class="ped-block" data-block="${esc(blockName)}">
+      <div class="ped-block-head">
+        <span style="font-size:16px">💪</span>
+        <input class="ped-block-name" placeholder="Название блока (Верх, Ноги, Руки...)"
+          value="${esc(blockName)}" onchange="pedRenameBlock('${esc(blockName)}', this.value)"/>
+        <button class="ped-block-del" onclick="pedDeleteBlock('${esc(blockName)}')" title="Удалить блок">✕</button>
+      </div>
+      <div class="ped-col-heads"><span>Упражнение</span><span style="text-align:center">Подходы</span><span style="text-align:center">Повторения</span><span></span></div>`;
+
+    bItems.forEach(item => {
+      html += `<div class="ped-ex-row" data-idx="${item._globalIdx}" data-block="${esc(blockName)}">
+        <input class="ped-fi ped-ex-name" placeholder="Название упражнения" value="${esc(item.exercise)}"/>
+        <input class="ped-fi ped-fi sm ped-sets" placeholder="4" value="${esc(item.sets)}"/>
+        <input class="ped-fi ped-fi sm ped-reps" placeholder="12" value="${esc(item.reps)}"/>
+        <button class="ped-del-ex" onclick="pedDeleteEx(${item._globalIdx})">✕</button>
+      </div>`;
+    });
+
+    html += `<button class="ped-add-ex" onclick="pedAddEx('${esc(blockName)}')">＋ добавить упражнение</button>
+    </div>`;
+  }
+
+  box.innerHTML = html;
+}
+
+// Добавить блок
+function pedAddBlock() {
+  pedReadDOM();
+  const name = ''; // Пустое — тренер сам впишет
+  _pedPlan[_pedWeek].push({ block: 'Новый блок', exercise: '', sets: '', reps: '' });
+  pedRenderWeek();
+  // Фокус на имя нового блока
+  const blocks = document.querySelectorAll('.ped-block-name');
+  if (blocks.length) blocks[blocks.length - 1].focus();
+}
+
+// Добавить упражнение в блок
+function pedAddEx(blockName) {
+  pedReadDOM();
+  // Находим последний элемент этого блока и вставляем после
+  const lastIdx = _pedPlan[_pedWeek].map((e,i)=>e.block===blockName?i:-1).filter(i=>i>=0).pop();
+  const insertAt = lastIdx !== undefined ? lastIdx + 1 : _pedPlan[_pedWeek].length;
+  _pedPlan[_pedWeek].splice(insertAt, 0, { block: blockName, exercise: '', sets: '', reps: '' });
+  pedRenderWeek();
+  // Фокус на новое упражнение
+  const rows = document.querySelectorAll('.ped-ex-row');
+  const newRow = rows[insertAt];
+  if (newRow) newRow.querySelector('.ped-ex-name')?.focus();
+}
+
+// Удалить упражнение
+function pedDeleteEx(idx) {
+  pedReadDOM();
+  _pedPlan[_pedWeek].splice(idx, 1);
+  pedRenderWeek();
+}
+
+// Удалить блок
+function pedDeleteBlock(blockName) {
+  if (!confirm(`Удалить блок "${blockName}" со всеми упражнениями?`)) return;
+  pedReadDOM();
+  _pedPlan[_pedWeek] = _pedPlan[_pedWeek].filter(e => e.block !== blockName);
+  pedRenderWeek();
+}
+
+// Переименовать блок
+function pedRenameBlock(oldName, newName) {
+  pedReadDOM();
+  _pedPlan[_pedWeek].forEach(e => { if (e.block === oldName) e.block = newName; });
+  // Не перерисовываем чтобы не терять фокус
+}
+
+// Скопировать неделю 1 на другие
+function copyWeekTo(target) {
+  pedReadDOM();
+  const src = JSON.parse(JSON.stringify(_pedPlan[1])); // deep copy
+  if (target === 'all') {
+    if (!confirm('Скопировать Неделю 1 на Недели 2, 3 и 4? Текущие данные будут заменены.')) return;
+    _pedPlan[2] = JSON.parse(JSON.stringify(src));
+    _pedPlan[3] = JSON.parse(JSON.stringify(src));
+    _pedPlan[4] = JSON.parse(JSON.stringify(src));
+    toast('✅ Неделя 1 скопирована на все недели','s');
+  } else {
+    if (!confirm(`Скопировать Неделю 1 на Неделю ${target}? Текущие данные будут заменены.`)) return;
+    _pedPlan[target] = JSON.parse(JSON.stringify(src));
+    toast(`✅ Скопировано на Неделю ${target}`,'s');
+  }
+  pedRenderWeekTabs();
+}
+
+// Сохранить весь план
+async function savePlanEditor() {
+  pedReadDOM();
+  // Убираем пустые упражнения
+  const clean = {};
+  for (let w = 1; w <= 4; w++) {
+    clean[w] = (_pedPlan[w]||[]).filter(e => e.exercise.trim());
+  }
+  const total = Object.values(clean).reduce((s,a) => s+a.length, 0);
+  if (!total) { toast('Добавьте хотя бы одно упражнение','e'); return; }
+  try {
+    await api('/api/users/' + _pedUserId + '/plan', 'POST', { trainingPlan: clean });
+    toast(`✅ План сохранён: ${total} упражнений`, 's');
+    closeMo('mPlanEditor');
+    allStudents = []; loadAdminHome();
   } catch(e) { toast('Ошибка: ' + e.message, 'e'); }
-  finally { btn.textContent = '💾 Сохранить план'; btn.disabled = false; }
 }
 
 // ═══════════════════════════════════════════
@@ -1070,7 +1267,7 @@ async function loadAdminStudents(){
           </div>
           <div class="sc-btns">
             <button class="mark-btn" onclick="markAtt('${u.id}','${esc(u.name)}')">✓ Отметить тренировку</button>
-            <button class="btn btn-g sm" onclick="openUploadPlan('${u.id}','${esc(u.name)}')">📊 Загрузить план</button>
+            <button class="btn btn-g sm" onclick="openUploadPlan('${u.id}','${esc(u.name)}')">📋 Редактировать план</button>
             <button class="btn btn-g sm" onclick="openNotes('${u.id}','${esc(u.name)}')">💬 Заметки</button>
             <button class="btn btn-g sm" onclick="openEditUser('${u.id}')">✏️ Изменить</button>
             <button class="btn btn-d sm" onclick="delUser('${u.id}')">🗑</button>
