@@ -277,6 +277,27 @@ app.post('/api/progress/photo', upload.single('photo'), async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// Удалить фото прогресса
+app.delete('/api/progress/photo/:photoId', async (req, res) => {
+  try {
+    const doc = await db.collection('progress').doc(req.params.photoId).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Фото не найдено' });
+    const { photoUrl } = doc.data();
+    // Удаляем файл из Storage
+    if (photoUrl) {
+      try {
+        const match = photoUrl.match(/\/o\/(.+?)\?/);
+        if (match) {
+          const fileName = decodeURIComponent(match[1]);
+          await bucket.file(fileName).delete().catch(() => {});
+        }
+      } catch {}
+    }
+    await db.collection('progress').doc(req.params.photoId).delete();
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ═══════════════════════════════════════════
 // ПОСТЫ
 // ═══════════════════════════════════════════
@@ -474,6 +495,32 @@ app.post('/api/diary/:userId', async (req, res) => {
     console.error('POST /api/diary:', e.message);
     res.status(500).json({ error: e.message });
   }
+});
+
+// Удалить запись дневника
+app.delete('/api/diary/:userId/:entryId', async (req, res) => {
+  try {
+    const doc = await db.collection('diary').doc(req.params.entryId).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Запись не найдена' });
+    if (doc.data().userId !== req.params.userId) return res.status(403).json({ error: 'Нет доступа' });
+    await db.collection('diary').doc(req.params.entryId).delete();
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Редактировать запись дневника
+app.put('/api/diary/:userId/:entryId', async (req, res) => {
+  try {
+    const { date, exercises, note, rating } = req.body;
+    const doc = await db.collection('diary').doc(req.params.entryId).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Запись не найдена' });
+    if (doc.data().userId !== req.params.userId) return res.status(403).json({ error: 'Нет доступа' });
+    await db.collection('diary').doc(req.params.entryId).update({
+      date, exercises, note: note || '', rating: rating || null,
+      updatedAt: new Date().toISOString()
+    });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // ═══════════════════════════════════════════
