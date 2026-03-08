@@ -652,6 +652,14 @@ function showTab(id,btn){
 // ═══════════════════════════════════════════
 // ПЛАН — утилиты для форм тренера
 // ═══════════════════════════════════════════
+// Иконка по типу файла/плана
+function planIcon(fileType) {
+  if (fileType === 'excel') return '📊';
+  if (fileType === 'pdf')   return '📄';
+  if (fileType === 'word')  return '📝';
+  return '📋';
+}
+
 function switchPlanTab(prefix, tab) {
   ['url','file'].forEach(t => {
     document.getElementById(`${prefix}Tab-${t}`).classList.toggle('active', t===tab);
@@ -828,7 +836,7 @@ async function loadAdminStudents(){
       else if(u.sessions<=2){pillCls='pill-yel';sessIcon='⚠️';}
       const pd=u.paymentDate?new Date(u.paymentDate).toLocaleDateString('ru-RU'):'—';
       const ptCls=u.paymentDate===today?'pill-yel':'pill-gray';
-      const hasPlan = u.planUrl ? true : false;
+      const hasPlan = u.trainingPlan || u.planUrl ? true : false;
       return `
         <div class="student-card">
           <div class="sc-top">
@@ -839,7 +847,7 @@ async function loadAdminStudents(){
             <span class="pill ${pillCls}">${sessIcon} ${u.sessions} занятий</span>
             <span class="pill ${ptCls}">💳 Оплата: ${pd}${u.paymentDate===today?' ⚠️':''}</span>
             ${u.telegramId?`<span class="pill pill-gray">✈️ TG</span>`:''}
-            ${hasPlan?`<span class="pill pill-green">${planIcon(u.planFileType)} ${u.planFileName||'План'}</span>`:''}
+            ${hasPlan?`<span class="pill pill-green">📊 ${u.planFileName||'План загружен'}</span>`:''}
           </div>
           <div class="sc-btns">
             <button class="mark-btn" onclick="markAtt('${u.id}','${esc(u.name)}')">✓ Отметить тренировку</button>
@@ -1053,9 +1061,12 @@ async function openEditUser(id){
     document.getElementById('eTg').value=u.telegramId||'';
     document.getElementById('eSe').value=u.sessions;
     document.getElementById('ePd').value=u.paymentDate||'';
-    document.getElementById('ePl').value=u.planUrl||'';
-    document.getElementById('editPlanFileName').style.display='none';
-    document.getElementById('editPlanFile').value='';
+    const ePlEl = document.getElementById('ePl');
+    if(ePlEl) ePlEl.value = u.planUrl||'';
+    const editPlanFN = document.getElementById('editPlanFileName');
+    if(editPlanFN) editPlanFN.style.display='none';
+    const editPlanFile = document.getElementById('editPlanFile');
+    if(editPlanFile) editPlanFile.value='';
     // Сбрасываем вкладку
     switchPlanTab('edit','url');
     openMo('mEditU');
