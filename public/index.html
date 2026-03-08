@@ -943,7 +943,19 @@ function renderPlanWeek(week) {
 
   const exercises = _trainingPlan[week] || [];
 
-  // Шапка с переключателем недель
+  // Иконки блоков
+  const BLOCK_ICONS = {
+    'верх':'💪', 'ноги':'🦵', 'руки':'💪', 'ягодицы':'🍑',
+    'спина':'🏋️', 'грудь':'🏋️', 'плечи':'🎯', 'пресс':'🔥',
+    'кардио':'🏃', 'разминка':'🤸'
+  };
+  function blockIcon(name) {
+    const low = (name||'').toLowerCase();
+    for (const [kw, ic] of Object.entries(BLOCK_ICONS)) { if (low.startsWith(kw)) return ic; }
+    return '💪';
+  }
+
+  // Переключатель недель
   let html = `<div class="week-switcher">`;
   for (let w = 1; w <= 4; w++) {
     const cnt = (_trainingPlan[w] || []).length;
@@ -959,30 +971,35 @@ function renderPlanWeek(week) {
     return;
   }
 
-  // Группируем по блокам
+  // Группируем по блокам, сохраняя порядок
+  const blockOrder = [];
   const blocks = {};
   exercises.forEach((ex, idx) => {
-    const b = ex.block || 'Общее';
-    if (!blocks[b]) blocks[b] = [];
+    const b = ex.block || '';
+    if (!blocks[b]) { blocks[b] = []; blockOrder.push(b); }
     blocks[b].push({ ...ex, num: idx + 1 });
   });
 
-  for (const [blockName, exList] of Object.entries(blocks)) {
+  for (const blockName of blockOrder) {
+    const exList = blocks[blockName];
     html += `<div class="plan-block">`;
-    if (blockName && blockName !== 'Общее') {
-      html += `<div class="plan-block-title">💪 ${esc(blockName)}</div>`;
+
+    if (blockName) {
+      html += `<div class="plan-block-title">${blockIcon(blockName)} ${esc(blockName)}</div>`;
     }
 
     // Таблица (десктоп)
     html += `<div class="ex-table-wrap"><table class="ex-table">
-      <thead><tr><th>#</th><th>Упражнение</th><th>Подходы</th><th>Повторения</th></tr></thead>
+      <thead><tr><th>#</th><th>Упражнение</th><th style="text-align:center">Подходы</th><th style="text-align:center">Повторения</th></tr></thead>
       <tbody>`;
     exList.forEach(ex => {
+      const setsStr = ex.sets && ex.sets !== '—' ? ex.sets : '<span style="color:var(--mu)">—</span>';
+      const repsStr = ex.reps && ex.reps !== '—' ? ex.reps : '<span style="color:var(--mu)">—</span>';
       html += `<tr>
         <td class="ex-num">${ex.num}</td>
         <td style="font-weight:500">${esc(ex.exercise)}</td>
-        <td><span class="ex-sets">${esc(ex.sets) || '—'}</span></td>
-        <td><span class="ex-reps">${esc(ex.reps) || '—'}</span></td>
+        <td style="text-align:center"><span class="ex-sets">${setsStr}</span></td>
+        <td style="text-align:center"><span class="ex-reps">${repsStr}</span></td>
       </tr>`;
     });
     html += `</tbody></table></div>`;
@@ -990,18 +1007,20 @@ function renderPlanWeek(week) {
     // Карточки (мобильный)
     html += `<div class="ex-cards">`;
     exList.forEach(ex => {
+      const sV = ex.sets && ex.sets !== '—' ? ex.sets : '—';
+      const rV = ex.reps && ex.reps !== '—' ? ex.reps : '—';
       html += `<div class="ex-card">
         <div class="ex-card-num">${ex.num}</div>
         <div class="ex-card-name">${esc(ex.exercise)}</div>
         <div class="ex-card-meta">
-          <div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase;letter-spacing:.5px">Подх.</div><div class="ex-card-sets">${esc(ex.sets)||'—'}</div></div>
-          <div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase;letter-spacing:.5px">Повт.</div><div class="ex-card-reps">${esc(ex.reps)||'—'}</div></div>
+          <div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase;letter-spacing:.5px">Подх.</div>
+               <div class="ex-card-sets">${sV}</div></div>
+          <div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase;letter-spacing:.5px">Повт.</div>
+               <div class="ex-card-reps">${rV}</div></div>
         </div>
       </div>`;
     });
-    html += `</div>`;
-
-    html += `</div>`; // .plan-block
+    html += `</div></div>`; // .ex-cards + .plan-block
   }
 
   box.innerHTML = html;
