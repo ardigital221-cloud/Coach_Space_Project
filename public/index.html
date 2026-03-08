@@ -1357,16 +1357,62 @@ async function loadAdminProg(){
   if(!uid){box.innerHTML='';return;}
   box.innerHTML=`<div class="empty"><div class="sp-ring" style="margin:30px auto"></div></div>`;
   try{
-    const data=await api('/api/progress/'+uid);
-    const weights=data.filter(d=>d.type==='weight');
-    const photos=data.filter(d=>d.type==='photo');
-    let html=`<div class="card card-a"><div class="ct">График веса</div>`;
-    html+=weights.length?`<div class="chart-w"><canvas id="adm-wc"></canvas></div>`:`<div class="empty"><div class="ei">⚖️</div>Нет данных о весе</div>`;
-    html+=`</div>`;
-    if(photos.length){html+=`<div class="st" style="margin-bottom:10px">📸 Фото</div><div class="ph-g">`+photos.map(p=>`<img class="ph-img" src="${p.photoUrl}" loading="lazy" onclick="openLightbox('${p.photoUrl}')"/>`).join('')+`</div>`;}
-    box.innerHTML=html;
-    if(weights.length)new Chart(document.getElementById('adm-wc'),chartCfg(weights));
-  }catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}
+    // Загружаем прогресс (вес/фото) и дневник параллельно
+    const [progressData, diaryData] = await Promise.all([
+      fetch('/api/progress/'+uid, {headers:{'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[]),
+      fetch('/api/diary/'+uid,    {headers:{'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[])
+    ]);
+
+    const weights = (Array.isArray(progressData)?progressData:[]).filter(d=>d.type==='weight');
+    const photos  = (Array.isArray(progressData)?progressData:[]).filter(d=>d.type==='photo');
+    const entries = Array.isArray(diaryData) ? diaryData : [];
+
+    let html = '';
+
+    // ── График веса ──
+    html += `<div class="card card-a"><div class="ct">⚖️ График веса</div>`;
+    html += weights.length
+      ? `<div class="chart-w"><canvas id="adm-wc"></canvas></div>`
+      : `<div class="empty" style="padding:20px 0"><div class="ei">⚖️</div>Нет данных о весе</div>`;
+    html += `</div>`;
+
+    // ── Фото прогресса ──
+    if(photos.length){
+      html += `<div class="st" style="margin-bottom:10px">📸 Фото прогресса</div><div class="ph-g">`;
+      html += photos.map(p=>`<img class="ph-img" src="${p.photoUrl}" loading="lazy" onclick="openLightbox('${p.photoUrl}')"/>`).join('');
+      html += `</div><div style="margin-bottom:16px"></div>`;
+    }
+
+    // ── Дневник тренировок ──
+    html += `<div class="sh" style="margin-bottom:12px"><div class="st">📊 Дневник тренировок</div><span style="font-size:12px;color:var(--mu2)">${entries.length} записей</span></div>`;
+    if(!entries.length){
+      html += `<div class="empty" style="padding:20px 0"><div class="ei">📊</div>Ученик ещё не вёл дневник</div>`;
+    } else {
+      html += entries.map(e => {
+        const stars = e.rating ? '⭐'.repeat(e.rating) : '';
+        const d = new Date(e.date).toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+        const exCount = (e.exercises||[]).length;
+        return `<div class="diary-day" style="cursor:default">
+          <div class="diary-day-head">
+            <span style="font-size:18px">🏋️</span>
+            <div>
+              <div class="diary-day-date">${d}</div>
+              <div class="diary-day-excount">${exCount} упражнений${e.note?' · '+esc(e.note.slice(0,50)):''}</div>
+            </div>
+            <div class="diary-day-rating">${stars}</div>
+          </div>
+          ${(e.exercises||[]).length ? `<div style="margin-top:10px">` +
+            e.exercises.map(ex => {
+              const chips = (ex.sets||[]).map(s=>`<span class="diary-set-chip">${s.weight?s.weight+'кг×':''}${s.reps}</span>`).join('');
+              return `<div class="diary-ex-row"><span class="diary-ex-name">${esc(ex.name)}</span><div class="diary-ex-sets">${chips}</div></div>`;
+            }).join('') + `</div>` : ''}
+        </div>`;
+      }).join('');
+    }
+
+    box.innerHTML = html;
+    if(weights.length) new Chart(document.getElementById('adm-wc'), chartCfg(weights));
+  }catch(e){box.innerHTML=`<div class="empty">${esc(e.message)}</div>`;}
 }
 
 // ═══════════════════════════════════════════
@@ -1642,7 +1688,13 @@ async function saveDiary() {
   if (!exercises.length) { toast('Добавьте хотя бы одно упражнение с подходами','e'); return; }
   const note = document.getElementById('diaryNote').value;
   try {
-    await api('/api/diary/' + ME.id, 'POST', { date, exercises, note, rating: _diaryRating || null });
+    const r = await fetch('/api/diary/' + ME.id, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ date, exercises, note, rating: _diaryRating || null })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Ошибка сохранения');
     toast('✅ Тренировка сохранена!', 's');
     closeMo('mDiary');
     loadDiary();
@@ -1653,7 +1705,11 @@ async function loadDiary() {
   const box = document.getElementById('diaryList');
   box.innerHTML = '<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';
   try {
-    const entries = await api('/api/diary/' + ME.id);
+    const r = await fetch('/api/diary/' + ME.id, { headers: { 'Accept': 'application/json' } });
+    if (!r.ok) throw new Error('Статус ' + r.status);
+    const ct = r.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) throw new Error('Сервер вернул не JSON. Проверьте server.js — маршруты /api/diary должны быть ДО app.get("*",...)');
+    const entries = await r.json();
     if (!entries.length) {
       box.innerHTML = '<div class="empty"><div class="ei">📊</div>Начни записывать тренировки!<br><small style="color:var(--mu)">Нажми «+ Запись» чтобы добавить</small></div>';
       return;
@@ -1678,7 +1734,10 @@ async function loadDiary() {
           }).join('') + '</div>' : ''}
       </div>`;
     }).join('');
-  } catch(e) { box.innerHTML = '<div class="empty">' + e.message + '</div>'; }
+  } catch(e) {
+    box.innerHTML = `<div class="empty"><div class="ei">📊</div>${esc(e.message)}</div>`;
+    console.error('loadDiary:', e);
+  }
 }
 
 
