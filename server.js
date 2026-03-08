@@ -329,6 +329,22 @@ app.delete('/api/progress/photo/:photoId', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ✅ НОВЫЙ: сброс всех записей веса ученика (только для тренера)
+app.delete('/api/progress/:userId/weight', async (req, res) => {
+  try {
+    const snap = await db.collection('progress')
+      .where('userId', '==', req.params.userId)
+      .where('type', '==', 'weight')
+      .get();
+    if (snap.empty) return res.json({ success: true, deleted: 0 });
+    const batch = db.batch();
+    snap.docs.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+    console.log(`[WEIGHT-RESET] userId=${req.params.userId}, deleted=${snap.size}`);
+    res.json({ success: true, deleted: snap.size });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ═══════════════════════════════════════════
 // ПОСТЫ
 // ═══════════════════════════════════════════
