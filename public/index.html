@@ -24,13 +24,11 @@
     img{max-width:100%;display:block;}
     ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--bg2);}::-webkit-scrollbar-thumb{background:rgba(110,231,183,.25);border-radius:3px;}
 
-    /* SPLASH */
     #splash{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .4s;}
     #splash.hide{opacity:0;pointer-events:none;}
     .sp-logo{font-family:'Unbounded',sans-serif;font-size:26px;font-weight:700;color:var(--ac);}
     .sp-ring{width:42px;height:42px;border:3px solid rgba(110,231,183,.2);border-top-color:var(--ac);border-radius:50%;animation:spin .8s linear infinite;}
 
-    /* LOGIN */
     #loginPage{min-height:100vh;display:none;align-items:center;justify-content:center;padding:24px;}
     #loginPage.show{display:flex;}
     .lcard{background:rgba(10,14,24,.92);backdrop-filter:blur(40px);border:1px solid var(--ba);border-radius:24px;padding:48px 38px;width:100%;max-width:420px;box-shadow:0 0 80px rgba(110,231,183,.05);animation:fadeUp .5s ease;}
@@ -123,7 +121,6 @@
     .poll-voters{font-size:11px;color:var(--mu2);margin-top:4px;}
     .poll-voters b{color:var(--tx);}
 
-    /* РЕАКЦИИ — имена под реакцией (для тренера) */
     .reactions-row{display:flex;align-items:flex-start;flex-wrap:wrap;gap:6px;margin-top:10px;}
     .react-group{display:flex;flex-direction:column;align-items:center;gap:3px;}
     .react-btn{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.05);border:1px solid var(--b);border-radius:20px;padding:5px 11px;font-size:13px;transition:all .2s;cursor:pointer;}
@@ -131,16 +128,7 @@
     .react-btn.active{border-color:var(--ac);background:rgba(110,231,183,.1);color:var(--ac);}
     .react-count{font-size:12px;font-weight:600;color:var(--mu2);}
     .react-btn.active .react-count{color:var(--ac);}
-    /* Имена под реакцией — только для тренера */
     .react-names{font-size:10px;color:var(--mu2);text-align:center;max-width:90px;line-height:1.3;}
-    .add-react{background:rgba(255,255,255,.04);border:1px solid var(--b);border-radius:20px;padding:5px 10px;font-size:14px;transition:all .2s;}
-    .add-react:hover{border-color:rgba(110,231,183,.3);}
-    .emoji-picker{display:none;position:absolute;background:rgba(10,15,26,.97);border:1px solid var(--ba);border-radius:var(--r2);padding:8px;z-index:50;gap:4px;flex-wrap:wrap;width:200px;box-shadow:0 8px 32px rgba(0,0,0,.5);}
-    .emoji-picker.show{display:flex;}
-    .ep-em{background:none;font-size:20px;padding:4px 6px;border-radius:6px;transition:background .15s;}
-    .ep-em:hover{background:rgba(255,255,255,.1);}
-    .react-wrap{position:relative;}
-
     .post-meta{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
     .post-dt{font-size:11px;color:var(--mu);}
 
@@ -178,43 +166,14 @@
     .ph-img{aspect-ratio:1/1;border-radius:10px;object-fit:cover;border:1px solid var(--b);}
     .chart-w{position:relative;height:210px;margin-top:6px;}
 
-    .plan-a{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(110,231,183,.08),rgba(99,102,241,.06));border:1px solid var(--ba);border-radius:var(--r);padding:16px 18px;text-decoration:none;color:var(--tx);transition:all .2s;margin-bottom:14px;}
-    .plan-a:hover{border-color:var(--ac);transform:translateY(-1px);}
     .tg-a{display:flex;align-items:center;gap:12px;background:rgba(0,136,204,.1);border:1px solid rgba(0,136,204,.22);border-radius:var(--r);padding:15px 18px;text-decoration:none;color:var(--tx);transition:all .2s;}
     .tg-a:hover{background:rgba(0,136,204,.16);}
 
-    /* ПЛАН — кнопка открыть + модалка с таблицей */
-    .plan-btn{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(110,231,183,.1),rgba(99,102,241,.07));border:1px solid var(--ba);border-radius:var(--r);padding:16px 18px;color:var(--tx);transition:all .2s;margin-bottom:14px;cursor:pointer;width:100%;text-align:left;}
-    .plan-btn:hover{border-color:var(--ac);transform:translateY(-1px);}
-    /* Модалка плана — широкая */
-    #mPlan .modal{max-width:96vw;width:100%;}
-    @media(min-width:700px){#mPlan .modal{max-width:860px;}}
-    /* Таблица Excel */
-    .plan-sheet-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
-    .sheet-tab{padding:6px 14px;border-radius:20px;border:1px solid var(--b);font-size:12px;font-weight:600;color:var(--mu2);cursor:pointer;background:rgba(255,255,255,.03);transition:all .2s;}
-    .sheet-tab.active{border-color:var(--ac);color:var(--ac);background:var(--acd);}
-    .plan-table-wrap{overflow-x:auto;border-radius:var(--r2);border:1px solid var(--b);}
-    .plan-table{border-collapse:collapse;width:100%;font-size:12px;}
-    .plan-table th{background:rgba(110,231,183,.08);color:var(--ac);font-weight:700;padding:9px 12px;text-align:left;border-bottom:1px solid var(--ba);white-space:nowrap;position:sticky;top:0;}
-    .plan-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--tx);white-space:nowrap;}
-    .plan-table tr:hover td{background:rgba(255,255,255,.03);}
-    .plan-table tr:last-child td{border-bottom:none;}
-    .plan-table-scroll{max-height:60vh;overflow-y:auto;}
-
-    /* ЗАГРУЗКА ПЛАНА у тренера */
-    .plan-upload-section{background:rgba(255,255,255,.03);border:1px solid var(--b);border-radius:var(--r2);padding:14px;margin-top:10px;}
-    .plan-tabs{display:flex;gap:8px;margin-bottom:12px;}
-    .plan-tab{flex:1;padding:8px;border-radius:var(--r3);border:1px solid var(--b);font-size:12px;font-weight:600;text-align:center;cursor:pointer;background:rgba(255,255,255,.03);color:var(--mu2);transition:all .2s;}
-    .plan-tab.active{border-color:var(--ac);color:var(--ac);background:var(--acd);}
-    .plan-tab-content{display:none;}.plan-tab-content.show{display:block;}
-
-    /* ПЛАН ТРЕНИРОВОК — вкладка ученика */
     .week-switcher{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
     .week-btn{flex:1;min-width:60px;padding:10px 6px;border-radius:var(--r2);border:1px solid var(--b);font-size:12px;font-weight:700;text-align:center;cursor:pointer;background:rgba(255,255,255,.03);color:var(--mu2);transition:all .2s;font-family:'Unbounded',sans-serif;}
     .week-btn.active{border-color:var(--ac);color:var(--ac);background:rgba(110,231,183,.1);}
     .plan-block{margin-bottom:22px;}
     .plan-block-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--ac);padding:8px 14px;background:rgba(110,231,183,.07);border-radius:var(--r3);margin-bottom:10px;border-left:3px solid var(--ac);}
-    /* Таблица — широкий экран */
     .ex-table{width:100%;border-collapse:collapse;font-size:13px;}
     .ex-table th{padding:10px 14px;text-align:left;color:var(--ac);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--ba);background:rgba(110,231,183,.05);}
     .ex-table td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--tx);}
@@ -223,7 +182,6 @@
     .ex-num{font-size:11px;color:var(--mu);width:32px;}
     .ex-sets{font-family:'Unbounded',sans-serif;font-size:14px;color:var(--ac);font-weight:700;}
     .ex-reps{font-family:'Unbounded',sans-serif;font-size:14px;color:var(--yel);font-weight:700;}
-    /* Карточки — мобильный */
     .ex-cards{display:none;}
     .ex-card{background:rgba(255,255,255,.03);border:1px solid var(--b);border-radius:var(--r2);padding:14px;margin-bottom:9px;display:flex;align-items:center;gap:14px;}
     .ex-card-num{width:28px;height:28px;border-radius:50%;background:var(--acd);border:1px solid var(--ba);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ac);font-weight:700;flex-shrink:0;}
@@ -288,8 +246,8 @@
     @keyframes spin    {to{transform:rotate(360deg)}}
     @keyframes pulse   {0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
 
-    /* ═══ ДНЕВНИК ═══ */
-    .diary-day{background:var(--card);border:1px solid var(--b);border-radius:var(--r);padding:16px;margin-bottom:10px;cursor:pointer;transition:border .2s;}
+    /* ДНЕВНИК */
+    .diary-day{background:var(--card);border:1px solid var(--b);border-radius:var(--r);padding:16px;margin-bottom:10px;transition:border .2s;}
     .diary-day:hover{border-color:var(--ba);}
     .diary-day-head{display:flex;align-items:center;gap:10px;}
     .diary-day-date{font-weight:700;font-size:13px;}
@@ -302,7 +260,6 @@
     .diary-set-chip{background:rgba(110,231,183,.1);border:1px solid var(--ba);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:600;color:var(--ac);}
     .set-inputs{display:flex;gap:6px;align-items:center;margin-bottom:6px;}
     .set-inputs .fi{width:70px;padding:8px 10px;font-size:13px;}
-    .set-inputs .fi:focus{border-color:var(--ac);}
     .ex-block{background:rgba(255,255,255,.02);border:1px solid var(--b);border-radius:var(--r2);padding:12px;margin-bottom:10px;}
     .ex-block-name{font-weight:700;font-size:13px;margin-bottom:10px;color:var(--ac);}
     .add-set-btn{font-size:11px;color:var(--ac);background:none;border:none;cursor:pointer;padding:4px 0;}
@@ -310,26 +267,11 @@
     .star-btn{font-size:24px;background:none;border:none;cursor:pointer;opacity:.4;transition:opacity .2s,transform .2s;}
     .star-btn.active{opacity:1;transform:scale(1.15);}
 
-    /* ═══ РЕКОРДЫ ═══ */
-    .pr-card{background:var(--card);border:1px solid var(--b);border-radius:var(--r2);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
-    .pr-medal{font-size:24px;flex-shrink:0;}
-    .pr-name{font-weight:600;font-size:13px;flex:1;}
-    .pr-val{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:700;color:var(--ac);}
-    .pr-meta{font-size:11px;color:var(--mu2);}
-    .pr-date{font-size:11px;color:var(--mu);margin-left:auto;}
 
-    /* ═══ ЦЕЛИ ═══ */
-    .goal-card{background:var(--card);border:1px solid var(--b);border-radius:var(--r);padding:16px;margin-bottom:10px;}
-    .goal-card.done{opacity:.5;}
-    .goal-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
-    .goal-title{font-weight:700;font-size:14px;flex:1;}
-    .goal-pct{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;color:var(--ac);}
-    .goal-bar-wrap{background:rgba(255,255,255,.06);border-radius:99px;height:8px;overflow:hidden;margin-bottom:8px;}
-    .goal-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .6s ease;}
-    .goal-vals{display:flex;justify-content:space-between;font-size:12px;color:var(--mu2);}
-    .goal-deadline{font-size:11px;color:var(--yel);margin-top:6px;}
 
-    /* ═══ КАЛЕНДАРЬ ═══ */
+
+
+    /* КАЛЕНДАРЬ */
     .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:16px;}
     .cal-head-cell{text-align:center;font-size:10px;font-weight:700;color:var(--mu2);text-transform:uppercase;padding:6px 0;}
     .cal-cell{aspect-ratio:1;border-radius:var(--r3);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:background .15s;position:relative;background:rgba(255,255,255,.02);border:1px solid transparent;}
@@ -343,14 +285,14 @@
     .cal-day-events{margin-top:12px;}
     .cal-event{background:rgba(110,231,183,.08);border:1px solid var(--ba);border-radius:var(--r3);padding:10px 14px;margin-bottom:7px;}
 
-    /* ═══ ЗАМЕТКИ ТРЕНЕРА ═══ */
+    /* ЗАМЕТКИ */
     .note-item{background:rgba(255,255,255,.02);border-left:3px solid var(--ac);border-radius:0 var(--r3) var(--r3) 0;padding:10px 14px;margin-bottom:8px;position:relative;}
     .note-date{font-size:11px;color:var(--mu2);margin-bottom:4px;}
     .note-text{font-size:13px;}
     .note-del{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--mu);font-size:14px;cursor:pointer;opacity:.5;}
     .note-del:hover{opacity:1;color:var(--red);}
 
-    /* ═══ ОТЗЫВЫ ═══ */
+    /* ОТЗЫВЫ */
     .review-card{background:var(--card);border:1px solid var(--b);border-radius:var(--r2);padding:14px;margin-bottom:8px;}
     .review-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
     .review-ava{width:32px;height:32px;border-radius:50%;background:var(--acd);border:1px solid var(--ba);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--ac);flex-shrink:0;}
@@ -363,8 +305,7 @@
     .avg-stars{font-size:20px;margin:4px 0;}
     .avg-count{font-size:12px;color:var(--mu2);}
 
-
-    /* ═══ РЕДАКТОР ПЛАНА (тренер) ═══ */
+    /* РЕДАКТОР ПЛАНА */
     .ped-week-tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
     .ped-week-tab{flex:1;min-width:70px;padding:9px 6px;border-radius:var(--r2);border:1px solid var(--b);font-size:12px;font-weight:700;text-align:center;cursor:pointer;background:rgba(255,255,255,.03);color:var(--mu2);transition:all .2s;font-family:'Unbounded',sans-serif;}
     .ped-week-tab.active{border-color:var(--ac);color:var(--ac);background:rgba(110,231,183,.1);}
@@ -386,7 +327,8 @@
     .ped-del-ex:hover{color:var(--red);}
     .ped-copy-bar{background:rgba(110,231,183,.06);border:1px solid var(--ba);border-radius:var(--r2);padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
     .ped-col-heads{display:grid;grid-template-columns:1fr 72px 72px 32px;gap:8px;padding:4px 14px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);}
-
+    #mPlanEditor .modal{max-width:96vw;width:100%;}
+    @media(min-width:700px){#mPlanEditor .modal{max-width:860px;}}
   </style>
 </head>
 <body>
@@ -452,7 +394,6 @@
         <div class="sub-pay">Дата оплаты: <span id="subPay">—</span></div>
         <div class="streak" id="streak" style="display:none"><div class="fire">🔥</div><span style="font-size:13px;color:var(--mu2)">Ты в деле! <b style="color:var(--tx)">Продолжай!</b></span></div>
       </div>
-      <!-- план -->
       <div id="planBtn"></div>
       <a class="tg-a" href="https://t.me/klim_fit" target="_blank">
         <span style="font-size:26px">✈️</span>
@@ -483,26 +424,16 @@
       <div id="uPlanContent"></div>
     </div>
 
-    <!-- УЧЕНИК: ДНЕВНИК ТРЕНИРОВОК -->
+    <!-- УЧЕНИК: ДНЕВНИК -->
     <div class="panel" id="p-udiary">
       <div class="sh">
         <div class="st">📊 Дневник тренировок</div>
-        <button class="btn btn-p sm" onclick="openMo('mDiary')">+ Запись</button>
+        <button class="btn btn-p sm" onclick="openDiaryModal()">+ Запись</button>
       </div>
       <div id="diaryList"></div>
     </div>
 
-    <!-- УЧЕНИК: ЦЕЛИ -->
-    <div class="panel" id="p-ugoals">
-      <div class="sh">
-        <div class="st">🎯 Мои цели</div>
-        <button class="btn btn-p sm" onclick="openMo('mAddGoal')">+ Цель</button>
-      </div>
-      <div id="goalsList"></div>
-      <div class="div" style="margin:20px 0"></div>
-      <div class="st" style="margin-bottom:14px">💪 Личные рекорды</div>
-      <div id="prList"></div>
-    </div>
+
 
     <!-- ТРЕНЕР: КАЛЕНДАРЬ -->
     <div class="panel" id="p-acal">
@@ -534,9 +465,8 @@
 
 <nav class="bnav" id="bnav" style="display:none"></nav>
 
-<!-- ════ МОДАЛКИ ════ -->
+<!-- МОДАЛКИ -->
 
-<!-- Добавить ученика -->
 <div class="mo" id="mAddU"><div class="modal">
   <div class="mh"></div><div class="mt">➕ Новый ученик</div>
   <div class="fg"><label class="fl">Имя</label><input class="fi" id="uN" placeholder="Иван Иванов"/></div>
@@ -551,12 +481,9 @@
   <div class="g2">
     <div class="fg"><label class="fl">Дата оплаты</label><input class="fi" id="uPd" type="date"/></div>
   </div>
-
-
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mAddU')">Отмена</button><button class="btn btn-p" onclick="addUser()">Сохранить</button></div>
 </div></div>
 
-<!-- Редактировать ученика -->
 <div class="mo" id="mEditU"><div class="modal">
   <div class="mh"></div><div class="mt">✏️ Редактировать</div>
   <input type="hidden" id="eId"/>
@@ -569,12 +496,9 @@
   <div class="g2">
     <div class="fg"><label class="fl">Дата оплаты</label><input class="fi" id="ePd" type="date"/></div>
   </div>
-
-
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mEditU')">Отмена</button><button class="btn btn-p" onclick="saveEditUser()">Сохранить</button></div>
 </div></div>
 
-<!-- Новый пост -->
 <div class="mo" id="mPost"><div class="modal">
   <div class="mh"></div><div class="mt">📢 Новый пост</div>
   <div class="fg"><label class="fl">Текст</label><textarea class="fta" id="postTxt" placeholder="Напишите новость или вопрос..."></textarea></div>
@@ -594,7 +518,6 @@
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mPost')">Отмена</button><button class="btn btn-p" onclick="addPost()">Опубликовать</button></div>
 </div></div>
 
-<!-- Создать тренировку -->
 <div class="mo" id="mAddW"><div class="modal">
   <div class="mh"></div><div class="mt">🏋️ Новая тренировка</div>
   <div class="fg"><label class="fl">Название</label><input class="fi" id="wTitle" placeholder="Группа А — Ноги / Персональная"/></div>
@@ -617,7 +540,6 @@
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mAddW')">Отмена</button><button class="btn btn-p" onclick="createWorkout()">Создать</button></div>
 </div></div>
 
-<!-- Добавить товар -->
 <div class="mo" id="mAddShop"><div class="modal">
   <div class="mh"></div><div class="mt">🛒 Новый товар</div>
   <div class="fg"><label class="fl">Название</label><input class="fi" id="shN" placeholder="Протеин XL"/></div>
@@ -631,7 +553,6 @@
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mAddShop')">Отмена</button><button class="btn btn-p" onclick="addShopItem()">Добавить</button></div>
 </div></div>
 
-<!-- Добавить вес -->
 <div class="mo" id="mAddWt"><div class="modal">
   <div class="mh"></div><div class="mt">⚖️ Записать вес</div>
   <div class="fg"><label class="fl">Вес (кг)</label><input class="fi" id="wtV" type="number" step="0.1" placeholder="72.5"/></div>
@@ -639,7 +560,6 @@
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mAddWt')">Отмена</button><button class="btn btn-p" onclick="addWeight()">Сохранить</button></div>
 </div></div>
 
-<!-- Загрузить фото -->
 <div class="mo" id="mAddPh"><div class="modal">
   <div class="mh"></div><div class="mt">📸 Фото прогресса</div>
   <div class="fg">
@@ -651,7 +571,7 @@
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mAddPh')">Отмена</button><button class="btn btn-p" onclick="uploadPhoto()">Загрузить</button></div>
 </div></div>
 
-<!-- Загрузка плана тренером -->
+<!-- Редактор плана -->
 <div class="mo" id="mPlanEditor"><div class="modal" style="max-width:680px;width:96vw">
   <div class="mh"></div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:8px">
@@ -675,7 +595,7 @@
   </div>
 </div></div>
 
-<!-- Дневник: добавить запись -->
+<!-- Дневник -->
 <div class="mo" id="mDiary"><div class="modal" style="max-width:520px">
   <div class="mh"></div><div class="mt">📊 Запись тренировки</div>
   <div class="g2">
@@ -697,32 +617,8 @@
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mDiary')">Отмена</button><button class="btn btn-p" onclick="saveDiary()">Сохранить</button></div>
 </div></div>
 
-<!-- Добавить цель -->
-<div class="mo" id="mAddGoal"><div class="modal">
-  <div class="mh"></div><div class="mt">🎯 Новая цель</div>
-  <div class="fg"><label class="fl">Название цели</label><input class="fi" id="goalTitle" placeholder="Пожать 100 кг"/></div>
-  <div class="g2">
-    <div class="fg"><label class="fl">Целевое значение</label><input class="fi" id="goalTarget" type="number" placeholder="100"/></div>
-    <div class="fg"><label class="fl">Единица</label><input class="fi" id="goalUnit" placeholder="кг"/></div>
-  </div>
-  <div class="g2">
-    <div class="fg"><label class="fl">Сейчас</label><input class="fi" id="goalCurrent" type="number" placeholder="70"/></div>
-    <div class="fg"><label class="fl">Дедлайн</label><input class="fi" id="goalDeadline" type="date"/></div>
-  </div>
-  <div class="mf"><button class="btn btn-g" onclick="closeMo('mAddGoal')">Отмена</button><button class="btn btn-p" onclick="saveGoal()">Создать</button></div>
-</div></div>
 
-<!-- Обновить прогресс цели -->
-<div class="mo" id="mUpdGoal"><div class="modal">
-  <div class="mh"></div><div class="mt">🎯 Обновить прогресс</div>
-  <input type="hidden" id="updGoalId"/>
-  <div class="fg"><label class="fl" id="updGoalLabel">Текущее значение</label>
-    <input class="fi" id="updGoalVal" type="number"/>
-  </div>
-  <div class="mf"><button class="btn btn-g" onclick="closeMo('mUpdGoal')">Отмена</button><button class="btn btn-p" onclick="updateGoalProgress()">Сохранить</button></div>
-</div></div>
 
-<!-- Написать отзыв (ученик) -->
 <div class="mo" id="mReview"><div class="modal">
   <div class="mh"></div><div class="mt">⭐ Оставить отзыв</div>
   <div class="fg"><label class="fl">Оценка тренировки</label>
@@ -740,7 +636,6 @@
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mReview')">Отмена</button><button class="btn btn-p" onclick="submitReview()">Отправить</button></div>
 </div></div>
 
-<!-- Заметки тренера к ученику -->
 <div class="mo" id="mNotes"><div class="modal">
   <div class="mh"></div>
   <div class="mt">💬 Заметки</div>
@@ -763,7 +658,6 @@
 let ME = null;
 let wChartInst = null;
 let allStudents = [];
-
 const EMOJIS = ['👍','❤️','🔥','😂','😮','👏','💪','✅'];
 
 // ═══════════════════════════════════════════
@@ -773,6 +667,11 @@ async function api(url, method='GET', body=null) {
   const opts = { method, headers:{'Content-Type':'application/json'} };
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(url, opts);
+  // ══ FIX 1: Проверяем Content-Type перед парсингом JSON ══
+  const ct = r.headers.get('content-type') || '';
+  if (!ct.includes('application/json')) {
+    throw new Error(`Сервер вернул не JSON (статус ${r.status}). Проверьте консоль.`);
+  }
   const d = await r.json();
   if (!r.ok) throw new Error(d.error || 'Ошибка');
   return d;
@@ -809,7 +708,7 @@ function startApp(){
 
 const TABS={
   admin:[{id:'ah',icon:'🏠',lbl:'Главная'},{id:'acal',icon:'📅',lbl:'Календарь'},{id:'aw',icon:'🏋️',lbl:'Тренировки'},{id:'aprog',icon:'📈',lbl:'Прогресс'},{id:'arev',icon:'⭐',lbl:'Отзывы'},{id:'ashop',icon:'🛒',lbl:'Магазин'}],
-  user: [{id:'uh',icon:'🏠',lbl:'Главная'},{id:'uplan',icon:'📋',lbl:'План'},{id:'udiary',icon:'📊',lbl:'Дневник'},{id:'ugoals',icon:'🎯',lbl:'Цели'},{id:'uprog',icon:'📈',lbl:'Прогресс'},{id:'ushop',icon:'🛒',lbl:'Магазин'}]
+  user: [{id:'uh',icon:'🏠',lbl:'Главная'},{id:'uplan',icon:'📋',lbl:'План'},{id:'udiary',icon:'📊',lbl:'Дневник'},{id:'uprog',icon:'📈',lbl:'Прогресс'},{id:'ushop',icon:'🛒',lbl:'Магазин'}]
 };
 function buildNav(){
   const nav=document.getElementById('bnav'),tabs=ME.role==='admin'?TABS.admin:TABS.user;
@@ -828,54 +727,36 @@ function showTab(id,btn){
   if(id==='uh')    loadUserHome();
   if(id==='uw')    loadUserWorkouts();
   if(id==='uprog') loadUserProgress();
-  if(id==='ushop')  loadUserShop();
-  if(id==='uplan')  loadUserPlan();
+  if(id==='ushop') loadUserShop();
+  if(id==='uplan') loadUserPlan();
   if(id==='udiary') loadDiary();
-  if(id==='ugoals') loadGoals();
-  if(id==='acal')   loadCalendar();
-  if(id==='arev')   loadReviews();
+
+  if(id==='acal')  loadCalendar();
+  if(id==='arev')  loadReviews();
 }
 
-// ═══════════════════════════════════════════
-// ПЛАН — утилиты для форм тренера
-// ═══════════════════════════════════════════
-// Иконка по типу файла/плана
-function planIcon(fileType) {
-  if (fileType === 'excel') return '📊';
-  if (fileType === 'pdf')   return '📄';
-  if (fileType === 'word')  return '📝';
-  return '📋';
-}
-
-
-
 // ═══════════════════════════════════════════════════════
-// ТРЕНЕР: РЕДАКТОР ПЛАНА ТРЕНИРОВОК
+// ТРЕНЕР: РЕДАКТОР ПЛАНА — FIX 2: Исправлен баг с блоками
 // ═══════════════════════════════════════════════════════
-// Структура: _pedPlan = { 1:[{block,exercise,sets,reps},...], 2:[...], 3:[...], 4:[...] }
-let _pedPlan    = { 1:[], 2:[], 3:[], 4:[] };
-let _pedWeek    = 1;
-let _pedUserId  = '';
+let _pedPlan   = { 1:[], 2:[], 3:[], 4:[] };
+let _pedWeek   = 1;
+let _pedUserId = '';
 
-// Открыть редактор для ученика
 async function openUploadPlan(userId, userName) {
   _pedUserId = userId;
-  document.getElementById('pedUserId').value    = userId;
+  document.getElementById('pedUserId').value = userId;
   document.getElementById('pedUserName').textContent = '👤 ' + userName;
   _pedWeek = 1;
-  // Загружаем существующий план если есть
   try {
     const data = await api('/api/users/' + userId + '/plan');
     _pedPlan = data.trainingPlan
       ? { 1: data.trainingPlan[1]||[], 2: data.trainingPlan[2]||[], 3: data.trainingPlan[3]||[], 4: data.trainingPlan[4]||[] }
       : { 1:[], 2:[], 3:[], 4:[] };
   } catch { _pedPlan = { 1:[], 2:[], 3:[], 4:[] }; }
-  // Если план пустой — добавляем базовые блоки
   if (!_pedPlan[1].length) {
     _pedPlan[1] = [
-      { block:'Верх',  exercise:'', sets:'', reps:'' },
-      { block:'Ноги',  exercise:'', sets:'', reps:'' },
-      { block:'Руки',  exercise:'', sets:'', reps:'' },
+      { block:'Верх', exercise:'', sets:'', reps:'' },
+      { block:'Ноги', exercise:'', sets:'', reps:'' },
     ];
   }
   pedRenderWeekTabs();
@@ -883,7 +764,6 @@ async function openUploadPlan(userId, userName) {
   openMo('mPlanEditor');
 }
 
-// Рендер вкладок недель
 function pedRenderWeekTabs() {
   const tabs = document.getElementById('pedWeekTabs');
   tabs.innerHTML = [1,2,3,4].map(w => {
@@ -892,21 +772,13 @@ function pedRenderWeekTabs() {
       Неделя ${w}<br><span style="font-size:10px;opacity:.6">${cnt} упр.</span>
     </button>`;
   }).join('');
-  // Показываем кнопку копирования только на неделе 1
   document.getElementById('pedCopyBar').style.display = _pedWeek === 1 ? 'flex' : 'none';
 }
 
-// Переключить неделю (сначала читаем текущее состояние DOM)
-function pedSwitchWeek(w) {
-  pedReadDOM();
-  _pedWeek = w;
-  pedRenderWeekTabs();
-  pedRenderWeek();
-}
-
-// Читаем текущее состояние DOM → записываем в _pedPlan[_pedWeek]
+// ══ FIX: pedReadDOM читает и сохраняет данные из DOM в _pedPlan
 function pedReadDOM() {
   const rows = document.querySelectorAll('.ped-ex-row[data-idx]');
+  if (!rows.length) return; // Ничего не делаем если DOM пустой
   const result = [];
   rows.forEach(row => {
     const block    = row.dataset.block || '';
@@ -918,7 +790,13 @@ function pedReadDOM() {
   _pedPlan[_pedWeek] = result;
 }
 
-// Рендер содержимого текущей недели
+function pedSwitchWeek(w) {
+  pedReadDOM(); // Сохраняем текущее состояние DOM перед переключением
+  _pedWeek = w;
+  pedRenderWeekTabs();
+  pedRenderWeek();
+}
+
 function pedRenderWeek() {
   const box   = document.getElementById('pedWeekContent');
   const items = _pedPlan[_pedWeek] || [];
@@ -941,11 +819,14 @@ function pedRenderWeek() {
   let html = '';
   for (const blockName of blockOrder) {
     const bItems = blockMap[blockName];
-    html += `<div class="ped-block" data-block="${esc(blockName)}">
+    // ══ FIX: используем data-blockkey для безопасного хранения имени блока ══
+    html += `<div class="ped-block" data-blockkey="${esc(blockName)}">
       <div class="ped-block-head">
         <span style="font-size:16px">💪</span>
         <input class="ped-block-name" placeholder="Название блока (Верх, Ноги, Руки...)"
-          value="${esc(blockName)}" onchange="pedRenameBlock('${esc(blockName)}', this.value)"/>
+          value="${esc(blockName)}"
+          data-original="${esc(blockName)}"
+          onblur="pedRenameBlock(this)"/>
         <button class="ped-block-del" onclick="pedDeleteBlock('${esc(blockName)}')" title="Удалить блок">✕</button>
       </div>
       <div class="ped-col-heads"><span>Упражнение</span><span style="text-align:center">Подходы</span><span style="text-align:center">Повторения</span><span></span></div>`;
@@ -959,46 +840,61 @@ function pedRenderWeek() {
       </div>`;
     });
 
-    html += `<button class="ped-add-ex" onclick="pedAddEx('${esc(blockName)}')">＋ добавить упражнение</button>
+    html += `<button class="ped-add-ex" data-block="${esc(blockName)}" onclick="pedAddExBtn(this)">＋ добавить упражнение</button>
     </div>`;
   }
 
   box.innerHTML = html;
 }
 
-// Добавить блок
+// ══ FIX: pedAddBlock — генерируем уникальное имя блока ══
 function pedAddBlock() {
   pedReadDOM();
-  const name = ''; // Пустое — тренер сам впишет
-  _pedPlan[_pedWeek].push({ block: 'Новый блок', exercise: '', sets: '', reps: '' });
+  // Считаем сколько блоков с именем "Блок N" уже есть
+  const existingBlocks = [...new Set((_pedPlan[_pedWeek]||[]).map(e => e.block))];
+  let newBlockName = 'Новый блок';
+  let counter = 2;
+  while (existingBlocks.includes(newBlockName)) {
+    newBlockName = `Новый блок ${counter}`;
+    counter++;
+  }
+  _pedPlan[_pedWeek].push({ block: newBlockName, exercise: '', sets: '', reps: '' });
   pedRenderWeek();
   // Фокус на имя нового блока
   const blocks = document.querySelectorAll('.ped-block-name');
-  if (blocks.length) blocks[blocks.length - 1].focus();
+  if (blocks.length) {
+    const last = blocks[blocks.length - 1];
+    last.focus();
+    last.select();
+  }
 }
 
-// Добавить упражнение в блок
+// ══ FIX: pedAddExBtn — читает blockName из data-атрибута кнопки ══
+function pedAddExBtn(btn) {
+  const blockName = btn.dataset.block;
+  pedAddEx(blockName);
+}
+
 function pedAddEx(blockName) {
   pedReadDOM();
-  // Находим последний элемент этого блока и вставляем после
-  const lastIdx = _pedPlan[_pedWeek].map((e,i)=>e.block===blockName?i:-1).filter(i=>i>=0).pop();
-  const insertAt = lastIdx !== undefined ? lastIdx + 1 : _pedPlan[_pedWeek].length;
-  _pedPlan[_pedWeek].splice(insertAt, 0, { block: blockName, exercise: '', sets: '', reps: '' });
+  const plan = _pedPlan[_pedWeek];
+  // Находим последний индекс с этим блоком
+  let lastIdx = -1;
+  plan.forEach((e, i) => { if (e.block === blockName) lastIdx = i; });
+  const insertAt = lastIdx >= 0 ? lastIdx + 1 : plan.length;
+  plan.splice(insertAt, 0, { block: blockName, exercise: '', sets: '', reps: '' });
   pedRenderWeek();
-  // Фокус на новое упражнение
+  // Фокус на новую строку
   const rows = document.querySelectorAll('.ped-ex-row');
-  const newRow = rows[insertAt];
-  if (newRow) newRow.querySelector('.ped-ex-name')?.focus();
+  if (rows[insertAt]) rows[insertAt].querySelector('.ped-ex-name')?.focus();
 }
 
-// Удалить упражнение
 function pedDeleteEx(idx) {
   pedReadDOM();
   _pedPlan[_pedWeek].splice(idx, 1);
   pedRenderWeek();
 }
 
-// Удалить блок
 function pedDeleteBlock(blockName) {
   if (!confirm(`Удалить блок "${blockName}" со всеми упражнениями?`)) return;
   pedReadDOM();
@@ -1006,17 +902,31 @@ function pedDeleteBlock(blockName) {
   pedRenderWeek();
 }
 
-// Переименовать блок
-function pedRenameBlock(oldName, newName) {
-  pedReadDOM();
-  _pedPlan[_pedWeek].forEach(e => { if (e.block === oldName) e.block = newName; });
-  // Не перерисовываем чтобы не терять фокус
+// ══ FIX: pedRenameBlock — работает через onblur с data-original ══
+function pedRenameBlock(input) {
+  const oldName = input.dataset.original;
+  const newName = input.value.trim() || oldName;
+  if (oldName === newName) return;
+  // Обновляем _pedPlan напрямую
+  (_pedPlan[_pedWeek] || []).forEach(e => {
+    if (e.block === oldName) e.block = newName;
+  });
+  // Обновляем data-атрибуты в DOM без полного перерендера
+  const blockEl = input.closest('.ped-block');
+  if (blockEl) {
+    blockEl.dataset.blockkey = newName;
+    blockEl.querySelectorAll('.ped-ex-row').forEach(row => { row.dataset.block = newName; });
+    const delBtn = blockEl.querySelector('.ped-block-del');
+    if (delBtn) delBtn.setAttribute('onclick', `pedDeleteBlock('${esc(newName)}')`);
+    const addBtn = blockEl.querySelector('.ped-add-ex');
+    if (addBtn) { addBtn.dataset.block = newName; }
+  }
+  input.dataset.original = newName;
 }
 
-// Скопировать неделю 1 на другие
 function copyWeekTo(target) {
   pedReadDOM();
-  const src = JSON.parse(JSON.stringify(_pedPlan[1])); // deep copy
+  const src = JSON.parse(JSON.stringify(_pedPlan[1]));
   if (target === 'all') {
     if (!confirm('Скопировать Неделю 1 на Недели 2, 3 и 4? Текущие данные будут заменены.')) return;
     _pedPlan[2] = JSON.parse(JSON.stringify(src));
@@ -1024,17 +934,15 @@ function copyWeekTo(target) {
     _pedPlan[4] = JSON.parse(JSON.stringify(src));
     toast('✅ Неделя 1 скопирована на все недели','s');
   } else {
-    if (!confirm(`Скопировать Неделю 1 на Неделю ${target}? Текущие данные будут заменены.`)) return;
+    if (!confirm(`Скопировать Неделю 1 на Неделю ${target}?`)) return;
     _pedPlan[target] = JSON.parse(JSON.stringify(src));
     toast(`✅ Скопировано на Неделю ${target}`,'s');
   }
   pedRenderWeekTabs();
 }
 
-// Сохранить весь план
 async function savePlanEditor() {
   pedReadDOM();
-  // Убираем пустые упражнения
   const clean = {};
   for (let w = 1; w <= 4; w++) {
     clean[w] = (_pedPlan[w]||[]).filter(e => e.exercise.trim());
@@ -1050,7 +958,7 @@ async function savePlanEditor() {
 }
 
 // ═══════════════════════════════════════════
-// УЧЕНИК: ПЛАН ТРЕНИРОВОК — вкладка
+// УЧЕНИК: ПЛАН ТРЕНИРОВОК
 // ═══════════════════════════════════════════
 let _trainingPlan = null;
 let _currentWeek  = 1;
@@ -1071,10 +979,8 @@ async function loadUserPlan() {
     _trainingPlan = data.trainingPlan;
     if (data.planUpdatedAt) {
       const d = new Date(data.planUpdatedAt);
-      document.getElementById('planUpdatedAt').textContent =
-        'обновлён ' + d.toLocaleDateString('ru-RU');
+      document.getElementById('planUpdatedAt').textContent = 'обновлён ' + d.toLocaleDateString('ru-RU');
     }
-    // Определяем текущую неделю (можно сохранить выбор)
     renderPlanWeek(_currentWeek);
   } catch(e) {
     box.innerHTML = `<div class="empty">${e.message}</div>`;
@@ -1085,38 +991,23 @@ function renderPlanWeek(week) {
   _currentWeek = week;
   const box = document.getElementById('uPlanContent');
   if (!_trainingPlan) return;
-
   const exercises = _trainingPlan[week] || [];
-
-  // Иконки блоков
-  const BLOCK_ICONS = {
-    'верх':'💪', 'ноги':'🦵', 'руки':'💪', 'ягодицы':'🍑',
-    'спина':'🏋️', 'грудь':'🏋️', 'плечи':'🎯', 'пресс':'🔥',
-    'кардио':'🏃', 'разминка':'🤸'
-  };
+  const BLOCK_ICONS = {'верх':'💪','ноги':'🦵','руки':'💪','ягодицы':'🍑','спина':'🏋️','грудь':'🏋️','плечи':'🎯','пресс':'🔥','кардио':'🏃','разминка':'🤸'};
   function blockIcon(name) {
     const low = (name||'').toLowerCase();
     for (const [kw, ic] of Object.entries(BLOCK_ICONS)) { if (low.startsWith(kw)) return ic; }
     return '💪';
   }
-
-  // Переключатель недель
   let html = `<div class="week-switcher">`;
   for (let w = 1; w <= 4; w++) {
     const cnt = (_trainingPlan[w] || []).length;
-    html += `<button class="week-btn${w===week?' active':''}" onclick="renderPlanWeek(${w})">
-      Неделя ${w}<br><span style="font-size:10px;opacity:.6">${cnt} упр.</span>
-    </button>`;
+    html += `<button class="week-btn${w===week?' active':''}" onclick="renderPlanWeek(${w})">Неделя ${w}<br><span style="font-size:10px;opacity:.6">${cnt} упр.</span></button>`;
   }
   html += `</div>`;
-
   if (!exercises.length) {
     html += `<div class="plan-empty"><div style="font-size:36px;margin-bottom:8px">🏖</div>Неделя ${week} пока пустая</div>`;
-    box.innerHTML = html;
-    return;
+    box.innerHTML = html; return;
   }
-
-  // Группируем по блокам, сохраняя порядок
   const blockOrder = [];
   const blocks = {};
   exercises.forEach((ex, idx) => {
@@ -1124,50 +1015,20 @@ function renderPlanWeek(week) {
     if (!blocks[b]) { blocks[b] = []; blockOrder.push(b); }
     blocks[b].push({ ...ex, num: idx + 1 });
   });
-
   for (const blockName of blockOrder) {
     const exList = blocks[blockName];
     html += `<div class="plan-block">`;
-
-    if (blockName) {
-      html += `<div class="plan-block-title">${blockIcon(blockName)} ${esc(blockName)}</div>`;
-    }
-
-    // Таблица (десктоп)
-    html += `<div class="ex-table-wrap"><table class="ex-table">
-      <thead><tr><th>#</th><th>Упражнение</th><th style="text-align:center">Подходы</th><th style="text-align:center">Повторения</th></tr></thead>
-      <tbody>`;
+    if (blockName) html += `<div class="plan-block-title">${blockIcon(blockName)} ${esc(blockName)}</div>`;
+    html += `<div><table class="ex-table"><thead><tr><th>#</th><th>Упражнение</th><th style="text-align:center">Подходы</th><th style="text-align:center">Повторения</th></tr></thead><tbody>`;
     exList.forEach(ex => {
-      const setsStr = ex.sets && ex.sets !== '—' ? ex.sets : '<span style="color:var(--mu)">—</span>';
-      const repsStr = ex.reps && ex.reps !== '—' ? ex.reps : '<span style="color:var(--mu)">—</span>';
-      html += `<tr>
-        <td class="ex-num">${ex.num}</td>
-        <td style="font-weight:500">${esc(ex.exercise)}</td>
-        <td style="text-align:center"><span class="ex-sets">${setsStr}</span></td>
-        <td style="text-align:center"><span class="ex-reps">${repsStr}</span></td>
-      </tr>`;
+      html += `<tr><td class="ex-num">${ex.num}</td><td style="font-weight:500">${esc(ex.exercise)}</td><td style="text-align:center"><span class="ex-sets">${ex.sets||'—'}</span></td><td style="text-align:center"><span class="ex-reps">${ex.reps||'—'}</span></td></tr>`;
     });
-    html += `</tbody></table></div>`;
-
-    // Карточки (мобильный)
-    html += `<div class="ex-cards">`;
+    html += `</tbody></table></div><div class="ex-cards">`;
     exList.forEach(ex => {
-      const sV = ex.sets && ex.sets !== '—' ? ex.sets : '—';
-      const rV = ex.reps && ex.reps !== '—' ? ex.reps : '—';
-      html += `<div class="ex-card">
-        <div class="ex-card-num">${ex.num}</div>
-        <div class="ex-card-name">${esc(ex.exercise)}</div>
-        <div class="ex-card-meta">
-          <div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase;letter-spacing:.5px">Подх.</div>
-               <div class="ex-card-sets">${sV}</div></div>
-          <div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase;letter-spacing:.5px">Повт.</div>
-               <div class="ex-card-reps">${rV}</div></div>
-        </div>
-      </div>`;
+      html += `<div class="ex-card"><div class="ex-card-num">${ex.num}</div><div class="ex-card-name">${esc(ex.exercise)}</div><div class="ex-card-meta"><div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase">Подх.</div><div class="ex-card-sets">${ex.sets||'—'}</div></div><div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase">Повт.</div><div class="ex-card-reps">${ex.reps||'—'}</div></div></div></div>`;
     });
-    html += `</div></div>`; // .ex-cards + .plan-block
+    html += `</div></div>`;
   }
-
   box.innerHTML = html;
 }
 
@@ -1240,13 +1101,11 @@ async function loadAdminPosts(){
     const posts=await api('/api/posts');
     if(!posts.length){box.innerHTML=`<div class="empty"><div class="ei">📢</div>Постов нет</div>`;return;}
     box.innerHTML=posts.map(p=>renderPost(p,true)).join('');
-  }catch(e){}
+  }catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}
 }
 
 function renderPost(p, isAdmin){
   const dt=fmtDt(p.createdAt);
-
-  // Опрос
   let pollHtml='';
   if(p.hasPoll && p.pollOptions?.length){
     const votes=p.votes||{};
@@ -1260,19 +1119,14 @@ function renderPost(p, isAdmin){
       if(isAdmin && votes[opt]?.length){
         votersHtml=`<div class="poll-voters">Проголосовали: `+votes[opt].map(v=>`<b>${esc(v.userName)}</b>`).join(', ')+'</div>';
       }
-      return `
-        <div class="poll-opt ${isVoted?'voted':''}" onclick="${isAdmin?'':` votePost('${p.id}','${esc(opt)}')`}">
-          <div class="poll-bar" style="width:${pct}%"></div>
-          <span class="poll-label">${esc(opt)}</span>
-          <span class="poll-count">${cnt} ${pct?'('+pct+'%)':''}</span>
-        </div>${votersHtml}`;
+      return `<div class="poll-opt ${isVoted?'voted':''}" onclick="${isAdmin?'':` votePost('${p.id}','${esc(opt)}')`}">
+        <div class="poll-bar" style="width:${pct}%"></div>
+        <span class="poll-label">${esc(opt)}</span>
+        <span class="poll-count">${cnt} ${pct?'('+pct+'%)':''}</span>
+      </div>${votersHtml}`;
     }).join('')+'</div>';
   }
-
-  // Реакции
   const reactions=p.reactions||{};
-  // Для тренера — только те что есть + имена под ними
-  // Для ученика — все доступные эмодзи, активная подсвечена
   let reactHtml = '';
   if (isAdmin) {
     reactHtml = EMOJIS.filter(e=>reactions[e]?.length>0).map(emoji=>{
@@ -1286,7 +1140,6 @@ function renderPost(p, isAdmin){
       </div>`;
     }).join('');
   } else {
-    // Ученик: показываем все эмодзи, выбранная подсвечена
     const myEmoji = EMOJIS.find(emoji => {
       const arr = reactions[emoji] || [];
       return arr.some(r => typeof r === 'string' ? r === ME?.id : r.userId === ME?.id);
@@ -1298,20 +1151,16 @@ function renderPost(p, isAdmin){
       return `<button class="react-btn${isMe?' active':''}" onclick="reactPost('${p.id}','${emoji}')">${emoji}${count > 0 ? `<span class="react-count">${count}</span>` : ''}</button>`;
     }).join('');
   }
-
-  const addReactHtml = '';
-
-  return `
-    <div class="post-card" id="post-${p.id}">
-      <div class="post-txt">${esc(p.text)}</div>
-      ${p.link?`<a class="post-link" href="${p.link}" target="_blank">🔗 Открыть ссылку</a>`:''}
-      ${pollHtml}
-      <div class="reactions-row">${reactHtml}${addReactHtml}</div>
-      <div class="post-meta">
-        <div class="post-dt">${dt}</div>
-        ${isAdmin?`<button class="btn btn-d sm" onclick="delPost('${p.id}')">🗑</button>`:''}
-      </div>
-    </div>`;
+  return `<div class="post-card" id="post-${p.id}">
+    <div class="post-txt">${esc(p.text)}</div>
+    ${p.link?`<a class="post-link" href="${p.link}" target="_blank">🔗 Открыть ссылку</a>`:''}
+    ${pollHtml}
+    <div class="reactions-row">${reactHtml}</div>
+    <div class="post-meta">
+      <div class="post-dt">${dt}</div>
+      ${isAdmin?`<button class="btn btn-d sm" onclick="delPost('${p.id}')">🗑</button>`:''}
+    </div>
+  </div>`;
 }
 
 function togglePoll(){
@@ -1348,14 +1197,12 @@ async function delPost(id){if(!confirm('Удалить пост?'))return;try{aw
 
 async function reactPost(postId,emoji){
   if(!ME)return;
-  // Передаём флаг singleMode — сервер снимет все другие реакции этого юзера
   try{
     await api(`/api/posts/${postId}/react`,'POST',{userId:ME.id,userName:ME.name,emoji,single:true});
     const posts=await api('/api/posts');
     const p=posts.find(x=>x.id===postId); if(!p)return;
     const el=document.getElementById('post-'+postId);
-    const isAdmin=ME.role==='admin';
-    if(el) el.outerHTML=renderPost(p,isAdmin);
+    if(el) el.outerHTML=renderPost(p,ME.role==='admin');
   }catch(e){toast(e.message,'e');}
 }
 
@@ -1370,16 +1217,8 @@ async function votePost(postId,option){
   }catch(e){toast(e.message,'e');}
 }
 
-function toggleEmojiPicker(btn,postId){
-  closeEmojiPickers();
-  const picker=btn.nextElementSibling;
-  picker.classList.toggle('show');
-}
-function closeEmojiPickers(){document.querySelectorAll('.emoji-picker').forEach(p=>p.classList.remove('show'));}
-document.addEventListener('click',e=>{if(!e.target.closest('.react-wrap'))closeEmojiPickers();});
-
 // ═══════════════════════════════════════════
-// ТРЕНЕР: УЧЕНИКИ — добавление/редактирование
+// ТРЕНЕР: УЧЕНИКИ
 // ═══════════════════════════════════════════
 async function addUser(){
   const name=v('uN'),login=v('uL'),pwd=v('uPw'),tg=v('uTg'),sess=v('uSe'),pd=v('uPd');
@@ -1387,8 +1226,7 @@ async function addUser(){
   try{
     await api('/api/users','POST',{name,login,password:pwd,telegramId:tg||null,sessions:parseInt(sess)||0,paymentDate:pd||null});
     toast(`✅ Ученик ${name} добавлен`,'s');
-    closeMo('mAddU');
-    clr(['uN','uL','uPw','uTg','uPd']);
+    closeMo('mAddU');clr(['uN','uL','uPw','uTg','uPd']);
     document.getElementById('uSe').value='8';
     allStudents=[];loadAdminHome();
   }catch(e){toast(e.message,'e');}
@@ -1411,11 +1249,7 @@ async function saveEditUser(){
   const id=document.getElementById('eId').value;
   const d={name:v('eN'),telegramId:v('eTg')||null,sessions:parseInt(v('eSe'))||0,paymentDate:v('ePd')||null};
   const np=v('ePw');if(np)d.password=np;
-
-  try{
-    await api('/api/users/'+id,'PUT',d);
-    toast('✅ Сохранено','s');closeMo('mEditU');allStudents=[];loadAdminHome();
-  }
+  try{await api('/api/users/'+id,'PUT',d);toast('✅ Сохранено','s');closeMo('mEditU');allStudents=[];loadAdminHome();}
   catch(e){toast(e.message,'e');}
 }
 
@@ -1443,14 +1277,13 @@ function renderWCard(w,isAdmin){
   const time=new Date(w.datetime).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
   const isGrp=w.type==='group';
   const chips=(w.studentIds||[]).map(sid=>{const s=allStudents.find(x=>x.id===sid);return`<span class="chip">${s?esc(s.name):sid}</span>`;}).join('');
-  return `
-    <div class="wcard ${isGrp?'group':''}">
-      <div class="w-title">${esc(w.title)}<span class="wbadge ${isGrp?'wb-g':'wb-p'}">${isGrp?'Группа':'Персональная'}</span></div>
-      <div class="w-meta">🕐 ${time} · ⏱ ${w.duration} мин</div>
-      ${chips?`<div class="w-chips">${chips}</div>`:''}
-      ${w.note?`<div class="w-note">📝 ${esc(w.note)}</div>`:''}
-      ${isAdmin?`<div><button class="btn btn-d sm" onclick="delWorkout('${w.id}')">🗑 Удалить</button></div>`:''}
-    </div>`;
+  return `<div class="wcard ${isGrp?'group':''}">
+    <div class="w-title">${esc(w.title)}<span class="wbadge ${isGrp?'wb-g':'wb-p'}">${isGrp?'Группа':'Персональная'}</span></div>
+    <div class="w-meta">🕐 ${time} · ⏱ ${w.duration} мин</div>
+    ${chips?`<div class="w-chips">${chips}</div>`:''}
+    ${w.note?`<div class="w-note">📝 ${esc(w.note)}</div>`:''}
+    ${isAdmin?`<div><button class="btn btn-d sm" onclick="delWorkout('${w.id}')">🗑 Удалить</button></div>`:''}
+  </div>`;
 }
 
 async function delWorkout(id){if(!confirm('Удалить?'))return;try{await api('/api/workouts/'+id,'DELETE');loadAdminWorkouts();}catch(e){toast(e.message,'e');}}
@@ -1552,7 +1385,7 @@ async function addShopItem(){
 async function delShopItem(id){if(!confirm('Удалить?'))return;try{await api('/api/shop/'+id,'DELETE');loadAdminShop();}catch(e){toast(e.message,'e');}}
 
 // ═══════════════════════════════════════════
-// УЧЕНИК: ГЛАВНАЯ — с просмотрщиком плана
+// УЧЕНИК: ГЛАВНАЯ
 // ═══════════════════════════════════════════
 async function loadUserHome(){
   try{ME=await api('/api/me/'+ME.id);}catch{}
@@ -1561,12 +1394,8 @@ async function loadUserHome(){
   n.style.color=ME.sessions<=0?'var(--red)':ME.sessions<=2?'var(--yel)':'var(--ac)';
   document.getElementById('subPay').textContent=ME.paymentDate?new Date(ME.paymentDate).toLocaleDateString('ru-RU'):'—';
   document.getElementById('streak').style.display=ME.sessions>0?'flex':'none';
-
-  const pb=document.getElementById('planBtn');
-  if (pb) pb.innerHTML = ''; // план теперь в отдельной вкладке
-
+  document.getElementById('planBtn').innerHTML='';
   loadUserPosts();
-  // Кнопка отзыва
   if (!document.getElementById('reviewHomeBtn')) {
     const tgBtn = document.querySelector('.tg-a');
     if (tgBtn) {
@@ -1587,7 +1416,7 @@ async function loadUserPosts(){
     const posts=await api('/api/posts');
     if(!posts.length){box.innerHTML=`<div class="empty"><div class="ei">📢</div>Новостей пока нет</div>`;return;}
     box.innerHTML=posts.map(p=>renderPost(p,false)).join('');
-  }catch{}
+  }catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}
 }
 
 // ═══════════════════════════════════════════
@@ -1604,12 +1433,11 @@ async function loadUserWorkouts(){
     let html='';
     if(future.length){
       html+=`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--ac);margin-bottom:10px">Предстоящие</div>`;
-      html+=future.map(w=>`
-        <div class="wcard ${w.type==='group'?'group':''}">
-          <div class="w-title">${esc(w.title)}<span class="wbadge ${w.type==='group'?'wb-g':'wb-p'}">${w.type==='group'?'Группа':'Личная'}</span></div>
-          <div class="w-meta">📅 ${new Date(w.datetime).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} · ⏱ ${w.duration} мин</div>
-          ${w.note?`<div class="w-note">📝 ${esc(w.note)}</div>`:''}
-        </div>`).join('');
+      html+=future.map(w=>`<div class="wcard ${w.type==='group'?'group':''}">
+        <div class="w-title">${esc(w.title)}<span class="wbadge ${w.type==='group'?'wb-g':'wb-p'}">${w.type==='group'?'Группа':'Личная'}</span></div>
+        <div class="w-meta">📅 ${new Date(w.datetime).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} · ⏱ ${w.duration} мин</div>
+        ${w.note?`<div class="w-note">📝 ${esc(w.note)}</div>`:''}
+      </div>`).join('');
     }
     if(past.length){
       html+=`<div class="div"></div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu2);margin-bottom:10px">История</div>`;
@@ -1628,7 +1456,6 @@ async function loadUserProgress(){
     const data=await api('/api/progress/'+ME.id);
     const weights=data.filter(d=>d.type==='weight');
     const photos=data.filter(d=>d.type==='photo');
-
     if(wChartInst){wChartInst.destroy();wChartInst=null;}
     const cw=document.getElementById('wChart');
     if(weights.length){
@@ -1638,7 +1465,6 @@ async function loadUserProgress(){
     }else{
       cw.parentElement.innerHTML=`<div class="empty"><div class="ei">⚖️</div>Добавьте первую запись веса</div>`;
     }
-
     const pg=document.getElementById('phGrid');
     pg.innerHTML=photos.length
       ?photos.map(p=>`<img class="ph-img" src="${p.photoUrl}" loading="lazy"/>`).join('')
@@ -1717,12 +1543,22 @@ function chartCfg(weights){
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748b',font:{size:11}},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#64748b',font:{size:11}},grid:{color:'rgba(255,255,255,.04)'}}}}}
 }
 
-
 // ═══════════════════════════════════════════════════════
-// 📊 ДНЕВНИК ТРЕНИРОВОК
+// FIX 3: ДНЕВНИК — сброс состояния при открытии
 // ═══════════════════════════════════════════════════════
 let _diaryRating = 0;
 let _diaryExCount = 0;
+
+function openDiaryModal() {
+  // Сбрасываем состояние перед открытием
+  _diaryRating = 0;
+  _diaryExCount = 0;
+  document.getElementById('diaryDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('diaryExList').innerHTML = '';
+  document.getElementById('diaryNote').value = '';
+  document.querySelectorAll('#starRow .star-btn').forEach(b => b.classList.remove('active'));
+  openMo('mDiary');
+}
 
 function setStar(n) {
   _diaryRating = n;
@@ -1743,15 +1579,18 @@ function addDiaryEx() {
     <button class="add-set-btn" onclick="addSet(${id})">+ Добавить подход</button>`;
   document.getElementById('diaryExList').appendChild(div);
   addSet(id);
+  // Фокус на поле упражнения
+  setTimeout(() => document.getElementById('exName_' + id)?.focus(), 50);
 }
 
 function addSet(exId) {
   const container = document.getElementById('exSets_' + exId);
+  if (!container) return;
   const n = container.children.length + 1;
   const row = document.createElement('div');
   row.className = 'set-inputs';
   row.innerHTML = `
-    <span style="font-size:11px;color:var(--mu2);width:20px">${n}</span>
+    <span style="font-size:11px;color:var(--mu2);width:20px;flex-shrink:0">${n}</span>
     <input class="fi" placeholder="Кг" type="number" step="0.5" style="width:70px;padding:8px 10px"/>
     <span style="font-size:12px;color:var(--mu2)">×</span>
     <input class="fi" placeholder="Повт" type="number" style="width:70px;padding:8px 10px"/>
@@ -1767,36 +1606,31 @@ async function saveDiary() {
     const idMatch = block.id.match(/diaryEx_(\d+)/);
     if (!idMatch) return;
     const exId = idMatch[1];
-    const name = document.getElementById('exName_' + exId)?.value?.trim();
+    const nameEl = document.getElementById('exName_' + exId);
+    const name = nameEl?.value?.trim();
     if (!name) return;
     const sets = [];
     block.querySelectorAll('.set-inputs').forEach(row => {
-      const inputs = row.querySelectorAll('input');
+      const inputs = row.querySelectorAll('input[type="number"]');
       const weight = inputs[0]?.value;
       const reps   = inputs[1]?.value;
       if (reps) sets.push({ weight: weight||'', reps: parseInt(reps) });
     });
     if (sets.length) exercises.push({ name, sets });
   });
+  if (!exercises.length) { toast('Добавьте хотя бы одно упражнение с подходами','e'); return; }
   const note = document.getElementById('diaryNote').value;
   try {
     await api('/api/diary/' + ME.id, 'POST', { date, exercises, note, rating: _diaryRating || null });
     toast('✅ Тренировка сохранена!', 's');
     closeMo('mDiary');
     loadDiary();
-    _diaryRating = 0;
-    setStar(0);
   } catch(e) { toast(e.message, 'e'); }
 }
 
 async function loadDiary() {
   const box = document.getElementById('diaryList');
   box.innerHTML = '<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';
-  // Устанавливаем сегодняшнюю дату в форме
-  document.getElementById('diaryDate').value = new Date().toISOString().split('T')[0];
-  document.getElementById('diaryExList').innerHTML = '';
-  document.getElementById('diaryNote').value = '';
-  _diaryExCount = 0;
   try {
     const entries = await api('/api/diary/' + ME.id);
     if (!entries.length) {
@@ -1810,14 +1644,15 @@ async function loadDiary() {
       return `<div class="diary-day">
         <div class="diary-day-head">
           <span style="font-size:18px">🏋️</span>
-          <div><div class="diary-day-date">${d}</div>
+          <div>
+            <div class="diary-day-date">${d}</div>
             <div class="diary-day-excount">${exCount} упражнений${e.note?' · '+esc(e.note.slice(0,40)):''}</div>
           </div>
           <div class="diary-day-rating">${stars}</div>
         </div>
         ${(e.exercises||[]).length ? `<div style="margin-top:10px">` +
           e.exercises.map(ex => {
-            const chips = ex.sets.map(s => `<span class="diary-set-chip">${s.weight?s.weight+'кг×':''}${s.reps}</span>`).join('');
+            const chips = (ex.sets||[]).map(s => `<span class="diary-set-chip">${s.weight?s.weight+'кг×':''}${s.reps}</span>`).join('');
             return `<div class="diary-ex-row"><span class="diary-ex-name">${esc(ex.name)}</span><div class="diary-ex-sets">${chips}</div></div>`;
           }).join('') + '</div>' : ''}
       </div>`;
@@ -1825,125 +1660,20 @@ async function loadDiary() {
   } catch(e) { box.innerHTML = '<div class="empty">' + e.message + '</div>'; }
 }
 
-// ═══════════════════════════════════════════════════════
-// 💪 ЛИЧНЫЕ РЕКОРДЫ
-// ═══════════════════════════════════════════════════════
-async function loadRecords() {
-  const box = document.getElementById('prList');
-  box.innerHTML = '<div class="sp-ring" style="margin:10px auto"></div>';
-  try {
-    const records = await api('/api/records/' + ME.id);
-    if (!records.length) { box.innerHTML = '<div style="color:var(--mu2);font-size:13px">Рекорды появятся после первых тренировок в дневнике 💪</div>'; return; }
-    records.sort((a,b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-    const medals = ['🥇','🥈','🥉'];
-    box.innerHTML = records.map((r, i) => {
-      const d = new Date(r.updatedAt).toLocaleDateString('ru-RU');
-      return `<div class="pr-card">
-        <div class="pr-medal">${medals[i]||'🏅'}</div>
-        <div><div class="pr-name">${esc(r.exercise)}</div><div class="pr-meta">${r.reps} повт.</div></div>
-        <div><div class="pr-val">${r.weight} кг</div><div class="pr-date">${d}</div></div>
-      </div>`;
-    }).join('');
-  } catch(e) { box.innerHTML = '<div style="color:var(--red)">' + e.message + '</div>'; }
-}
+
 
 // ═══════════════════════════════════════════════════════
-// 🎯 ЦЕЛИ
-// ═══════════════════════════════════════════════════════
-async function loadGoals() {
-  loadRecords();
-  const box = document.getElementById('goalsList');
-  box.innerHTML = '<div class="sp-ring" style="margin:20px auto"></div>';
-  try {
-    const goals = await api('/api/goals/' + ME.id);
-    if (!goals.length) {
-      box.innerHTML = '<div class="empty"><div class="ei">🎯</div>Поставь первую цель!<br><small style="color:var(--mu)">Нажми «+ Цель»</small></div>';
-      return;
-    }
-    box.innerHTML = goals.map(g => {
-      const pct = g.target > 0 ? Math.min(100, Math.round((g.current / g.target) * 100)) : 0;
-      const dl = g.deadline ? `<div class="goal-deadline">📅 До: ${new Date(g.deadline).toLocaleDateString('ru-RU')}</div>` : '';
-      return `<div class="goal-card${g.done?' done':''}">
-        <div class="goal-head">
-          <span style="font-size:20px">${g.done?'✅':'🎯'}</span>
-          <div class="goal-title">${esc(g.title)}</div>
-          <div class="goal-pct">${pct}%</div>
-          <button class="btn btn-d sm" onclick="deleteGoal('${g.id}')">✕</button>
-        </div>
-        <div class="goal-bar-wrap"><div class="goal-bar" style="width:${pct}%"></div></div>
-        <div class="goal-vals">
-          <span>${g.current} ${esc(g.unit)}</span>
-          <span>${g.target} ${esc(g.unit)}</span>
-        </div>
-        ${dl}
-        ${!g.done ? `<div style="margin-top:10px;display:flex;gap:8px">
-          <button class="btn btn-g sm" onclick="openUpdGoal('${g.id}','${esc(g.title)}','${esc(g.unit)}',${g.current})">📝 Обновить</button>
-          <button class="btn btn-p sm" onclick="markGoalDone('${g.id}')">✅ Выполнено</button>
-        </div>` : ''}
-      </div>`;
-    }).join('');
-  } catch(e) { box.innerHTML = '<div class="empty">' + e.message + '</div>'; }
-}
-
-async function saveGoal() {
-  const title   = document.getElementById('goalTitle').value.trim();
-  const target  = document.getElementById('goalTarget').value;
-  const unit    = document.getElementById('goalUnit').value.trim();
-  const current = document.getElementById('goalCurrent').value;
-  const dl      = document.getElementById('goalDeadline').value;
-  if (!title) { toast('Введите название цели','e'); return; }
-  try {
-    await api('/api/goals/' + ME.id, 'POST', { title, target, unit, current, deadline: dl || null });
-    toast('🎯 Цель создана!','s'); closeMo('mAddGoal'); loadGoals();
-    ['goalTitle','goalTarget','goalUnit','goalCurrent','goalDeadline'].forEach(id => document.getElementById(id).value='');
-  } catch(e) { toast(e.message,'e'); }
-}
-
-function openUpdGoal(id, title, unit, current) {
-  document.getElementById('updGoalId').value   = id;
-  document.getElementById('updGoalLabel').textContent = title + (unit ? ' (' + unit + ')' : '');
-  document.getElementById('updGoalVal').value  = current;
-  openMo('mUpdGoal');
-}
-
-async function updateGoalProgress() {
-  const id  = document.getElementById('updGoalId').value;
-  const val = document.getElementById('updGoalVal').value;
-  try {
-    await api('/api/goals/' + ME.id + '/' + id, 'PUT', { current: val });
-    toast('✅ Прогресс обновлён','s'); closeMo('mUpdGoal'); loadGoals();
-  } catch(e) { toast(e.message,'e'); }
-}
-
-async function markGoalDone(id) {
-  try {
-    await api('/api/goals/' + ME.id + '/' + id, 'PUT', { done: true });
-    toast('🏆 Цель достигнута!','s'); loadGoals();
-  } catch(e) { toast(e.message,'e'); }
-}
-
-async function deleteGoal(id) {
-  if(!confirm('Удалить цель?')) return;
-  try { await api('/api/goals/' + ME.id + '/' + id, 'DELETE'); loadGoals(); } catch(e) { toast(e.message,'e'); }
-}
-
-// ═══════════════════════════════════════════════════════
-// 📅 КАЛЕНДАРЬ (тренер)
+// КАЛЕНДАРЬ
 // ═══════════════════════════════════════════════════════
 let _calYear  = new Date().getFullYear();
 let _calMonth = new Date().getMonth();
 let _calWorkouts = [];
-
 const RU_MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const RU_DAYS   = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 
 async function loadCalendar() {
-  try {
-    _calWorkouts = await api('/api/workouts');
-    renderCalendar();
-  } catch(e) { console.error(e); }
+  try { _calWorkouts = await api('/api/workouts'); renderCalendar(); } catch(e) { console.error(e); }
 }
-
 function calPrev() { _calMonth--; if(_calMonth < 0){ _calMonth=11; _calYear--; } renderCalendar(); }
 function calNext() { _calMonth++; if(_calMonth > 11){ _calMonth=0;  _calYear++; } renderCalendar(); }
 
@@ -1951,34 +1681,23 @@ function renderCalendar() {
   document.getElementById('calMonthLabel').textContent = RU_MONTHS[_calMonth] + ' ' + _calYear;
   const grid = document.getElementById('calGrid');
   const today = new Date().toISOString().split('T')[0];
-
-  // Заголовки дней
   let html = RU_DAYS.map(d => `<div class="cal-head-cell">${d}</div>`).join('');
-
-  // Первый день месяца (0=Вс → сдвигаем под Пн)
   const firstDay = new Date(_calYear, _calMonth, 1);
-  const startDow = (firstDay.getDay() + 6) % 7; // 0=Пн
-  const daysInMonth  = new Date(_calYear, _calMonth+1, 0).getDate();
-  const daysInPrevM  = new Date(_calYear, _calMonth, 0).getDate();
-
-  // Пустые ячейки из предыдущего месяца
+  const startDow = (firstDay.getDay() + 6) % 7;
+  const daysInMonth = new Date(_calYear, _calMonth+1, 0).getDate();
+  const daysInPrevM = new Date(_calYear, _calMonth, 0).getDate();
   for (let i = 0; i < startDow; i++) {
-    const d = daysInPrevM - startDow + 1 + i;
-    html += `<div class="cal-cell other-month">${d}</div>`;
+    html += `<div class="cal-cell other-month">${daysInPrevM - startDow + 1 + i}</div>`;
   }
-
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = `${_calYear}-${String(_calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const hasW = _calWorkouts.some(w => w.datetime && w.datetime.startsWith(dateStr));
     const isToday = dateStr === today;
     html += `<div class="cal-cell${hasW?' has-workout':''}${isToday?' today':''}" onclick="showCalDay('${dateStr}')">${d}</div>`;
   }
-
-  // Добиваем до полных 6 рядов
   const total = startDow + daysInMonth;
   const remain = total % 7 === 0 ? 0 : 7 - (total % 7);
   for (let i = 1; i <= remain; i++) html += `<div class="cal-cell other-month">${i}</div>`;
-
   grid.innerHTML = html;
   document.getElementById('calEvents').innerHTML = '';
 }
@@ -1991,19 +1710,18 @@ function showCalDay(dateStr) {
   evBox.innerHTML = `<div style="font-size:12px;font-weight:700;color:var(--mu2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">${d}</div>` +
     ws.map(w => {
       const t = new Date(w.datetime).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
-      const badge = w.type==='group'?'👥 Группа':'👤 Личная';
       return `<div class="cal-event">
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:18px">🏋️</span>
           <div><div style="font-weight:600;font-size:13px">${esc(w.title)}</div>
-          <div style="font-size:12px;color:var(--mu2)">${t} · ${badge}</div></div>
+          <div style="font-size:12px;color:var(--mu2)">${t} · ${w.type==='group'?'👥 Группа':'👤 Личная'}</div></div>
         </div>
       </div>`;
     }).join('');
 }
 
 // ═══════════════════════════════════════════════════════
-// ⭐ ОТЗЫВЫ
+// FIX 1: ОТЗЫВЫ — исправлен запрос и обработка ошибок
 // ═══════════════════════════════════════════════════════
 let _reviewRating = 0;
 
@@ -2019,7 +1737,8 @@ async function submitReview() {
     await api('/api/reviews', 'POST', { userId: ME.id, userName: ME.name, rating: _reviewRating, text });
     toast('⭐ Спасибо за отзыв!','s');
     closeMo('mReview');
-    _reviewRating = 0; setReviewStar(0);
+    _reviewRating = 0;
+    setReviewStar(0);
     document.getElementById('reviewText').value = '';
   } catch(e) { toast(e.message,'e'); }
 }
@@ -2027,14 +1746,17 @@ async function submitReview() {
 async function loadReviews() {
   const box = document.getElementById('reviewsList');
   const avgBox = document.getElementById('avgRating');
-  box.innerHTML = '<div class="sp-ring" style="margin:20px auto"></div>';
+  box.innerHTML = '<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';
+  avgBox.innerHTML = '';
   try {
+    // ══ FIX: GET /api/reviews без orderBy — сортируем на клиенте ══
     const reviews = await api('/api/reviews');
     if (!reviews.length) {
-      avgBox.innerHTML = '';
       box.innerHTML = '<div class="empty"><div class="ei">⭐</div>Отзывов пока нет</div>';
       return;
     }
+    // Сортируем на клиенте по дате (новые сначала)
+    reviews.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
     const avg = (reviews.reduce((s,r) => s + r.rating, 0) / reviews.length).toFixed(1);
     const stars = Math.round(avg);
     avgBox.innerHTML = `<div class="avg-rating">
@@ -2044,21 +1766,27 @@ async function loadReviews() {
     </div>`;
     box.innerHTML = reviews.map(r => {
       const d = new Date(r.createdAt).toLocaleDateString('ru-RU');
+      const ratingStars = '⭐'.repeat(Math.min(5, Math.max(1, r.rating)));
       return `<div class="review-card">
         <div class="review-head">
-          <div class="review-ava">${r.userName.charAt(0).toUpperCase()}</div>
-          <div><div class="review-name">${esc(r.userName)}</div>
-            <div class="review-stars">${'⭐'.repeat(r.rating)}</div></div>
+          <div class="review-ava">${(r.userName||'?').charAt(0).toUpperCase()}</div>
+          <div>
+            <div class="review-name">${esc(r.userName||'Ученик')}</div>
+            <div class="review-stars">${ratingStars}</div>
+          </div>
           <div class="review-date">${d}</div>
         </div>
         ${r.text ? `<div class="review-text">${esc(r.text)}</div>` : ''}
       </div>`;
     }).join('');
-  } catch(e) { box.innerHTML = '<div class="empty">' + e.message + '</div>'; }
+  } catch(e) {
+    box.innerHTML = `<div class="empty"><div class="ei">⭐</div>${esc(e.message)}</div>`;
+    console.error('loadReviews error:', e);
+  }
 }
 
 // ═══════════════════════════════════════════════════════
-// 📤 ЭКСПОРТ В EXCEL
+// ЭКСПОРТ EXCEL
 // ═══════════════════════════════════════════════════════
 function exportExcel() {
   toast('⏳ Подготовка файла...','w');
@@ -2070,11 +1798,8 @@ function exportExcel() {
   document.body.removeChild(a);
 }
 
-
-
-
 // ═══════════════════════════════════════════════════════
-// 💬 ЗАМЕТКИ ТРЕНЕРА
+// ЗАМЕТКИ ТРЕНЕРА
 // ═══════════════════════════════════════════════════════
 async function openNotes(userId, userName) {
   document.getElementById('notesUserId').value = userId;
