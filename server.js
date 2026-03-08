@@ -521,8 +521,10 @@ app.post('/api/diary/:userId', async (req, res) => {
 
 app.get('/api/diary/:userId', async (req, res) => {
   try {
-    const snap = await db.collection('diary').where('userId','==',req.params.userId).orderBy('date','desc').limit(60).get();
-    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    const snap = await db.collection('diary').where('userId','==',req.params.userId).limit(60).get();
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    items.sort((a,b) => b.date.localeCompare(a.date));
+    res.json(items);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -551,8 +553,10 @@ app.get('/api/records/:userId', async (req, res) => {
 // ══════════════════════════════════════════════
 app.get('/api/goals/:userId', async (req, res) => {
   try {
-    const snap = await db.collection('goals').where('userId','==',req.params.userId).orderBy('createdAt','desc').get();
-    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    const snap = await db.collection('goals').where('userId','==',req.params.userId).get();
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    items.sort((a,b) => b.createdAt.localeCompare(a.createdAt));
+    res.json(items);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -592,8 +596,10 @@ app.delete('/api/goals/:userId/:goalId', async (req, res) => {
 // ══════════════════════════════════════════════
 app.get('/api/notes/:userId', async (req, res) => {
   try {
-    const snap = await db.collection('notes').where('userId','==',req.params.userId).orderBy('createdAt','desc').limit(30).get();
-    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    const snap = await db.collection('notes').where('userId','==',req.params.userId).limit(30).get();
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    items.sort((a,b) => b.createdAt.localeCompare(a.createdAt));
+    res.json(items);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -636,8 +642,10 @@ app.post('/api/reviews', async (req, res) => {
 
 app.get('/api/reviews', async (req, res) => {
   try {
-    const snap = await db.collection('reviews').orderBy('createdAt','desc').limit(50).get();
-    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    const snap = await db.collection('reviews').limit(50).get();
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    items.sort((a,b) => b.createdAt.localeCompare(a.createdAt));
+    res.json(items);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -651,7 +659,7 @@ app.get('/api/export/students', async (req, res) => {
 
     const [usersSnap, diarySnap, reviewsSnap] = await Promise.all([
       db.collection('users').where('role','==','student').get(),
-      db.collection('diary').orderBy('date','desc').get(),
+      db.collection('diary').get(),
       db.collection('reviews').get()
     ]);
 
