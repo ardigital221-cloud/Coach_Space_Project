@@ -514,11 +514,22 @@
   <input type="hidden" id="pedUserId"/>
   <div class="ped-week-tabs" id="pedWeekTabs"></div>
   <div class="ped-copy-bar" id="pedCopyBar">
-    <span style="font-size:12px;color:var(--mu2)">Скопировать Неделю 1 на:</span>
-    <button class="btn btn-g sm" onclick="copyWeekTo(2)">→ Нед. 2</button>
-    <button class="btn btn-g sm" onclick="copyWeekTo(3)">→ Нед. 3</button>
-    <button class="btn btn-g sm" onclick="copyWeekTo(4)">→ Нед. 4</button>
-    <button class="btn btn-g sm" onclick="copyWeekTo('all')">→ Все</button>
+    <span style="font-size:12px;color:var(--mu2);flex-shrink:0">Копировать Нед.</span>
+    <select class="fsel" id="pedCopyFrom" style="width:auto;padding:5px 10px;font-size:12px;flex-shrink:0">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+    </select>
+    <span style="font-size:12px;color:var(--mu2);flex-shrink:0">→</span>
+    <select class="fsel" id="pedCopyTo" style="width:auto;padding:5px 10px;font-size:12px;flex-shrink:0">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="all">Все</option>
+    </select>
+    <button class="btn btn-g sm" onclick="copyWeekAny()">Копировать</button>
   </div>
   <div id="pedWeekContent"></div>
   <button class="btn btn-g sm" style="margin-bottom:16px;width:100%;justify-content:center" onclick="pedAddBlock()">+ Добавить блок</button>
@@ -785,21 +796,29 @@ function pedRenameBlock(input){
   input.dataset.original=newName;
 }
 
-function copyWeekTo(target){
+function copyWeekAny(){
   pedReadDOM();
-  const src=JSON.parse(JSON.stringify(_pedPlan[1]));
-  if(target==='all'){
-    if(!confirm('Скопировать Неделю 1 на Недели 2, 3 и 4? Текущие данные будут заменены.'))return;
-    _pedPlan[2]=JSON.parse(JSON.stringify(src));
-    _pedPlan[3]=JSON.parse(JSON.stringify(src));
-    _pedPlan[4]=JSON.parse(JSON.stringify(src));
-    toast('✅ Неделя 1 скопирована на все недели','s');
+  const from=parseInt(document.getElementById('pedCopyFrom').value);
+  const toVal=document.getElementById('pedCopyTo').value;
+  if(toVal!=='all' && parseInt(toVal)===from){toast('Выберите другую неделю','e');return;}
+  const src=JSON.parse(JSON.stringify(_pedPlan[from]));
+  if(toVal==='all'){
+    const others=[1,2,3,4].filter(w=>w!==from);
+    if(!confirm(`Скопировать Неделю ${from} на все остальные (${others.join(', ')})? Данные будут заменены.`))return;
+    others.forEach(w=>{_pedPlan[w]=JSON.parse(JSON.stringify(src));});
+    toast(`✅ Неделя ${from} скопирована на недели ${others.join(', ')}`,'s');
   }else{
-    if(!confirm(`Скопировать Неделю 1 на Неделю ${target}?`))return;
-    _pedPlan[target]=JSON.parse(JSON.stringify(src));
-    toast(`✅ Скопировано на Неделю ${target}`,'s');
+    const to=parseInt(toVal);
+    if(!confirm(`Скопировать Неделю ${from} → Неделю ${to}? Данные недели ${to} будут заменены.`))return;
+    _pedPlan[to]=JSON.parse(JSON.stringify(src));
+    toast(`✅ Неделя ${from} → Неделя ${to}`,'s');
   }
   pedRenderWeekTabs();
+}
+
+function copyWeekTo(target){
+  // legacy — оставлен для совместимости
+  copyWeekAny();
 }
 
 async function savePlanEditor(){
