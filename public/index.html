@@ -71,8 +71,9 @@
     .btn-out{background:none;color:var(--mu);font-size:18px;padding:6px;transition:color .2s;}
     .btn-out:hover{color:var(--red);}
 
-    .bnav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(8,12,20,.94);backdrop-filter:blur(24px);border-top:1px solid var(--b);display:flex;padding-bottom:env(safe-area-inset-bottom);}
-    .nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 4px;background:none;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--mu);transition:color .2s;}
+    .bnav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(8,12,20,.94);backdrop-filter:blur(24px);border-top:1px solid var(--b);display:flex;overflow-x:auto;overflow-y:hidden;padding-bottom:env(safe-area-inset-bottom);scrollbar-width:none;-ms-overflow-style:none;}
+    .bnav::-webkit-scrollbar{display:none;}
+    .nb{flex:0 0 auto;min-width:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 6px;background:none;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--mu);transition:color .2s;}
     .nb .ni{font-size:19px;}.nb.active{color:var(--ac);}
 
     .content{max-width:680px;margin:0 auto;padding:18px 14px;}
@@ -1199,7 +1200,7 @@ async function loadAdminStudents(){
       else if(u.sessions<=2){pillCls='pill-yel';sessIcon='⚠️';}
       const pd=u.paymentDate?new Date(u.paymentDate).toLocaleDateString('ru-RU'):'—';
       const ptCls=u.paymentDate===today?'pill-yel':'pill-gray';
-      const hasPlan = u.trainingPlan || u.planUrl ? true : false;
+      const hasPlan = u.trainingPlan ? true : false;
       return `
         <div class="student-card">
           <div class="sc-top">
@@ -1210,7 +1211,7 @@ async function loadAdminStudents(){
             <span class="pill ${pillCls}">${sessIcon} ${u.sessions} занятий</span>
             <span class="pill ${ptCls}">💳 Оплата: ${pd}${u.paymentDate===today?' ⚠️':''}</span>
             ${u.telegramId?`<span class="pill pill-gray">✈️ TG</span>`:''}
-            ${hasPlan?`<span class="pill pill-green">📊 ${u.planFileName||'План загружен'}</span>`:''}
+            ${hasPlan?`<span class="pill pill-green">📋 План готов</span>`:''}
           </div>
           <div class="sc-btns">
             <button class="mark-btn" onclick="markAtt('${u.id}','${esc(u.name)}')">✓ Отметить тренировку</button>
@@ -1565,7 +1566,19 @@ async function loadUserHome(){
   if (pb) pb.innerHTML = ''; // план теперь в отдельной вкладке
 
   loadUserPosts();
-  addReviewBtnToHome();
+  // Кнопка отзыва
+  if (!document.getElementById('reviewHomeBtn')) {
+    const tgBtn = document.querySelector('.tg-a');
+    if (tgBtn) {
+      const btn = document.createElement('button');
+      btn.id = 'reviewHomeBtn';
+      btn.className = 'tg-a';
+      btn.style.cssText = 'cursor:pointer;border:none;text-align:left;width:100%;background:rgba(255,255,255,.03)';
+      btn.innerHTML = '<span style="font-size:26px">⭐</span><div><b style="font-size:14px">Оставить отзыв</b><br><span style="font-size:12px;color:var(--mu2)">Оцените тренировку</span></div>';
+      btn.onclick = () => openMo('mReview');
+      tgBtn.parentNode.insertBefore(btn, tgBtn.nextSibling);
+    }
+  }
 }
 
 async function loadUserPosts(){
@@ -2057,20 +2070,7 @@ function exportExcel() {
   document.body.removeChild(a);
 }
 
-// ═══════════════════════════════════════════════════════
-// 🏠 КНОПКА «Оставить отзыв» на главной ученика
-// ═══════════════════════════════════════════════════════
-function addReviewBtnToHome() {
-  const tgBtn = document.querySelector('.tg-a');
-  if (tgBtn && !document.getElementById('reviewHomeBtn')) {
-    const btn = document.createElement('button');
-    btn.id = 'reviewHomeBtn';
-    btn.className = 'tg-a'; btn.style.cssText = 'cursor:pointer;border:none;text-align:left;width:100%';
-    btn.innerHTML = '<span style="font-size:26px">⭐</span><div><b style="font-size:14px">Оставить отзыв</b><br><span style="font-size:12px;color:var(--mu2)">Оцените тренировку</span></div>';
-    btn.onclick = () => openMo('mReview');
-    tgBtn.parentNode.insertBefore(btn, tgBtn.nextSibling);
-  }
-}
+
 
 
 // ═══════════════════════════════════════════════════════
