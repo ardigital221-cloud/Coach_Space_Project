@@ -2,6 +2,10 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8"/>
+  <!-- ✅ ИСПРАВЛЕНО: отключаем кеш браузера чтобы всегда получать свежий HTML -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
   <title>Coach Space</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -259,7 +263,6 @@
     .cal-dot-w{background:var(--ac);}
     .cal-dot-p{background:var(--yel);}
     .cal-cell.other-month{opacity:.3;}
-    /* Легенда календаря */
     .cal-legend{display:flex;gap:14px;margin-bottom:12px;flex-wrap:wrap;}
     .cal-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--mu2);}
     .cal-legend-dot{width:8px;height:8px;border-radius:50%;}
@@ -306,7 +309,6 @@
     .ped-col-heads{display:grid;grid-template-columns:1fr 72px 72px 32px;gap:8px;padding:4px 14px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);}
     #mPlanEditor .modal{max-width:96vw;width:100%;}
     @media(min-width:700px){#mPlanEditor .modal{max-width:860px;}}
-    /* Тест уведомлений блок */
     .tg-status{background:rgba(110,231,183,.06);border:1px solid var(--ba);border-radius:var(--r);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
     .tg-status-icon{font-size:22px;}
     .tg-status-text{font-size:13px;color:var(--mu2);flex:1;}
@@ -410,7 +412,6 @@
       <div class="cal-day-events" id="calEvents"></div>
     </div>
 
-    <!-- ✅ ИЗМЕНЕНО: добавлена кнопка теста уведомлений -->
     <div class="panel" id="p-arev">
       <div class="sh">
         <div class="st">⭐ Отзывы учеников</div>
@@ -911,6 +912,8 @@ async function loadAdminStats(){
   }catch(e){toast(e.message,'e');}
 }
 
+// ✅ ИСПРАВЛЕНО: кнопка сброса веса теперь использует data-атрибуты
+// вместо inline JS со строками — это избегает проблем с кавычками в именах
 async function loadAdminStudents(){
   const box=document.getElementById('aStudents');
   try{
@@ -936,12 +939,12 @@ async function loadAdminStudents(){
           ${hasPlan?`<span class="pill pill-green">📋 План готов</span>`:''}
         </div>
         <div class="sc-btns">
-          <button class="mark-btn" onclick="markAtt('${u.id}','${esc(u.name)}')">✓ Отметить тренировку</button>
-          <button class="btn btn-g sm" onclick="openUploadPlan('${u.id}','${esc(u.name)}')">📋 Редактировать план</button>
-          <button class="btn btn-g sm" onclick="openNotes('${u.id}','${esc(u.name)}')">💬 Заметки</button>
-          <button class="btn btn-w sm" onclick="resetWeight('${u.id}','${esc(u.name)}')">⚖️ Сбросить вес</button>
-          <button class="btn btn-g sm" onclick="openEditUser('${u.id}')">✏️ Изменить</button>
-          <button class="btn btn-d sm" onclick="delUser('${u.id}')">🗑</button>
+          <button class="mark-btn" data-id="${u.id}" data-name="${esc(u.name)}" onclick="markAtt(this.dataset.id,this.dataset.name)">✓ Отметить тренировку</button>
+          <button class="btn btn-g sm" data-id="${u.id}" data-name="${esc(u.name)}" onclick="openUploadPlan(this.dataset.id,this.dataset.name)">📋 Редактировать план</button>
+          <button class="btn btn-g sm" data-id="${u.id}" data-name="${esc(u.name)}" onclick="openNotes(this.dataset.id,this.dataset.name)">💬 Заметки</button>
+          <button class="btn btn-w sm" data-id="${u.id}" data-name="${esc(u.name)}" onclick="resetWeight(this.dataset.id,this.dataset.name)">⚖️ Сбросить вес</button>
+          <button class="btn btn-g sm" data-id="${u.id}" onclick="openEditUser(this.dataset.id)">✏️ Изменить</button>
+          <button class="btn btn-d sm" data-id="${u.id}" onclick="delUser(this.dataset.id)">🗑</button>
         </div>
       </div>`;
     }).join('');
@@ -1574,7 +1577,6 @@ const RU_DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 
 async function loadCalendar(){
   try{
-    // Грузим тренировки и учеников параллельно
     const [ws, students] = await Promise.all([
       api('/api/workouts'),
       allStudents.length ? Promise.resolve(allStudents) : api('/api/users')
@@ -1591,25 +1593,13 @@ function renderCalendar(){
   document.getElementById('calMonthLabel').textContent=RU_MONTHS[_calMonth]+' '+_calYear;
   const grid=document.getElementById('calGrid');
   const today=new Date().toISOString().split('T')[0];
-
-  // Собираем Set дат оплат из учеников
   const paymentDates=new Set(allStudents.map(s=>s.paymentDate).filter(Boolean));
-  // Карта дата → ученики с оплатой
-  const paymentMap={};
-  allStudents.forEach(s=>{
-    if(!s.paymentDate) return;
-    if(!paymentMap[s.paymentDate]) paymentMap[s.paymentDate]=[];
-    paymentMap[s.paymentDate].push(s.name);
-  });
-
   let html=RU_DAYS.map(d=>`<div class="cal-head-cell">${d}</div>`).join('');
   const firstDay=new Date(_calYear,_calMonth,1);
   const startDow=(firstDay.getDay()+6)%7;
   const daysInMonth=new Date(_calYear,_calMonth+1,0).getDate();
   const daysInPrevM=new Date(_calYear,_calMonth,0).getDate();
-
   for(let i=0;i<startDow;i++) html+=`<div class="cal-cell other-month">${daysInPrevM-startDow+1+i}</div>`;
-
   for(let d=1;d<=daysInMonth;d++){
     const dateStr=`${_calYear}-${String(_calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const hasW=_calWorkouts.some(w=>w.datetime&&w.datetime.startsWith(dateStr));
@@ -1619,7 +1609,6 @@ function renderCalendar(){
     if(hasW) cls+=' has-workout';
     if(hasP) cls+=' has-payment';
     if(isToday) cls+=' today';
-    // Точки-маркеры
     let dots='';
     if(hasW||hasP){
       dots='<div class="cal-dots">';
@@ -1629,30 +1618,23 @@ function renderCalendar(){
     }
     html+=`<div class="${cls}" onclick="showCalDay('${dateStr}')">${d}${dots}</div>`;
   }
-
   const total=startDow+daysInMonth;
   const remain=total%7===0?0:7-(total%7);
   for(let i=1;i<=remain;i++) html+=`<div class="cal-cell other-month">${i}</div>`;
-
   grid.innerHTML=html;
   document.getElementById('calEvents').innerHTML='';
 }
 
 function showCalDay(dateStr){
   const ws=_calWorkouts.filter(w=>w.datetime&&w.datetime.startsWith(dateStr));
-  // Ученики с оплатой в этот день
   const payers=allStudents.filter(s=>s.paymentDate===dateStr);
   const evBox=document.getElementById('calEvents');
   const d=new Date(dateStr).toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
-
   if(!ws.length && !payers.length){
     evBox.innerHTML=`<div style="color:var(--mu2);font-size:13px;padding:10px 0">${d} — событий нет</div>`;
     return;
   }
-
   let html=`<div style="font-size:12px;font-weight:700;color:var(--mu2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">${d}</div>`;
-
-  // Тренировки
   if(ws.length){
     ws.forEach(w=>{
       const t=new Date(w.datetime).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
@@ -1667,8 +1649,6 @@ function showCalDay(dateStr){
       </div>`;
     });
   }
-
-  // Оплаты
   if(payers.length){
     payers.forEach(s=>{
       const sessColor=s.sessions<=0?'var(--red)':s.sessions<=2?'var(--yel)':'var(--ac)';
@@ -1683,7 +1663,6 @@ function showCalDay(dateStr){
       </div>`;
     });
   }
-
   evBox.innerHTML=html;
 }
 
@@ -1699,7 +1678,6 @@ async function submitReview(){
   }catch(e){toast(e.message,'e');}
 }
 
-// ✅ ИЗМЕНЕНО: добавлена кнопка удаления для admin
 async function loadReviews(){
   const box=document.getElementById('reviewsList'),avgBox=document.getElementById('avgRating');
   box.innerHTML='<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';avgBox.innerHTML='';
@@ -1733,16 +1711,15 @@ async function loadReviews(){
   }catch(e){box.innerHTML=`<div class="empty"><div class="ei">⭐</div>${esc(e.message)}</div>`;console.error('loadReviews:',e);}
 }
 
-// ✅ НОВОЕ: сброс записей веса ученика тренером
+// ✅ Сброс веса ученика тренером
 async function resetWeight(userId, userName){
-  if(!confirm(`Удалить все записи веса «${userName}»?\n\nЭто действие нельзя отменить — все точки графика веса будут стёрты.`)) return;
+  if(!confirm(`Удалить все записи веса «${userName}»?\n\nЭто действие нельзя отменить.`)) return;
   try{
     const r = await api(`/api/progress/${userId}/weight`, 'DELETE');
-    toast(`⚖️ График веса «${userName}» очищен (удалено ${r.deleted} записей)`, 'w');
+    toast(`⚖️ График веса «${userName}» очищен (${r.deleted} записей)`, 'w');
   }catch(e){ toast('Ошибка: '+e.message, 'e'); }
 }
 
-// ✅ НОВОЕ: удаление отзыва тренером
 async function delReview(id){
   if(!confirm('Удалить этот отзыв?'))return;
   try{
@@ -1752,10 +1729,9 @@ async function delReview(id){
   }catch(e){toast(e.message,'e');}
 }
 
-// ✅ НОВОЕ: тест Telegram уведомлений
 async function testNotifications(){
   const chatId=prompt('Telegram ID для теста (оставьте пустым = отправить тренеру):');
-  if(chatId===null)return; // нажали Отмена
+  if(chatId===null)return;
   try{
     const r=await api('/api/notifications/test','POST',{chatId:chatId||null});
     if(r.success)toast('✅ Тест отправлен → '+r.sentTo,'s');
