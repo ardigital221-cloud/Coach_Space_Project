@@ -60,7 +60,17 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 
 app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+
+// ✅ ИСПРАВЛЕНО: отдаём index.html без кеша, остальные статик-файлы кешируются как обычно
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('index.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+  }
+}));
 
 // ═══════════════════════════════════════════
 // ПРОКСИ ДЛЯ ИЗОБРАЖЕНИЙ Firebase Storage
@@ -329,20 +339,26 @@ app.delete('/api/progress/photo/:photoId', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ✅ НОВЫЙ: сброс всех записей веса ученика (только для тренера)
+// ✅ Сброс всех записей веса ученика (только для тренера)
+// ВАЖНО: фильтрация по type делается на сервере, а не двумя where в Firestore
+// — это исключает необходимость составного индекса в Firestore
 app.delete('/api/progress/:userId/weight', async (req, res) => {
   try {
     const snap = await db.collection('progress')
       .where('userId', '==', req.params.userId)
-      .where('type', '==', 'weight')
       .get();
     if (snap.empty) return res.json({ success: true, deleted: 0 });
+    const weightDocs = snap.docs.filter(doc => doc.data().type === 'weight');
+    if (!weightDocs.length) return res.json({ success: true, deleted: 0 });
     const batch = db.batch();
-    snap.docs.forEach(doc => batch.delete(doc.ref));
+    weightDocs.forEach(doc => batch.delete(doc.ref));
     await batch.commit();
-    console.log(`[WEIGHT-RESET] userId=${req.params.userId}, deleted=${snap.size}`);
-    res.json({ success: true, deleted: snap.size });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+    console.log(`[WEIGHT-RESET] userId=${req.params.userId}, deleted=${weightDocs.length}`);
+    res.json({ success: true, deleted: weightDocs.length });
+  } catch (e) {
+    console.error(`[WEIGHT-RESET-ERR] ${e.message}`);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ═══════════════════════════════════════════
@@ -604,7 +620,6 @@ app.post('/api/reviews', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ✅ НОВЫЙ: удаление отзыва (только для тренера/admin)
 app.delete('/api/reviews/:id', async (req, res) => {
   try {
     const doc = await db.collection('reviews').doc(req.params.id).get();
