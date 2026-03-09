@@ -1297,13 +1297,16 @@ async function loadUserProgress(){
     const weights=data.filter(d=>d.type==='weight');
     const photos=data.filter(d=>d.type==='photo');
     if(wChartInst){wChartInst.destroy();wChartInst=null;}
-    const cw=document.getElementById('wChart');
-    if(weights.length){
-      const newCanvas=document.createElement('canvas');newCanvas.id='wChart';
-      cw.parentNode.replaceChild(newCanvas,cw);
-      wChartInst=new Chart(newCanvas,chartCfg(weights));
-    }else{
-      cw.parentElement.innerHTML=`<div class="empty"><div class="ei">⚖️</div>Добавьте первую запись веса</div>`;
+    // ✅ ИСПРАВЛЕНО: используем контейнер .chart-w вместо прямой замены canvas
+    // это исключает ошибку "null is not an object (evaluating 'cw.parentNode')"
+    const chartBox=document.querySelector('#p-uprog .chart-w');
+    if(chartBox){
+      if(weights.length){
+        chartBox.innerHTML='<canvas id="wChart"></canvas>';
+        wChartInst=new Chart(document.getElementById('wChart'),chartCfg(weights));
+      }else{
+        chartBox.innerHTML=`<div class="empty"><div class="ei">⚖️</div>Добавьте первую запись веса</div>`;
+      }
     }
     const pg=document.getElementById('phGrid');
     pg.innerHTML=photos.length
