@@ -61,7 +61,6 @@ app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// ✅ ИСПРАВЛЕНО: отдаём index.html без кеша, остальные статик-файлы кешируются как обычно
 app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('index.html')) {
@@ -313,6 +312,8 @@ app.post('/api/progress/photo', upload.single('photo'), async (req, res) => {
     const photoUrl = `/api/img/${encodeURIComponent(fileName)}`;
     const ref = await db.collection('progress').add({
       userId, type: 'photo', photoUrl,
+      // Сохраняем оригинальный путь файла для удаления
+      storagePath: fileName,
       date: new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString()
     });
@@ -320,28 +321,45 @@ app.post('/api/progress/photo', upload.single('photo'), async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ✅ ИСПРАВЛЕНО: удаление фото прогресса — используем поле storagePath
+// Для старых записей без storagePath пробуем извлечь путь из URL /api/img/...
 app.delete('/api/progress/photo/:photoId', async (req, res) => {
   try {
     const doc = await db.collection('progress').doc(req.params.photoId).get();
     if (!doc.exists) return res.status(404).json({ error: 'Фото не найдено' });
-    const { photoUrl } = doc.data();
-    if (photoUrl) {
-      try {
-        const match = photoUrl.match(/\/o\/(.+?)\?/);
-        if (match) {
-          const fileName = decodeURIComponent(match[1]);
-          await bucket.file(fileName).delete().catch(() => {});
-        }
-      } catch {}
+    const data = doc.data();
+
+    // Определяем путь к файлу в Storage
+    let storagePath = data.storagePath || null;
+
+    if (!storagePath && data.photoUrl) {
+      // Новый формат: /api/img/progress%2F...
+      const match = data.photoUrl.match(/\/api\/img\/(.+)$/);
+      if (match) {
+        storagePath = decodeURIComponent(match[1]);
+      }
+      // Старый формат: Firebase direct URL с /o/...
+      if (!storagePath) {
+        const oldMatch = data.photoUrl.match(/\/o\/(.+?)\?/);
+        if (oldMatch) storagePath = decodeURIComponent(oldMatch[1]);
+      }
     }
+
+    if (storagePath) {
+      await bucket.file(storagePath).delete().catch(e => {
+        console.warn(`[PHOTO-DEL] Файл не найден в Storage: ${storagePath} — ${e.message}`);
+      });
+    }
+
     await db.collection('progress').doc(req.params.photoId).delete();
     res.json({ success: true });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    console.error('[PHOTO-DEL-ERR]', e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// ✅ Сброс всех записей веса ученика (только для тренера)
-// ВАЖНО: фильтрация по type делается на сервере, а не двумя where в Firestore
-// — это исключает необходимость составного индекса в Firestore
+// Сброс всех записей веса ученика (только для тренера)
 app.delete('/api/progress/:userId/weight', async (req, res) => {
   try {
     const snap = await db.collection('progress')
@@ -442,7 +460,7 @@ app.post('/api/posts/:id/vote', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════
-// МАГАЗИН
+// МАГАЗИН — поддержка нескольких фото
 // ═══════════════════════════════════════════
 app.get('/api/shop', async (req, res) => {
   try {
@@ -453,29 +471,100 @@ app.get('/api/shop', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/shop', upload.single('photo'), async (req, res) => {
+// ✅ Создание товара — первичная загрузка (одно или несколько фото через upload.array)
+app.post('/api/shop', upload.array('photos', 10), async (req, res) => {
   try {
     const { name, price } = req.body;
     if (!name || !price) return res.status(400).json({ error: 'Название и цена обязательны' });
-    let photoUrl = null;
-    if (req.file) {
-      const fileName = `shop/${Date.now()}_${req.file.originalname}`;
-      const file = bucket.file(fileName);
-      await file.save(req.file.buffer, {
-        metadata: { contentType: req.file.mimetype, cacheControl: 'public, max-age=31536000' }
+
+    const photos = [];
+    for (const file of (req.files || [])) {
+      const fileName = `shop/${Date.now()}_${Math.random().toString(36).slice(2)}_${file.originalname}`;
+      const f = bucket.file(fileName);
+      await f.save(file.buffer, {
+        metadata: { contentType: file.mimetype, cacheControl: 'public, max-age=31536000' }
       });
-      photoUrl = `/api/img/${encodeURIComponent(fileName)}`;
+      photos.push({ url: `/api/img/${encodeURIComponent(fileName)}`, storagePath: fileName });
     }
+
+    // Обратная совместимость: photoUrl = первое фото
+    const photoUrl = photos.length ? photos[0].url : null;
+
     const ref = await db.collection('shop').add({
-      name, price: parseFloat(price), photoUrl,
+      name, price: parseFloat(price),
+      photoUrl,   // legacy
+      photos,     // новый массив
       createdAt: new Date().toISOString()
     });
-    res.json({ id: ref.id, photoUrl });
+    res.json({ id: ref.id, photoUrl, photos });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ✅ Добавить фото к существующему товару
+app.post('/api/shop/:id/photos', upload.single('photo'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'Фото обязательно' });
+    const docRef = db.collection('shop').doc(req.params.id);
+    const doc = await docRef.get();
+    if (!doc.exists) return res.status(404).json({ error: 'Товар не найден' });
+
+    const fileName = `shop/${Date.now()}_${Math.random().toString(36).slice(2)}_${req.file.originalname}`;
+    const f = bucket.file(fileName);
+    await f.save(req.file.buffer, {
+      metadata: { contentType: req.file.mimetype, cacheControl: 'public, max-age=31536000' }
+    });
+    const newPhoto = { url: `/api/img/${encodeURIComponent(fileName)}`, storagePath: fileName };
+
+    const existing = doc.data().photos || [];
+    // Миграция старых записей с photoUrl
+    if (!existing.length && doc.data().photoUrl) {
+      existing.push({ url: doc.data().photoUrl, storagePath: null });
+    }
+    const updated = [...existing, newPhoto];
+    await docRef.update({ photos: updated, photoUrl: updated[0].url });
+
+    res.json({ success: true, photo: newPhoto, photos: updated });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ✅ Удалить одно фото товара по индексу
+app.delete('/api/shop/:id/photos/:idx', async (req, res) => {
+  try {
+    const idx = parseInt(req.params.idx);
+    const docRef = db.collection('shop').doc(req.params.id);
+    const doc = await docRef.get();
+    if (!doc.exists) return res.status(404).json({ error: 'Товар не найден' });
+
+    const photos = doc.data().photos || [];
+    if (idx < 0 || idx >= photos.length) return res.status(400).json({ error: 'Неверный индекс' });
+
+    const removed = photos[idx];
+    if (removed.storagePath) {
+      await bucket.file(removed.storagePath).delete().catch(e => {
+        console.warn(`[SHOP-PHOTO-DEL] ${removed.storagePath}: ${e.message}`);
+      });
+    }
+
+    photos.splice(idx, 1);
+    const photoUrl = photos.length ? photos[0].url : null;
+    await docRef.update({ photos, photoUrl });
+
+    res.json({ success: true, photos });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.delete('/api/shop/:id', async (req, res) => {
   try {
+    // Удаляем все файлы товара из Storage
+    const doc = await db.collection('shop').doc(req.params.id).get();
+    if (doc.exists) {
+      const photos = doc.data().photos || [];
+      for (const p of photos) {
+        if (p.storagePath) {
+          await bucket.file(p.storagePath).delete().catch(() => {});
+        }
+      }
+    }
     await db.collection('shop').doc(req.params.id).delete();
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -690,7 +779,7 @@ app.get('/api/export/students', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════
-// ЭНДПОИНТ ПРОВЕРКИ УВЕДОМЛЕНИЙ (для тренера)
+// ЭНДПОИНТ ПРОВЕРКИ УВЕДОМЛЕНИЙ
 // ═══════════════════════════════════════════
 app.post('/api/notifications/test', async (req, res) => {
   const { chatId } = req.body;
