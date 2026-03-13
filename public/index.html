@@ -148,27 +148,30 @@
     .shopi:hover{border-color:rgba(110,231,183,.25);transform:translateY(-2px);}
 
     /* Галерея фото товара */
-    .shop-gallery{position:relative;aspect-ratio:1/1;background:rgba(255,255,255,.05);overflow:hidden;}
-    .shop-gallery-img{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer;transition:opacity .2s;}
-    .shop-gallery-img:hover{opacity:.9;}
-    .shop-gallery-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:36px;opacity:.3;}
-    /* Навигационные точки */
-    .gallery-dots{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);display:flex;gap:4px;}
-    .gallery-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer;transition:background .2s;}
-    .gallery-dot.active{background:#fff;}
+    .shop-gallery{position:relative;aspect-ratio:1/1;background:rgba(255,255,255,.04);overflow:hidden;border-radius:var(--r2) var(--r2) 0 0;}
+    .shop-gallery-img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;transition:transform .3s;}
+    .shop-gallery:hover .shop-gallery-img{transform:scale(1.03);}
+    .shop-gallery.img-err .shop-gallery-img{display:none;}
+    .shop-gallery-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;opacity:.2;}
     /* Стрелки */
-    .gallery-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);border:none;color:#fff;width:26px;height:26px;border-radius:50%;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .2s;}
-    .shop-gallery:hover .gallery-arrow{opacity:1;}
-    .gallery-arrow-l{left:5px;}
-    .gallery-arrow-r{right:5px;}
-    /* Счётчик фото (в админке) */
-    .gallery-count{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;}
-    /* Кнопка удаления фото (только в админке) */
-    .gallery-del-btn{position:absolute;top:6px;left:6px;background:rgba(248,113,113,.8);border:none;color:#fff;width:22px;height:22px;border-radius:50%;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .2s;line-height:1;}
-    .shop-gallery:hover .gallery-del-btn{opacity:1;}
-    /* Кнопка добавить фото (в админке) */
-    .gallery-add-btn{width:100%;background:rgba(110,231,183,.08);border:1px dashed rgba(110,231,183,.3);color:var(--ac);font-size:11px;padding:6px;cursor:pointer;transition:background .2s;}
-    .gallery-add-btn:hover{background:rgba(110,231,183,.15);}
+    .sg-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.55);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.12);color:#fff;width:32px;height:32px;border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .2s;z-index:2;line-height:1;}
+    .shop-gallery:hover .sg-arrow{opacity:1;}
+    .sg-l{left:8px;}.sg-r{right:8px;}
+    /* Счётчик */
+    .sg-count{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;z-index:2;}
+    /* Точки */
+    .sg-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:2;}
+    .sg-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer;transition:all .18s;}
+    .sg-dot.a{background:#fff;transform:scale(1.3);}
+    /* Панель управления фото (только тренер) */
+    .sg-admin-bar{position:absolute;bottom:0;left:0;right:0;display:flex;gap:0;opacity:0;transition:opacity .2s;z-index:3;}
+    .shop-gallery:hover .sg-admin-bar{opacity:1;}
+    .sg-del-btn{flex:1;background:rgba(248,113,113,.85);backdrop-filter:blur(4px);border:none;color:#fff;padding:8px;font-size:11px;font-weight:600;cursor:pointer;transition:background .15s;}
+    .sg-del-btn:hover{background:rgba(248,113,113,1);}
+    .sg-add-btn{flex:0 0 auto;background:rgba(110,231,183,.85);backdrop-filter:blur(4px);border:none;color:#09131a;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;transition:background .15s;}
+    .sg-add-btn:hover{background:rgba(110,231,183,1);}
+    .sg-add-photo-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:rgba(110,231,183,.07);border:1px dashed rgba(110,231,183,.3);color:var(--ac);font-size:12px;padding:10px;cursor:pointer;margin-top:8px;border-radius:var(--r3);transition:background .18s;}
+    .sg-add-photo-btn:hover{background:rgba(110,231,183,.14);}
 
     .sbody{padding:11px;flex:1;display:flex;flex-direction:column;}
     .sname{font-weight:600;font-size:13px;margin-bottom:3px;}
@@ -292,6 +295,14 @@
     ═══════════════════════════════════════ */
     .diary-plan-block{margin-bottom:18px;}
     .diary-plan-block-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--ac);padding:6px 12px;background:rgba(110,231,183,.07);border-radius:8px;margin-bottom:8px;border-left:3px solid var(--ac);}
+    /* Кнопки блоков */
+    .block-btn{padding:8px 14px;border-radius:20px;border:1.5px solid var(--b);background:rgba(255,255,255,.03);color:var(--mu2);font-size:12px;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap;flex-shrink:0;}
+    .block-btn:hover{border-color:var(--ac);color:var(--ac);}
+    .block-btn.active{border-color:var(--ac);color:var(--ac);background:rgba(110,231,183,.12);}
+    .block-btn .block-cnt{font-size:10px;opacity:.6;margin-left:4px;}
+    /* Шапка упражнения — компактная */
+    .diary-ex-empty{text-align:center;padding:30px 0;color:var(--mu2);font-size:13px;}
+    .diary-ex-empty .ei{font-size:32px;display:block;margin-bottom:8px;}
     .diary-ex-card{background:rgba(255,255,255,.03);border:1px solid var(--b);border-radius:var(--r2);margin-bottom:8px;overflow:hidden;transition:border-color .2s;}
     .diary-ex-card.active{border-color:rgba(110,231,183,.35);}
     .diary-ex-header{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;}
@@ -650,32 +661,50 @@
   </div>
 </div></div>
 
-<div class="mo" id="mDiary"><div class="modal" style="max-width:560px;padding:20px 16px">
-  <div class="mh"></div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-    <div class="mt" style="margin-bottom:0" id="diaryModalTitle">📊 Запись тренировки</div>
-    <input class="fi" id="diaryDate" type="date" style="width:148px;padding:8px 11px;font-size:13px"/>
-  </div>
-  <div id="diaryWeekBar" style="display:none;margin-bottom:12px">
-    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--mu2);margin-bottom:6px">Неделя плана</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap" id="diaryWeekBtns"></div>
-  </div>
-  <div id="diaryExList"></div>
-  <button class="btn btn-g sm" style="width:100%;justify-content:center;margin-bottom:14px" onclick="addDiaryEx()">+ Добавить своё упражнение</button>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-    <span style="font-size:12px;color:var(--mu2);font-weight:600">Оценка тренировки</span>
-    <div class="star-row" id="starRow" style="margin:0;gap:4px">
-      <button class="star-btn" onclick="setStar(1)">⭐</button>
-      <button class="star-btn" onclick="setStar(2)">⭐</button>
-      <button class="star-btn" onclick="setStar(3)">⭐</button>
-      <button class="star-btn" onclick="setStar(4)">⭐</button>
-      <button class="star-btn" onclick="setStar(5)">⭐</button>
+<div class="mo" id="mDiary"><div class="modal" style="max-width:560px;padding:0;overflow:hidden">
+  <div class="mh" style="position:absolute;top:12px;right:12px;z-index:10"></div>
+
+  <!-- Шапка: дата + заголовок -->
+  <div style="padding:18px 18px 0;border-bottom:1px solid var(--b);background:rgba(255,255,255,.02)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px">
+      <div id="diaryModalTitle" style="font-family:'Unbounded',sans-serif;font-size:15px;font-weight:700">📊 Запись тренировки</div>
+      <input class="fi" id="diaryDate" type="date" style="width:148px;padding:8px 11px;font-size:13px;flex-shrink:0"/>
+    </div>
+
+    <!-- Выбор недели -->
+    <div id="diaryWeekBar" style="display:none;margin-bottom:14px">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--mu2);margin-bottom:7px">📅 Неделя плана</div>
+      <div style="display:flex;gap:6px" id="diaryWeekBtns"></div>
+    </div>
+
+    <!-- Выбор блока -->
+    <div id="diaryBlockBar" style="display:none;padding-bottom:4px">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--mu2);margin-bottom:7px">💪 Блок упражнений</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;overflow-x:auto;padding-bottom:10px;scrollbar-width:none" id="diaryBlockBtns"></div>
     </div>
   </div>
-  <div class="fg"><textarea class="fta" id="diaryNote" placeholder="Заметка о тренировке..." style="min-height:56px"></textarea></div>
-  <div class="mf" style="margin-top:10px">
-    <button class="btn btn-g" onclick="resetDiaryModal();closeMo('mDiary')">Отмена</button>
-    <button class="btn btn-p" id="diarySaveBtn" onclick="saveDiary()">💾 Сохранить</button>
+
+  <!-- Список упражнений -->
+  <div style="padding:14px 18px;max-height:55vh;overflow-y:auto" id="diaryExList"></div>
+
+  <!-- Добавить своё + Оценка + Заметка -->
+  <div style="padding:0 18px 18px;border-top:1px solid var(--b);background:rgba(0,0,0,.15)">
+    <button class="btn btn-g sm" style="width:100%;justify-content:center;margin-top:12px;margin-bottom:12px" onclick="addDiaryEx()">+ Добавить своё упражнение</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span style="font-size:12px;color:var(--mu2);font-weight:600">Оценка тренировки</span>
+      <div class="star-row" id="starRow" style="margin:0;gap:4px">
+        <button class="star-btn" onclick="setStar(1)">⭐</button>
+        <button class="star-btn" onclick="setStar(2)">⭐</button>
+        <button class="star-btn" onclick="setStar(3)">⭐</button>
+        <button class="star-btn" onclick="setStar(4)">⭐</button>
+        <button class="star-btn" onclick="setStar(5)">⭐</button>
+      </div>
+    </div>
+    <textarea class="fta" id="diaryNote" placeholder="Заметка о тренировке..." style="min-height:50px;margin-bottom:12px"></textarea>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-g" style="flex:1" onclick="resetDiaryModal();closeMo('mDiary')">Отмена</button>
+      <button class="btn btn-p" style="flex:2" id="diarySaveBtn" onclick="saveDiary()">💾 Сохранить</button>
+    </div>
   </div>
 </div></div>
 
@@ -812,122 +841,104 @@ function showTab(id,btn){
 // ═══════════════════════════════════════════
 // МАГАЗИН — галерея фото
 // ═══════════════════════════════════════════
-
-// Состояние галерей: { itemId: currentIndex }
 const galleryState = {};
 
-// Получить массив фото из объекта товара (поддержка legacy и нового формата)
 function getItemPhotos(item) {
   if (item.photos && item.photos.length) return item.photos.map(p => p.url || p);
   if (item.photoUrl) return [item.photoUrl];
   return [];
 }
 
-// Рендер галереи товара
 function renderShopGallery(item, isAdmin) {
   const photos = getItemPhotos(item);
   const id = item.id;
   if (!galleryState[id]) galleryState[id] = 0;
+  const idx = Math.min(galleryState[id] || 0, Math.max(0, photos.length - 1));
 
   if (!photos.length) {
-    return `<div class="shop-gallery">
+    return `<div class="shop-gallery" id="gallery-${id}">
       <div class="shop-gallery-ph">📦</div>
-      ${isAdmin ? `<label class="gallery-add-btn" title="Добавить фото"><input type="file" class="shop-photo-input" accept="image/*" onchange="addShopPhoto('${id}',this)"/>📷 Добавить фото</label>` : ''}
+      ${isAdmin ? `<label class="sg-add-photo-btn"><input type="file" accept="image/*" onchange="addShopPhoto('${id}',this)" style="display:none"/>📷 Добавить фото</label>` : ''}
     </div>`;
   }
 
-  const idx = Math.min(galleryState[id], photos.length - 1);
-  const dotsHtml = photos.length > 1
-    ? `<div class="gallery-dots">${photos.map((_,i)=>`<div class="gallery-dot${i===idx?' active':''}" onclick="event.stopPropagation();galleryGo('${id}',${i},event)"></div>`).join('')}</div>`
-    : '';
-  const arrowsHtml = photos.length > 1
-    ? `<button class="gallery-arrow gallery-arrow-l" onclick="event.stopPropagation();galleryPrev('${id}',${photos.length})">‹</button>
-       <button class="gallery-arrow gallery-arrow-r" onclick="event.stopPropagation();galleryNext('${id}',${photos.length})">›</button>`
-    : '';
-  const countHtml = photos.length > 1
-    ? `<div class="gallery-count">${idx+1}/${photos.length}</div>`
-    : '';
-  const delHtml = isAdmin
-    ? `<button class="gallery-del-btn" title="Удалить это фото" onclick="event.stopPropagation();delShopPhoto('${id}',${idx})">✕</button>`
-    : '';
-  const addHtml = isAdmin
-    ? `<label class="gallery-add-btn" title="Добавить фото"><input type="file" class="shop-photo-input" accept="image/*" onchange="addShopPhoto('${id}',this)"/>+ фото</label>`
+  const dots = photos.length > 1
+    ? `<div class="sg-dots">${photos.map((_,i)=>`<div class="sg-dot${i===idx?' a':''}" onclick="event.stopPropagation();gallerySwitchTo('${id}',${i})"></div>`).join('')}</div>`
     : '';
 
   return `<div class="shop-gallery" id="gallery-${id}">
-    <img class="shop-gallery-img" id="gimg-${id}" src="${esc(photos[idx])}" alt="" onclick="openLightbox('${esc(photos[idx])}')" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
-    <div class="shop-gallery-ph" style="display:none">📦</div>
-    ${arrowsHtml}
-    ${countHtml}
-    ${delHtml}
-    ${dotsHtml}
-    ${addHtml}
+    <img class="shop-gallery-img" id="gimg-${id}" src="${esc(photos[idx])}" alt=""
+      onclick="openLightbox('${esc(photos[idx])}')"
+      onerror="this.parentElement.classList.add('img-err')"/>
+    ${photos.length > 1 ? `
+      <button class="sg-arrow sg-l" onclick="event.stopPropagation();galleryPrev('${id}',${photos.length})">‹</button>
+      <button class="sg-arrow sg-r" onclick="event.stopPropagation();galleryNext('${id}',${photos.length})">›</button>
+      <div class="sg-count">${idx+1} / ${photos.length}</div>` : ''}
+    ${dots}
+    ${isAdmin ? `
+      <div class="sg-admin-bar">
+        <button class="sg-del-btn" onclick="event.stopPropagation();delShopPhoto('${id}',${idx})">🗑 Удалить фото</button>
+        <label class="sg-add-btn"><input type="file" accept="image/*" onchange="addShopPhoto('${id}',this)" style="display:none"/>+ Фото</label>
+      </div>` : ''}
   </div>`;
 }
 
-function galleryGo(id, idx, e) {
-  if(e) e.stopPropagation();
+function gallerySwitchTo(id, idx) {
   galleryState[id] = idx;
-  refreshGalleryDOM(id);
+  updateGalleryDOM(id);
 }
 function galleryPrev(id, total) {
-  galleryState[id] = (galleryState[id] - 1 + total) % total;
-  refreshGalleryDOM(id);
+  galleryState[id] = ((galleryState[id]||0) - 1 + total) % total;
+  updateGalleryDOM(id);
 }
 function galleryNext(id, total) {
-  galleryState[id] = (galleryState[id] + 1) % total;
-  refreshGalleryDOM(id);
+  galleryState[id] = ((galleryState[id]||0) + 1) % total;
+  updateGalleryDOM(id);
 }
 
-function refreshGalleryDOM(id) {
-  // Перерисовываем только галерею внутри карточки, не всю страницу
+function updateGalleryDOM(id) {
   const isAdmin = ME && ME.role === 'admin';
   fetch('/api/shop').then(r=>r.json()).then(items => {
     const item = items.find(x => x.id === id);
     if (!item) return;
     const photos = getItemPhotos(item);
-    const idx = Math.min(galleryState[id] || 0, photos.length - 1);
-    const gEl = document.getElementById('gallery-' + id);
+    const idx = Math.min(galleryState[id]||0, photos.length-1);
+    const gEl = document.getElementById('gallery-'+id);
     if (!gEl) return;
-    // Обновляем изображение и точки
-    const imgEl = document.getElementById('gimg-' + id);
+    const imgEl = document.getElementById('gimg-'+id);
     if (imgEl) imgEl.src = photos[idx];
-    gEl.querySelectorAll('.gallery-dot').forEach((dot, i) => {
-      dot.classList.toggle('active', i === idx);
-    });
-    const countEl = gEl.querySelector('.gallery-count');
-    if (countEl) countEl.textContent = `${idx+1}/${photos.length}`;
-    const delEl = gEl.querySelector('.gallery-del-btn');
-    if (delEl) delEl.setAttribute('onclick', `event.stopPropagation();delShopPhoto('${id}',${idx})`);
+    gEl.querySelectorAll('.sg-dot').forEach((d,i) => d.classList.toggle('a', i===idx));
+    const cnt = gEl.querySelector('.sg-count');
+    if (cnt) cnt.textContent = `${idx+1} / ${photos.length}`;
+    const del = gEl.querySelector('.sg-del-btn');
+    if (del) del.setAttribute('onclick', `event.stopPropagation();delShopPhoto('${id}',${idx})`);
   }).catch(()=>{});
 }
 
-// Добавить фото к товару (тренер)
 async function addShopPhoto(itemId, input) {
   const file = input.files[0];
   if (!file) return;
-  toast('⏳ Загрузка фото...','w');
+  toast('⏳ Загрузка...','w');
   const fd = new FormData();
   fd.append('photo', file);
   try {
-    const r = await fetch(`/api/shop/${itemId}/photos`, { method: 'POST', body: fd });
+    const r = await fetch(`/api/shop/${itemId}/photos`, { method:'POST', body:fd });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error);
     toast('✅ Фото добавлено','s');
     input.value = '';
     loadAdminShop();
-  } catch(e) { toast('Ошибка: ' + e.message, 'e'); }
+  } catch(e) { toast('Ошибка: '+e.message,'e'); }
 }
 
-// Удалить конкретное фото товара (тренер)
 async function delShopPhoto(itemId, idx) {
-  if (!confirm('Удалить это фото товара?')) return;
+  if (!confirm('Удалить это фото?')) return;
   try {
     await api(`/api/shop/${itemId}/photos/${idx}`, 'DELETE');
     toast('🗑 Фото удалено','w');
-    delete galleryState[itemId];
+    galleryState[itemId] = 0;
     loadAdminShop();
-  } catch(e) { toast('Ошибка: ' + e.message, 'e'); }
+  } catch(e) { toast('Ошибка: '+e.message,'e'); }
 }
 
 // Превью нескольких фото при добавлении товара
@@ -1673,10 +1684,12 @@ async function deletePhoto(photoId, e) {
 // ДНЕВНИК — с планом и быстрым вводом
 // ═══════════════════════════════════════════
 let _diaryRating = 0;
-let _diaryPlan = null;     // план текущего ученика
-let _diaryWeek = 1;        // активная неделя
-let _diaryEntryId = null;  // null = новая, string = редактирование
-let _diaryExercises = [];  // [{name, planSets, planReps, sets:[{weight,reps,done}]}]
+let _diaryPlan = null;        // план текущего ученика
+let _diaryWeek = 1;           // активная неделя
+let _diaryActiveBlock = null; // активный блок
+let _diaryEntryId = null;     // null = новая, string = редактирование
+let _diaryExercises = [];     // упражнения текущего блока
+let _diaryAllExercises = [];  // все упражнения всех блоков (накопленные)
 let _diaryCustomCount = 0;
 
 // ─── Picker (барабанный выбор чисел) ──────
@@ -1905,33 +1918,108 @@ function addDiaryEx() {
 }
 
 // ─── Неделя плана ─────────────────────────
-function diaryBuildFromPlan(week) {
-  _diaryWeek = week;
-  const planWeek = _diaryPlan ? (_diaryPlan[week] || []) : [];
-
-  _diaryExercises = planWeek
-    .filter(ex => ex.exercise && ex.exercise.trim())
-    .map(ex => ({
-      name: ex.exercise,
-      block: ex.block || '',
-      custom: false,
-      planSets: ex.sets || '',
-      planReps: ex.reps || '',
-      expanded: false,
-      sets: buildDefaultSets(ex)
-    }));
-
-  // Обновляем вид кнопок недели
-  document.querySelectorAll('.diary-week-btn').forEach(b => {
-    b.classList.toggle('active', parseInt(b.dataset.week) === week);
-  });
-  renderDiaryExList();
-}
-
 function buildDefaultSets(ex) {
   const count = parseInt(ex.sets) || 3;
   const reps = ex.reps || '';
   return Array.from({ length: count }, () => ({ weight: '', reps: reps, done: false }));
+}
+
+// ─── Выбор недели ─────────────────────────
+function diarySelectWeek(week) {
+  _diaryWeek = week;
+  _diaryActiveBlock = null;
+
+  document.querySelectorAll('.diary-week-btn').forEach(b =>
+    b.classList.toggle('active', parseInt(b.dataset.week) === week));
+
+  // Обновить блоки
+  renderBlockBtns();
+}
+
+// ─── Рендер кнопок блоков ─────────────────
+function renderBlockBtns() {
+  const bar = document.getElementById('diaryBlockBar');
+  const btns = document.getElementById('diaryBlockBtns');
+  if (!_diaryPlan) { bar.style.display = 'none'; return; }
+
+  const planWeek = _diaryPlan[_diaryWeek] || [];
+  const exList = planWeek.filter(ex => ex.exercise && ex.exercise.trim());
+
+  // Собираем уникальные блоки
+  const blocks = [];
+  const seen = new Set();
+  exList.forEach(ex => {
+    const b = ex.block || 'Без блока';
+    if (!seen.has(b)) { seen.add(b); blocks.push(b); }
+  });
+
+  if (!blocks.length) { bar.style.display = 'none'; _diaryExercises = []; renderDiaryExList(); return; }
+
+  bar.style.display = 'block';
+
+  // Если блок не выбран — выбираем первый
+  if (!_diaryActiveBlock) _diaryActiveBlock = blocks[0];
+
+  btns.innerHTML = blocks.map(b => {
+    const cnt = exList.filter(e => (e.block||'Без блока') === b).length;
+    const isActive = b === _diaryActiveBlock;
+    return `<button class="block-btn${isActive?' active':''}" onclick="diarySelectBlock('${b.replace(/'/g,"\'")}')">${b}<span class="block-cnt">${cnt}</span></button>`;
+  }).join('');
+
+  loadBlockExercises();
+}
+
+// ─── Выбор блока ──────────────────────────
+function diarySelectBlock(blockName) {
+  _diaryActiveBlock = blockName;
+  document.querySelectorAll('.block-btn').forEach(b =>
+    b.classList.toggle('active', b.textContent.trim().startsWith(blockName)));
+  loadBlockExercises();
+}
+
+function loadBlockExercises() {
+  if (!_diaryPlan) return;
+
+  // Сохраняем текущий блок в накопитель перед переключением
+  flushCurrentBlockToStore();
+
+  const planWeek = _diaryPlan[_diaryWeek] || [];
+  const exList = planWeek.filter(ex =>
+    ex.exercise && ex.exercise.trim() &&
+    (ex.block || 'Без блока') === _diaryActiveBlock
+  );
+
+  // Берём из накопителя если уже редактировали этот блок
+  const stored = _diaryAllExercises.filter(e => e.block === _diaryActiveBlock);
+
+  if (stored.length) {
+    _diaryExercises = stored;
+  } else {
+    _diaryExercises = exList.map(ex => ({
+      name: ex.exercise,
+      block: ex.block || 'Без блока',
+      custom: false,
+      planSets: ex.sets || '',
+      planReps: ex.reps || '',
+      expanded: true,
+      sets: buildDefaultSets(ex)
+    }));
+    // Сохраняем в накопитель
+    _diaryAllExercises = _diaryAllExercises.filter(e => e.block !== _diaryActiveBlock);
+    _diaryAllExercises.push(..._diaryExercises);
+  }
+
+  renderDiaryExList();
+}
+
+function flushCurrentBlockToStore() {
+  if (!_diaryExercises.length) return;
+  // Удаляем старые записи этого блока и заменяем актуальными
+  const curBlock = _diaryExercises[0]?.block;
+  if (curBlock !== undefined) {
+    _diaryAllExercises = _diaryAllExercises.filter(e => e.block !== curBlock);
+    _diaryAllExercises.push(..._diaryExercises);
+  }
 }
 
 // ─── Открытие модалки ─────────────────────
@@ -1939,6 +2027,8 @@ async function openDiaryModal() {
   _diaryEntryId = null;
   _diaryRating = 0;
   _diaryExercises = [];
+  _diaryAllExercises = [];  // все упражнения всех блоков
+  _diaryActiveBlock = null;
   document.getElementById('diaryDate').value = new Date().toISOString().split('T')[0];
   document.getElementById('diaryNote').value = '';
   document.getElementById('diaryModalTitle').textContent = '📊 Запись тренировки';
@@ -1957,11 +2047,13 @@ async function openDiaryModal() {
     weekBar.style.display = 'block';
     weekBtns.innerHTML = [1,2,3,4].map(w => {
       const cnt = (_diaryPlan[w]||[]).filter(e=>e.exercise).length;
-      return `<button class="week-btn diary-week-btn${w===1?' active':''}" data-week="${w}" style="font-size:11px;padding:7px 10px;min-width:50px" onclick="diaryBuildFromPlan(${w})">Нед. ${w}<br><span style="opacity:.6;font-size:10px">${cnt}упр</span></button>`;
+      return `<button class="week-btn diary-week-btn${w===1?' active':''}" data-week="${w}" onclick="diarySelectWeek(${w})">Нед. ${w}<span class="block-cnt">${cnt}</span></button>`;
     }).join('');
-    diaryBuildFromPlan(1);
+    _diaryWeek = 1;
+    renderBlockBtns();
   } else {
     weekBar.style.display = 'none';
+    document.getElementById('diaryBlockBar').style.display = 'none';
     renderDiaryExList();
   }
 
@@ -1975,7 +2067,13 @@ async function saveDiary() {
   const date = document.getElementById('diaryDate').value;
   if (!date) { toast('Укажите дату', 'e'); return; }
 
-  const exercises = _diaryExercises
+  // Сохраняем текущий блок в накопитель
+  flushCurrentBlockToStore();
+
+  // Берём все упражнения из накопителя + кастомные
+  const allEx = [..._diaryAllExercises, ..._diaryExercises.filter(e => e.custom && !_diaryAllExercises.find(x => x === e))];
+
+  const exercises = allEx
     .map(ex => ({
       name: ex.name,
       sets: ex.sets
