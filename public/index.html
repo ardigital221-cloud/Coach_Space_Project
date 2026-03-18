@@ -18,8 +18,6 @@
       --red:#f87171;--yel:#fbbf24;--blu:#60a5fa;
       --tx:#f0f4f8;--mu:#64748b;--mu2:#94a3b8;
       --r:16px;--r2:12px;--r3:9px;
-      --nav-h:56px;
-      --safe-bottom:env(safe-area-inset-bottom, 0px);
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;}
@@ -56,11 +54,8 @@
     .btn-w{background:rgba(251,191,36,.1);color:var(--yel);border-color:rgba(251,191,36,.2);}
     .btn-w:hover{background:rgba(251,191,36,.18);}
     .sm{font-size:12px;padding:6px 12px;border-radius:var(--r3);}
-
-    /* ═══ ФИКС: правильный padding под навбар с учётом safe area iPhone ═══ */
-    #app{display:none;min-height:100vh;padding-bottom:calc(var(--nav-h) + var(--safe-bottom) + 16px);}
+    #app{display:none;min-height:100vh;padding-bottom:76px;}
     #app.show{display:block;}
-
     .topbar{position:sticky;top:0;z-index:100;background:rgba(8,12,20,.9);backdrop-filter:blur(24px);border-bottom:1px solid var(--b);padding:0 18px;height:58px;display:flex;align-items:center;justify-content:space-between;}
     .t-logo{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;color:var(--ac);}
     .t-r{display:flex;align-items:center;gap:9px;}
@@ -70,32 +65,9 @@
     .rs{background:rgba(251,191,36,.15);color:var(--yel);}
     .btn-out{background:none;color:var(--mu);font-size:18px;padding:6px;transition:color .2s;}
     .btn-out:hover{color:var(--red);}
-
-    /* ═══ ФИКС: навбар с правильной высотой и safe area ═══ */
-    .bnav{
-      position:fixed;bottom:0;left:0;right:0;z-index:100;
-      background:rgba(8,12,20,.97);
-      backdrop-filter:blur(24px);
-      border-top:1px solid var(--b);
-      display:flex;
-      overflow-x:auto;overflow-y:hidden;
-      /* Высота кнопок + safe area снизу (home indicator iPhone) */
-      padding-bottom:var(--safe-bottom);
-      scrollbar-width:none;-ms-overflow-style:none;
-      justify-content:stretch;
-    }
+    .bnav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(8,12,20,.94);backdrop-filter:blur(24px);border-top:1px solid var(--b);display:flex;overflow-x:auto;overflow-y:hidden;padding-bottom:env(safe-area-inset-bottom);scrollbar-width:none;-ms-overflow-style:none;justify-content:stretch;}
     .bnav::-webkit-scrollbar{display:none;}
-    .nb{
-      flex:1;min-width:54px;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-      gap:3px;
-      /* Фиксированная высота кнопки навбара */
-      height:var(--nav-h);
-      padding:9px 4px;
-      background:none;
-      font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;
-      color:var(--mu);transition:color .2s;
-    }
+    .nb{flex:1;min-width:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:9px 4px;background:none;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--mu);transition:color .2s;}
     .nb .ni{font-size:19px;}.nb.active{color:var(--ac);}
     .content{max-width:680px;margin:0 auto;padding:18px 14px;}
     .panel{display:none;animation:fadeUp .3s ease;}.panel.active{display:block;}
@@ -167,21 +139,31 @@
     .w-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
     .chip{font-size:11px;padding:3px 9px;border-radius:20px;background:rgba(255,255,255,.06);color:var(--mu2);}
     .w-note{font-size:12px;color:var(--mu2);font-style:italic;margin-bottom:8px;}
+
+    /* ═══════════════════════════════════════
+       МАГАЗИН — обновлённые стили
+    ═══════════════════════════════════════ */
     .shop-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px;}
     .shopi{background:rgba(255,255,255,.03);border:1px solid var(--b);border-radius:var(--r);overflow:hidden;transition:all .2s;display:flex;flex-direction:column;}
     .shopi:hover{border-color:rgba(110,231,183,.25);transform:translateY(-2px);}
+
+    /* Галерея фото товара */
     .shop-gallery{position:relative;aspect-ratio:1/1;background:rgba(255,255,255,.04);overflow:hidden;border-radius:var(--r2) var(--r2) 0 0;}
     .shop-gallery-img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;transition:transform .3s;}
     .shop-gallery:hover .shop-gallery-img{transform:scale(1.03);}
     .shop-gallery.img-err .shop-gallery-img{display:none;}
     .shop-gallery-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;opacity:.2;}
+    /* Стрелки */
     .sg-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.55);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.12);color:#fff;width:32px;height:32px;border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .2s;z-index:2;line-height:1;}
     .shop-gallery:hover .sg-arrow{opacity:1;}
     .sg-l{left:8px;}.sg-r{right:8px;}
+    /* Счётчик */
     .sg-count{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;z-index:2;}
+    /* Точки */
     .sg-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:2;}
     .sg-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer;transition:all .18s;}
     .sg-dot.a{background:#fff;transform:scale(1.3);}
+    /* Панель управления фото (только тренер) */
     .sg-admin-bar{position:absolute;bottom:0;left:0;right:0;display:flex;gap:0;opacity:0;transition:opacity .2s;z-index:3;}
     .shop-gallery:hover .sg-admin-bar{opacity:1;}
     .sg-del-btn{flex:1;background:rgba(248,113,113,.85);backdrop-filter:blur(4px);border:none;color:#fff;padding:8px;font-size:11px;font-weight:600;cursor:pointer;transition:background .15s;}
@@ -190,10 +172,14 @@
     .sg-add-btn:hover{background:rgba(110,231,183,1);}
     .sg-add-photo-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:rgba(110,231,183,.07);border:1px dashed rgba(110,231,183,.3);color:var(--ac);font-size:12px;padding:10px;cursor:pointer;margin-top:8px;border-radius:var(--r3);transition:background .18s;}
     .sg-add-photo-btn:hover{background:rgba(110,231,183,.14);}
+
     .sbody{padding:11px;flex:1;display:flex;flex-direction:column;}
     .sname{font-weight:600;font-size:13px;margin-bottom:3px;}
     .sprice{font-family:'Unbounded',sans-serif;font-size:14px;color:var(--ac);margin-bottom:9px;}
+
+    /* Скрытый input для добавления фото в магазин */
     .shop-photo-input{display:none;}
+
     .ph-g{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px;}
     .ph-wrap{position:relative;}
     .ph-img{width:100%;aspect-ratio:1/1;border-radius:10px;object-fit:cover;border:1px solid var(--b);cursor:pointer;transition:opacity .2s;display:block;}
@@ -265,11 +251,14 @@
     .upbtn:hover{border-color:var(--ac);}
     .upbtn input{display:none;}
     .up-prev{width:100%;border-radius:10px;object-fit:cover;max-height:180px;display:none;margin-top:8px;}
+
+    /* Превью нескольких фото в форме добавления */
     .multi-prev{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
     .multi-prev-item{position:relative;width:72px;height:72px;border-radius:var(--r3);overflow:hidden;border:1px solid var(--b);}
     .multi-prev-item img{width:100%;height:100%;object-fit:cover;display:block;}
     .multi-prev-del{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.7);border:none;color:#fff;width:18px;height:18px;border-radius:50%;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;}
-    .toasts{position:fixed;bottom:calc(var(--nav-h) + var(--safe-bottom) + 12px);right:14px;z-index:9999;display:flex;flex-direction:column;gap:7px;}
+
+    .toasts{position:fixed;bottom:86px;right:14px;z-index:9999;display:flex;flex-direction:column;gap:7px;}
     .toast{background:rgba(9,13,22,.97);border:1px solid var(--b);border-radius:var(--r2);padding:11px 15px;font-size:13px;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.4);animation:slideIn .3s ease;}
     .toast.s{border-left:3px solid var(--ac);}.toast.e{border-left:3px solid var(--red);}.toast.w{border-left:3px solid var(--yel);}
     .empty{text-align:center;padding:34px 16px;color:var(--mu2);}
@@ -300,12 +289,18 @@
     .star-row{display:flex;gap:6px;margin:10px 0;}
     .star-btn{font-size:24px;background:none;border:none;cursor:pointer;opacity:.4;transition:opacity .2s,transform .2s;}
     .star-btn.active{opacity:1;transform:scale(1.15);}
+
+    /* ═══════════════════════════════════════
+       ДНЕВНИК — упражнения из плана
+    ═══════════════════════════════════════ */
     .diary-plan-block{margin-bottom:18px;}
     .diary-plan-block-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--ac);padding:6px 12px;background:rgba(110,231,183,.07);border-radius:8px;margin-bottom:8px;border-left:3px solid var(--ac);}
+    /* Кнопки блоков */
     .block-btn{padding:8px 14px;border-radius:20px;border:1.5px solid var(--b);background:rgba(255,255,255,.03);color:var(--mu2);font-size:12px;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap;flex-shrink:0;}
     .block-btn:hover{border-color:var(--ac);color:var(--ac);}
     .block-btn.active{border-color:var(--ac);color:var(--ac);background:rgba(110,231,183,.12);}
     .block-btn .block-cnt{font-size:10px;opacity:.6;margin-left:4px;}
+    /* Шапка упражнения — компактная */
     .diary-ex-empty{text-align:center;padding:30px 0;color:var(--mu2);font-size:13px;}
     .diary-ex-empty .ei{font-size:32px;display:block;margin-bottom:8px;}
     .diary-ex-card{background:rgba(255,255,255,.03);border:1px solid var(--b);border-radius:var(--r2);margin-bottom:8px;overflow:hidden;transition:border-color .2s;}
@@ -320,6 +315,8 @@
     .diary-ex-body{padding:0 14px 14px;display:none;}
     .diary-ex-card.active .diary-ex-body{display:block;}
     .diary-sets-list{display:flex;flex-direction:column;gap:7px;margin-bottom:10px;}
+
+    /* Строка подхода с быстрыми кнопками */
     .diary-set-row{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid var(--b);border-radius:var(--r3);padding:8px 10px;}
     .diary-set-num{font-size:11px;color:var(--mu2);font-weight:700;min-width:22px;text-align:center;}
     .diary-set-field{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}
@@ -336,6 +333,10 @@
     .diary-add-set-btn:hover{background:rgba(110,231,183,.12);}
     .diary-ex-del-btn{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;padding:7px;background:rgba(248,113,113,.06);border:1px dashed rgba(248,113,113,.2);border-radius:var(--r3);color:var(--red);font-size:11px;cursor:pointer;margin-top:8px;transition:background .2s;}
     .diary-ex-del-btn:hover{background:rgba(248,113,113,.12);}
+
+    /* ═══════════════════════════════════════
+       PICKER — барабанный выбор чисел
+    ═══════════════════════════════════════ */
     .picker-drum{display:flex;flex-direction:column;align-items:center;gap:0;}
     .drum-arrow{background:rgba(255,255,255,.06);border:1px solid var(--b);border-radius:10px;color:var(--tx);font-size:14px;width:52px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s;user-select:none;}
     .drum-arrow:hover{background:rgba(110,231,183,.12);border-color:rgba(110,231,183,.3);color:var(--ac);}
@@ -409,6 +410,10 @@
     .tg-status-icon{font-size:22px;}
     .tg-status-text{font-size:13px;color:var(--mu2);flex:1;}
     .tg-status-text b{color:var(--tx);}
+
+    /* ═══════════════════════════════════════
+       ПРАВИЛА COACH SPACE
+    ═══════════════════════════════════════ */
     .rules-card{background:linear-gradient(135deg,rgba(13,18,32,.9),rgba(9,13,22,.95));border:1px solid rgba(110,231,183,.18);border-radius:var(--r);padding:0;margin-bottom:14px;overflow:hidden;}
     .rules-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;cursor:pointer;user-select:none;transition:background .15s;}
     .rules-header:hover{background:rgba(110,231,183,.04);}
@@ -471,27 +476,93 @@
         </div>
         <div class="rules-body">
           <div class="rules-list">
-            <div class="rule-item"><div class="rule-num">1</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">🏋️</span>Посещение тренировок</div><div class="rule-text">Тренировки проходят по программе. Пропуск без уважительной причины — <span class="warn">100 берпи</span> на следующей тренировке.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">1</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🏋️</span>Посещение тренировок</div>
+                <div class="rule-text">Тренировки проходят по программе. Пропуск без уважительной причины — <span class="warn">100 берпи</span> на следующей тренировке.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">2</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">⚠️</span>Предупреждение</div><div class="rule-text">Если не можешь прийти — предупреди заранее. Игнорирование тренировки без предупреждения — <span class="warn">отработка</span>.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">2</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">⚠️</span>Предупреждение</div>
+                <div class="rule-text">Если не можешь прийти — предупреди заранее. Игнорирование тренировки без предупреждения — <span class="warn">отработка</span>.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">3</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">🤝</span>Командные активности</div><div class="rule-text">Съёмки, совместные тренировки и сборы — часть проекта. Неучастие без серьёзной причины — <span class="warn">отработка</span>.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">3</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🤝</span>Командные активности</div>
+                <div class="rule-text">Съёмки, совместные тренировки и сборы — часть проекта. Неучастие без серьёзной причины — <span class="warn">отработка</span>.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">4</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">📱</span>Социальные сети</div><div class="rule-text">После тренировки — <b>сторис или пост</b> с отметкой тренера.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">4</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">📱</span>Социальные сети</div>
+                <div class="rule-text">После тренировки — <b>сторис или пост</b> с отметкой тренера.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">5</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">📸</span>Фото и видео</div><div class="rule-text">В рамках проекта ведётся съёмка. Фото и видео могут использоваться в соцсетях Coach Space. <b>Отказ от съёмок в проекте не предусмотрен.</b></div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">5</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">📸</span>Фото и видео</div>
+                <div class="rule-text">В рамках проекта ведётся съёмка. Фото и видео могут использоваться в соцсетях Coach Space. <b>Отказ от съёмок в проекте не предусмотрен.</b></div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">6</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">🤜</span>Субординация и поведение</div><div class="rule-text">Несмотря на дружескую атмосферу, в проекте соблюдается уважение и субординация. Крики, оскорбления и агрессивное поведение — <span class="warn">основание для исключения</span>.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">6</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🤜</span>Субординация и поведение</div>
+                <div class="rule-text">Несмотря на дружескую атмосферу, в проекте соблюдается уважение и субординация. Крики, оскорбления и агрессивное поведение — <span class="warn">основание для исключения</span>.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">7</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">🎯</span>Формат тренировок</div><div class="rule-text">Coach Space — это <b>не персональные тренировки</b>. Участники работают по программе и самостоятельно поддерживают дисциплину. Тренер даёт систему и контроль, но не бегает за участниками.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">7</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🎯</span>Формат тренировок</div>
+                <div class="rule-text">Coach Space — это <b>не персональные тренировки</b>. Участники работают по программе и самостоятельно поддерживают дисциплину. Тренер даёт систему и контроль, но не бегает за участниками.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">8</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">📈</span>Работа на результат</div><div class="rule-text">Проект для людей, которые хотят прогрессировать. Отсутствие результата из-за недисциплинированности — <span class="warn">основание для исключения</span>.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">8</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">📈</span>Работа на результат</div>
+                <div class="rule-text">Проект для людей, которые хотят прогрессировать. Отсутствие результата из-за недисциплинированности — <span class="warn">основание для исключения</span>.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">9</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">💳</span>Оплата</div><div class="rule-text">Оплата производится раз в месяц в установленную дату. Если нужно перенести — предупреди заранее. Отсутствие оплаты без предупреждения — <span class="warn">исключение</span>.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">9</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">💳</span>Оплата</div>
+                <div class="rule-text">Оплата производится раз в месяц в установленную дату. Если нужно перенести — предупреди заранее. Отсутствие оплаты без предупреждения — <span class="warn">исключение</span>.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">10</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">👕</span>Форма проекта</div><div class="rule-text">Брендированная футболка Coach Space — <span class="money">обязательное условие</span>. Стоимость: <span class="money">4 500 ₸</span>. Своя футболка + нанесение бренда — <span class="money">2 500 ₸</span>. Должна быть через несколько недель тренировок.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">10</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">👕</span>Форма проекта</div>
+                <div class="rule-text">Брендированная футболка Coach Space — <span class="money">обязательное условие</span>. Стоимость: <span class="money">4 500 ₸</span>. Своя футболка + нанесение бренда — <span class="money">2 500 ₸</span>. Должна быть через несколько недель тренировок.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">11</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">🚫</span>Исключение из проекта</div><div class="rule-text">Исключение означает окончание абонемента <span class="warn">без перерасчёта и возврата</span> денежных средств.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">11</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🚫</span>Исключение из проекта</div>
+                <div class="rule-text">Исключение означает окончание абонемента <span class="warn">без перерасчёта и возврата</span> денежных средств.</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -524,8 +595,8 @@
         <div class="streak" id="streak" style="display:none"><div class="fire">🔥</div><span style="font-size:13px;color:var(--mu2)">Ты в деле! <b style="color:var(--tx)">Продолжай!</b></span></div>
       </div>
       <div id="planBtn"></div>
-      <div class="rules-card" id="rulesCardUser">
-        <div class="rules-header" onclick="toggleRulesUser()">
+      <div class="rules-card" id="rulesCard">
+        <div class="rules-header" onclick="toggleRules()">
           <div class="rules-header-left">
             <div class="rules-icon">📋</div>
             <div>
@@ -537,27 +608,93 @@
         </div>
         <div class="rules-body">
           <div class="rules-list">
-            <div class="rule-item"><div class="rule-num">1</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">🏋️</span>Посещение тренировок</div><div class="rule-text">Тренировки проходят по программе. Пропуск без уважительной причины — <span class="warn">100 берпи</span> на следующей тренировке.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">1</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🏋️</span>Посещение тренировок</div>
+                <div class="rule-text">Тренировки проходят по программе. Пропуск без уважительной причины — <span class="warn">100 берпи</span> на следующей тренировке.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">2</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">⚠️</span>Предупреждение</div><div class="rule-text">Если не можешь прийти — предупреди заранее. Игнорирование тренировки без предупреждения — <span class="warn">отработка</span>.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">2</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">⚠️</span>Предупреждение</div>
+                <div class="rule-text">Если не можешь прийти — предупреди заранее. Игнорирование тренировки без предупреждения — <span class="warn">отработка</span>.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">3</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">🤝</span>Командные активности</div><div class="rule-text">Съёмки, совместные тренировки и сборы — часть проекта. Неучастие без серьёзной причины — <span class="warn">отработка</span>.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">3</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🤝</span>Командные активности</div>
+                <div class="rule-text">Съёмки, совместные тренировки и сборы — часть проекта. Неучастие без серьёзной причины — <span class="warn">отработка</span>.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">4</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">📱</span>Социальные сети</div><div class="rule-text">После тренировки — <b>сторис или пост</b> с отметкой тренера.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">4</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">📱</span>Социальные сети</div>
+                <div class="rule-text">После тренировки — <b>сторис или пост</b> с отметкой тренера.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">5</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">📸</span>Фото и видео</div><div class="rule-text">В рамках проекта ведётся съёмка. Фото и видео могут использоваться в соцсетях Coach Space. <b>Отказ от съёмок в проекте не предусмотрен.</b></div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">5</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">📸</span>Фото и видео</div>
+                <div class="rule-text">В рамках проекта ведётся съёмка. Фото и видео могут использоваться в соцсетях Coach Space. <b>Отказ от съёмок в проекте не предусмотрен.</b></div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">6</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">🤜</span>Субординация и поведение</div><div class="rule-text">Несмотря на дружескую атмосферу, в проекте соблюдается уважение и субординация. Крики, оскорбления и агрессивное поведение — <span class="warn">основание для исключения</span>.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">6</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🤜</span>Субординация и поведение</div>
+                <div class="rule-text">Несмотря на дружескую атмосферу, в проекте соблюдается уважение и субординация. Крики, оскорбления и агрессивное поведение — <span class="warn">основание для исключения</span>.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">7</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">🎯</span>Формат тренировок</div><div class="rule-text">Coach Space — это <b>не персональные тренировки</b>. Участники работают по программе и самостоятельно поддерживают дисциплину. Тренер даёт систему и контроль, но не бегает за участниками.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">7</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🎯</span>Формат тренировок</div>
+                <div class="rule-text">Coach Space — это <b>не персональные тренировки</b>. Участники работают по программе и самостоятельно поддерживают дисциплину. Тренер даёт систему и контроль, но не бегает за участниками.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">8</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">📈</span>Работа на результат</div><div class="rule-text">Проект для людей, которые хотят прогрессировать. Отсутствие результата из-за недисциплинированности — <span class="warn">основание для исключения</span>.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">8</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">📈</span>Работа на результат</div>
+                <div class="rule-text">Проект для людей, которые хотят прогрессировать. Отсутствие результата из-за недисциплинированности — <span class="warn">основание для исключения</span>.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">9</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">💳</span>Оплата</div><div class="rule-text">Оплата производится раз в месяц в установленную дату. Если нужно перенести — предупреди заранее. Отсутствие оплаты без предупреждения — <span class="warn">исключение</span>.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">9</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">💳</span>Оплата</div>
+                <div class="rule-text">Оплата производится раз в месяц в установленную дату. Если нужно перенести — предупреди заранее. Отсутствие оплаты без предупреждения — <span class="warn">исключение</span>.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">10</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">👕</span>Форма проекта</div><div class="rule-text">Брендированная футболка Coach Space — <span class="money">обязательное условие</span>. Стоимость: <span class="money">4 500 ₸</span>. Своя футболка + нанесение бренда — <span class="money">2 500 ₸</span>. Должна быть через несколько недель тренировок.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">10</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">👕</span>Форма проекта</div>
+                <div class="rule-text">Брендированная футболка Coach Space — <span class="money">обязательное условие</span>. Стоимость: <span class="money">4 500 ₸</span>. Своя футболка + нанесение бренда — <span class="money">2 500 ₸</span>. Должна быть через несколько недель тренировок.</div>
+              </div>
+            </div>
             <div class="rules-sep"></div>
-            <div class="rule-item"><div class="rule-num">11</div><div class="rule-content"><div class="rule-name"><span class="rule-emoji">🚫</span>Исключение из проекта</div><div class="rule-text">Исключение означает окончание абонемента <span class="warn">без перерасчёта и возврата</span> денежных средств.</div></div></div>
+            <div class="rule-item">
+              <div class="rule-num">11</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🚫</span>Исключение из проекта</div>
+                <div class="rule-text">Исключение означает окончание абонемента <span class="warn">без перерасчёта и возврата</span> денежных средств.</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -621,7 +758,7 @@
 
 <nav class="bnav" id="bnav" style="display:none"></nav>
 
-<!-- МОДАЛКИ — все те же что в оригинале -->
+<!-- МОДАЛКИ -->
 <div class="mo" id="mAddU"><div class="modal">
   <div class="mh"></div><div class="mt">➕ Новый ученик</div>
   <div class="fg"><label class="fl">Имя</label><input class="fi" id="uN" placeholder="Иван Иванов"/></div>
@@ -695,6 +832,7 @@
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mAddW')">Отмена</button><button class="btn btn-p" onclick="createWorkout()">Создать</button></div>
 </div></div>
 
+<!-- ✅ ОБНОВЛЕНО: форма добавления товара с несколькими фото -->
 <div class="mo" id="mAddShop"><div class="modal">
   <div class="mh"></div><div class="mt">🛒 Новый товар</div>
   <div class="fg"><label class="fl">Название</label><input class="fi" id="shN" placeholder="Протеин XL"/></div>
@@ -758,21 +896,31 @@
 
 <div class="mo" id="mDiary"><div class="modal" style="max-width:560px;padding:0;overflow:hidden">
   <div class="mh" style="position:absolute;top:12px;right:12px;z-index:10"></div>
+
+  <!-- Шапка: дата + заголовок -->
   <div style="padding:18px 18px 0;border-bottom:1px solid var(--b);background:rgba(255,255,255,.02)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px">
       <div id="diaryModalTitle" style="font-family:'Unbounded',sans-serif;font-size:15px;font-weight:700">📊 Запись тренировки</div>
       <input class="fi" id="diaryDate" type="date" style="width:148px;padding:8px 11px;font-size:13px;flex-shrink:0"/>
     </div>
+
+    <!-- Выбор недели -->
     <div id="diaryWeekBar" style="display:none;margin-bottom:14px">
       <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--mu2);margin-bottom:7px">📅 Неделя плана</div>
       <div style="display:flex;gap:6px" id="diaryWeekBtns"></div>
     </div>
+
+    <!-- Выбор блока -->
     <div id="diaryBlockBar" style="display:none;padding-bottom:4px">
       <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--mu2);margin-bottom:7px">💪 Блок упражнений</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;overflow-x:auto;padding-bottom:10px;scrollbar-width:none" id="diaryBlockBtns"></div>
     </div>
   </div>
+
+  <!-- Список упражнений -->
   <div style="padding:14px 18px;max-height:55vh;overflow-y:auto" id="diaryExList"></div>
+
+  <!-- Добавить своё + Оценка + Заметка -->
   <div style="padding:0 18px 18px;border-top:1px solid var(--b);background:rgba(0,0,0,.15)">
     <button class="btn btn-g sm" style="width:100%;justify-content:center;margin-top:12px;margin-bottom:12px" onclick="addDiaryEx()">+ Добавить своё упражнение</button>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -838,7 +986,9 @@
   <div class="mt">💬 Заметки</div>
   <div style="font-size:14px;font-weight:600;color:var(--ac);margin-bottom:14px" id="notesUserName"></div>
   <input type="hidden" id="notesUserId"/>
-  <div class="fg"><textarea class="fta" id="noteText" placeholder="Заметка о тренировке, прогрессе..."></textarea></div>
+  <div class="fg">
+    <textarea class="fta" id="noteText" placeholder="Заметка о тренировке, прогрессе..."></textarea>
+  </div>
   <div style="margin-bottom:14px"><button class="btn btn-p sm" onclick="saveNote()">Добавить заметку</button></div>
   <div id="notesList"></div>
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mNotes')">Закрыть</button></div>
@@ -921,31 +1071,64 @@ function showTab(id,btn){
   if(id==='arev')  loadReviews();
 }
 
+// ═══════════════════════════════════════════
+// МАГАЗИН — галерея фото
+// ═══════════════════════════════════════════
 const galleryState = {};
+
 function getItemPhotos(item) {
   if (item.photos && item.photos.length) return item.photos.map(p => p.url || p);
   if (item.photoUrl) return [item.photoUrl];
   return [];
 }
+
 function renderShopGallery(item, isAdmin) {
   const photos = getItemPhotos(item);
   const id = item.id;
   if (!galleryState[id]) galleryState[id] = 0;
   const idx = Math.min(galleryState[id] || 0, Math.max(0, photos.length - 1));
+
   if (!photos.length) {
-    return `<div class="shop-gallery" id="gallery-${id}"><div class="shop-gallery-ph">📦</div>${isAdmin ? `<label class="sg-add-photo-btn"><input type="file" accept="image/*" onchange="addShopPhoto('${id}',this)" style="display:none"/>📷 Добавить фото</label>` : ''}</div>`;
+    return `<div class="shop-gallery" id="gallery-${id}">
+      <div class="shop-gallery-ph">📦</div>
+      ${isAdmin ? `<label class="sg-add-photo-btn"><input type="file" accept="image/*" onchange="addShopPhoto('${id}',this)" style="display:none"/>📷 Добавить фото</label>` : ''}
+    </div>`;
   }
-  const dots = photos.length > 1 ? `<div class="sg-dots">${photos.map((_,i)=>`<div class="sg-dot${i===idx?' a':''}" onclick="event.stopPropagation();gallerySwitchTo('${id}',${i})"></div>`).join('')}</div>` : '';
+
+  const dots = photos.length > 1
+    ? `<div class="sg-dots">${photos.map((_,i)=>`<div class="sg-dot${i===idx?' a':''}" onclick="event.stopPropagation();gallerySwitchTo('${id}',${i})"></div>`).join('')}</div>`
+    : '';
+
   return `<div class="shop-gallery" id="gallery-${id}">
-    <img class="shop-gallery-img" id="gimg-${id}" src="${esc(photos[idx])}" alt="" onclick="openLightbox('${esc(photos[idx])}')" onerror="this.parentElement.classList.add('img-err')"/>
-    ${photos.length > 1 ? `<button class="sg-arrow sg-l" onclick="event.stopPropagation();galleryPrev('${id}',${photos.length})">‹</button><button class="sg-arrow sg-r" onclick="event.stopPropagation();galleryNext('${id}',${photos.length})">›</button><div class="sg-count">${idx+1} / ${photos.length}</div>` : ''}
+    <img class="shop-gallery-img" id="gimg-${id}" src="${esc(photos[idx])}" alt=""
+      onclick="openLightbox('${esc(photos[idx])}')"
+      onerror="this.parentElement.classList.add('img-err')"/>
+    ${photos.length > 1 ? `
+      <button class="sg-arrow sg-l" onclick="event.stopPropagation();galleryPrev('${id}',${photos.length})">‹</button>
+      <button class="sg-arrow sg-r" onclick="event.stopPropagation();galleryNext('${id}',${photos.length})">›</button>
+      <div class="sg-count">${idx+1} / ${photos.length}</div>` : ''}
     ${dots}
-    ${isAdmin ? `<div class="sg-admin-bar"><button class="sg-del-btn" onclick="event.stopPropagation();delShopPhoto('${id}',${idx})">🗑 Удалить фото</button><label class="sg-add-btn"><input type="file" accept="image/*" onchange="addShopPhoto('${id}',this)" style="display:none"/>+ Фото</label></div>` : ''}
+    ${isAdmin ? `
+      <div class="sg-admin-bar">
+        <button class="sg-del-btn" onclick="event.stopPropagation();delShopPhoto('${id}',${idx})">🗑 Удалить фото</button>
+        <label class="sg-add-btn"><input type="file" accept="image/*" onchange="addShopPhoto('${id}',this)" style="display:none"/>+ Фото</label>
+      </div>` : ''}
   </div>`;
 }
-function gallerySwitchTo(id, idx) { galleryState[id] = idx; updateGalleryDOM(id); }
-function galleryPrev(id, total) { galleryState[id] = ((galleryState[id]||0) - 1 + total) % total; updateGalleryDOM(id); }
-function galleryNext(id, total) { galleryState[id] = ((galleryState[id]||0) + 1) % total; updateGalleryDOM(id); }
+
+function gallerySwitchTo(id, idx) {
+  galleryState[id] = idx;
+  updateGalleryDOM(id);
+}
+function galleryPrev(id, total) {
+  galleryState[id] = ((galleryState[id]||0) - 1 + total) % total;
+  updateGalleryDOM(id);
+}
+function galleryNext(id, total) {
+  galleryState[id] = ((galleryState[id]||0) + 1) % total;
+  updateGalleryDOM(id);
+}
+
 function updateGalleryDOM(id) {
   const isAdmin = ME && ME.role === 'admin';
   fetch('/api/shop').then(r=>r.json()).then(items => {
@@ -964,188 +1147,1502 @@ function updateGalleryDOM(id) {
     if (del) del.setAttribute('onclick', `event.stopPropagation();delShopPhoto('${id}',${idx})`);
   }).catch(()=>{});
 }
+
 async function addShopPhoto(itemId, input) {
-  const file = input.files[0]; if (!file) return;
+  const file = input.files[0];
+  if (!file) return;
   toast('⏳ Загрузка...','w');
-  const fd = new FormData(); fd.append('photo', file);
-  try { const r = await fetch(`/api/shop/${itemId}/photos`, { method:'POST', body:fd }); const d = await r.json(); if (!r.ok) throw new Error(d.error); toast('✅ Фото добавлено','s'); input.value = ''; loadAdminShop(); } catch(e) { toast('Ошибка: '+e.message,'e'); }
+  const fd = new FormData();
+  fd.append('photo', file);
+  try {
+    const r = await fetch(`/api/shop/${itemId}/photos`, { method:'POST', body:fd });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    toast('✅ Фото добавлено','s');
+    input.value = '';
+    loadAdminShop();
+  } catch(e) { toast('Ошибка: '+e.message,'e'); }
 }
+
 async function delShopPhoto(itemId, idx) {
   if (!confirm('Удалить это фото?')) return;
-  try { await api(`/api/shop/${itemId}/photos/${idx}`, 'DELETE'); toast('🗑 Фото удалено','w'); galleryState[itemId] = 0; loadAdminShop(); } catch(e) { toast('Ошибка: '+e.message,'e'); }
+  try {
+    await api(`/api/shop/${itemId}/photos/${idx}`, 'DELETE');
+    toast('🗑 Фото удалено','w');
+    galleryState[itemId] = 0;
+    loadAdminShop();
+  } catch(e) { toast('Ошибка: '+e.message,'e'); }
 }
+
+// Превью нескольких фото при добавлении товара
 let _shFilesArr = [];
 function prevShopMulti(e) {
   _shFilesArr = Array.from(e.target.files);
   const prev = document.getElementById('shMultiPrev');
-  prev.innerHTML = _shFilesArr.map((f, i) => { const url = URL.createObjectURL(f); return `<div class="multi-prev-item" id="shprev-${i}"><img src="${url}" alt=""/><button class="multi-prev-del" onclick="removeShFile(${i})">✕</button></div>`; }).join('');
+  prev.innerHTML = _shFilesArr.map((f, i) => {
+    const url = URL.createObjectURL(f);
+    return `<div class="multi-prev-item" id="shprev-${i}">
+      <img src="${url}" alt=""/>
+      <button class="multi-prev-del" onclick="removeShFile(${i})">✕</button>
+    </div>`;
+  }).join('');
 }
+
 function removeShFile(idx) {
   _shFilesArr.splice(idx, 1);
+  // Перерисовываем превью
   const prev = document.getElementById('shMultiPrev');
-  prev.innerHTML = _shFilesArr.map((f, i) => { const url = URL.createObjectURL(f); return `<div class="multi-prev-item" id="shprev-${i}"><img src="${url}" alt=""/><button class="multi-prev-del" onclick="removeShFile(${i})">✕</button></div>`; }).join('');
+  prev.innerHTML = _shFilesArr.map((f, i) => {
+    const url = URL.createObjectURL(f);
+    return `<div class="multi-prev-item" id="shprev-${i}">
+      <img src="${url}" alt=""/>
+      <button class="multi-prev-del" onclick="removeShFile(${i})">✕</button>
+    </div>`;
+  }).join('');
 }
+
 async function addShopItem(){
   const name=v('shN'),price=v('shP');
   if(!name||!price){toast('Название и цена обязательны','e');return;}
-  const fd=new FormData(); fd.append('name',name); fd.append('price',price);
+  const fd=new FormData();
+  fd.append('name',name);
+  fd.append('price',price);
   _shFilesArr.forEach(f => fd.append('photos', f));
-  try{ const r=await fetch('/api/shop',{method:'POST',body:fd}); const d=await r.json(); if(!r.ok)throw new Error(d.error); toast('✅ Товар добавлен','s'); closeMo('mAddShop'); clr(['shN','shP']); document.getElementById('shFile').value=''; document.getElementById('shMultiPrev').innerHTML=''; _shFilesArr=[]; loadAdminShop(); }catch(e){toast(e.message,'e');}
+  try{
+    const r=await fetch('/api/shop',{method:'POST',body:fd});
+    const d=await r.json();if(!r.ok)throw new Error(d.error);
+    toast('✅ Товар добавлен','s');
+    closeMo('mAddShop');
+    clr(['shN','shP']);
+    document.getElementById('shFile').value='';
+    document.getElementById('shMultiPrev').innerHTML='';
+    _shFilesArr=[];
+    loadAdminShop();
+  }catch(e){toast(e.message,'e');}
 }
+
 async function loadAdminShop(){
   const g=document.getElementById('aShopGrid');
-  try{ const items=await api('/api/shop'); if(!items.length){g.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">🛒</div>Магазин пуст</div>`;return;} g.innerHTML=items.map(i=>`<div class="shopi">${renderShopGallery(i, true)}<div class="sbody"><div class="sname">${esc(i.name)}</div><div class="sprice">${i.price} ₸</div><button class="btn btn-d sm" style="width:100%;margin-top:auto" onclick="delShopItem('${i.id}')">🗑 Удалить товар</button></div></div>`).join(''); }catch(e){g.innerHTML=`<div class="empty">${e.message}</div>`;}
+  try{
+    const items=await api('/api/shop');
+    if(!items.length){g.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">🛒</div>Магазин пуст</div>`;return;}
+    g.innerHTML=items.map(i=>`
+      <div class="shopi">
+        ${renderShopGallery(i, true)}
+        <div class="sbody">
+          <div class="sname">${esc(i.name)}</div>
+          <div class="sprice">${i.price} ₸</div>
+          <button class="btn btn-d sm" style="width:100%;margin-top:auto" onclick="delShopItem('${i.id}')">🗑 Удалить товар</button>
+        </div>
+      </div>`).join('');
+  }catch(e){g.innerHTML=`<div class="empty">${e.message}</div>`;}
 }
+
 async function delShopItem(id){if(!confirm('Удалить товар?'))return;try{await api('/api/shop/'+id,'DELETE');delete galleryState[id];toast('Товар удалён','w');loadAdminShop();}catch(e){toast(e.message,'e');}}
+
 async function loadUserShop(){
   const g=document.getElementById('uShopGrid');
-  try{ const items=await api('/api/shop'); if(!items.length){g.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">🛒</div>Магазин пуст</div>`;return;} g.innerHTML=items.map(i=>`<div class="shopi">${renderShopGallery(i, false)}<div class="sbody"><div class="sname">${esc(i.name)}</div><div class="sprice">${i.price} ₸</div><button class="btn btn-p sm" style="width:100%;margin-top:auto" onclick="orderItem('${i.id}','${esc(i.name)}')">Заказать</button></div></div>`).join(''); }catch(e){g.innerHTML=`<div class="empty">${e.message}</div>`;}
+  try{
+    const items=await api('/api/shop');
+    if(!items.length){g.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">🛒</div>Магазин пуст</div>`;return;}
+    g.innerHTML=items.map(i=>`
+      <div class="shopi">
+        ${renderShopGallery(i, false)}
+        <div class="sbody">
+          <div class="sname">${esc(i.name)}</div>
+          <div class="sprice">${i.price} ₸</div>
+          <button class="btn btn-p sm" style="width:100%;margin-top:auto" onclick="orderItem('${i.id}','${esc(i.name)}')">Заказать</button>
+        </div>
+      </div>`).join('');
+  }catch(e){g.innerHTML=`<div class="empty">${e.message}</div>`;}
 }
-async function orderItem(id,name){if(!confirm(`Заказать «${name}»? Тренер получит уведомление в Telegram.`))return;try{await api('/api/shop/'+id+'/order','POST',{userId:ME.id,userName:ME.name});toast('✅ Заказ отправлен! Тренер свяжется с вами.','s');}catch(e){toast(e.message,'e');}}
 
+async function orderItem(id,name){
+  if(!confirm(`Заказать «${name}»? Тренер получит уведомление в Telegram.`))return;
+  try{await api('/api/shop/'+id+'/order','POST',{userId:ME.id,userName:ME.name});toast('✅ Заказ отправлен! Тренер свяжется с вами.','s');}
+  catch(e){toast(e.message,'e');}
+}
+
+// ═══════════════════════════════════════════
+// ПЛАН ТРЕНИРОВОК
+// ═══════════════════════════════════════════
 let _pedPlan={1:[],2:[],3:[],4:[]},_pedWeek=1,_pedUserId='';
-async function openUploadPlan(userId,userName){_pedUserId=userId;document.getElementById('pedUserId').value=userId;document.getElementById('pedUserName').textContent='👤 '+userName;_pedWeek=1;try{const data=await api('/api/users/'+userId+'/plan');_pedPlan=data.trainingPlan?{1:data.trainingPlan[1]||[],2:data.trainingPlan[2]||[],3:data.trainingPlan[3]||[],4:data.trainingPlan[4]||[]}:{1:[],2:[],3:[],4:[]};}catch{_pedPlan={1:[],2:[],3:[],4:[]};} if(!_pedPlan[1].length){_pedPlan[1]=[{block:'Верх',exercise:'',sets:'',reps:''},{block:'Ноги',exercise:'',sets:'',reps:''}];} pedRenderWeekTabs();pedRenderWeek();openMo('mPlanEditor');}
-function pedRenderWeekTabs(){const tabs=document.getElementById('pedWeekTabs');tabs.innerHTML=[1,2,3,4].map(w=>{const cnt=(_pedPlan[w]||[]).filter(e=>e.exercise).length;return `<button class="ped-week-tab${w===_pedWeek?' active':''}" onclick="pedSwitchWeek(${w})">Неделя ${w}<br><span style="font-size:10px;opacity:.6">${cnt} упр.</span></button>`;}).join('');document.getElementById('pedCopyBar').style.display=_pedWeek===1?'flex':'none';}
-function pedReadDOM(){const blockEls=document.querySelectorAll('.ped-block');if(!blockEls.length)return;const result=[];blockEls.forEach(blockEl=>{const blockNameInput=blockEl.querySelector('.ped-block-name');const blockName=blockNameInput?blockNameInput.value.trim():'';const rows=blockEl.querySelectorAll('.ped-ex-row[data-idx]');rows.forEach(row=>{const exercise=row.querySelector('.ped-ex-name')?.value?.trim()||'';const sets=row.querySelector('.ped-sets')?.value?.trim()||'';const reps=row.querySelector('.ped-reps')?.value?.trim()||'';result.push({block:blockName,exercise,sets,reps});});if(!rows.length)result.push({block:blockName,exercise:'',sets:'',reps:''}); });_pedPlan[_pedWeek]=result;}
+
+async function openUploadPlan(userId,userName){
+  _pedUserId=userId;
+  document.getElementById('pedUserId').value=userId;
+  document.getElementById('pedUserName').textContent='👤 '+userName;
+  _pedWeek=1;
+  try{
+    const data=await api('/api/users/'+userId+'/plan');
+    _pedPlan=data.trainingPlan
+      ?{1:data.trainingPlan[1]||[],2:data.trainingPlan[2]||[],3:data.trainingPlan[3]||[],4:data.trainingPlan[4]||[]}
+      :{1:[],2:[],3:[],4:[]};
+  }catch{_pedPlan={1:[],2:[],3:[],4:[]};}
+  if(!_pedPlan[1].length){_pedPlan[1]=[{block:'Верх',exercise:'',sets:'',reps:''},{block:'Ноги',exercise:'',sets:'',reps:''}];}
+  pedRenderWeekTabs();pedRenderWeek();openMo('mPlanEditor');
+}
+
+function pedRenderWeekTabs(){
+  const tabs=document.getElementById('pedWeekTabs');
+  tabs.innerHTML=[1,2,3,4].map(w=>{
+    const cnt=(_pedPlan[w]||[]).filter(e=>e.exercise).length;
+    return `<button class="ped-week-tab${w===_pedWeek?' active':''}" onclick="pedSwitchWeek(${w})">Неделя ${w}<br><span style="font-size:10px;opacity:.6">${cnt} упр.</span></button>`;
+  }).join('');
+  document.getElementById('pedCopyBar').style.display=_pedWeek===1?'flex':'none';
+}
+
+function pedReadDOM(){
+  const blockEls=document.querySelectorAll('.ped-block');
+  if(!blockEls.length)return;
+  const result=[];
+  blockEls.forEach(blockEl=>{
+    const blockNameInput=blockEl.querySelector('.ped-block-name');
+    const blockName=blockNameInput?blockNameInput.value.trim():'';
+    const rows=blockEl.querySelectorAll('.ped-ex-row[data-idx]');
+    rows.forEach(row=>{
+      const exercise=row.querySelector('.ped-ex-name')?.value?.trim()||'';
+      const sets=row.querySelector('.ped-sets')?.value?.trim()||'';
+      const reps=row.querySelector('.ped-reps')?.value?.trim()||'';
+      result.push({block:blockName,exercise,sets,reps});
+    });
+    if(!rows.length)result.push({block:blockName,exercise:'',sets:'',reps:''});
+  });
+  _pedPlan[_pedWeek]=result;
+}
+
 function pedSwitchWeek(w){pedReadDOM();_pedWeek=w;pedRenderWeekTabs();pedRenderWeek();}
-function pedRenderWeek(){const box=document.getElementById('pedWeekContent');const items=_pedPlan[_pedWeek]||[];if(!items.length){box.innerHTML=`<div style="text-align:center;padding:24px;color:var(--mu2);font-size:13px">Нажми «+ Добавить блок» чтобы начать</div>`;return;}const blockOrder=[],blockMap={};items.forEach((item,idx)=>{const b=item.block||'';if(!blockMap[b]){blockMap[b]=[];blockOrder.push(b);}blockMap[b].push({...item,_globalIdx:idx});});let html='';for(const blockName of blockOrder){const bItems=blockMap[blockName];html+=`<div class="ped-block" data-blockkey="${esc(blockName)}"><div class="ped-block-head"><span style="font-size:16px">💪</span><input class="ped-block-name" placeholder="Название блока (Верх, Ноги, Руки...)" value="${esc(blockName)}" data-original="${esc(blockName)}" onblur="pedRenameBlock(this)"/><button class="ped-block-del" onclick="pedDeleteBlock('${esc(blockName)}')" title="Удалить блок">✕</button></div><div class="ped-col-heads"><span>Упражнение</span><span style="text-align:center">Подходы</span><span style="text-align:center">Повторения</span><span></span></div>`;bItems.forEach(item=>{html+=`<div class="ped-ex-row" data-idx="${item._globalIdx}" data-block="${esc(blockName)}"><input class="ped-fi ped-ex-name" placeholder="Название упражнения" value="${esc(item.exercise)}"/><input class="ped-fi ped-fi sm ped-sets" placeholder="4" value="${esc(item.sets)}"/><input class="ped-fi ped-fi sm ped-reps" placeholder="12" value="${esc(item.reps)}"/><button class="ped-del-ex" onclick="pedDeleteEx(${item._globalIdx})">✕</button></div>`;});html+=`<button class="ped-add-ex" data-block="${esc(blockName)}" onclick="pedAddExBtn(this)">＋ добавить упражнение</button></div>`;}box.innerHTML=html;}
-function pedAddBlock(){pedReadDOM();const existingBlocks=[...new Set((_pedPlan[_pedWeek]||[]).map(e=>e.block))];let newBlockName='Новый блок',counter=2;while(existingBlocks.includes(newBlockName)){newBlockName=`Новый блок ${counter}`;counter++;}_pedPlan[_pedWeek].push({block:newBlockName,exercise:'',sets:'',reps:''});pedRenderWeek();const blocks=document.querySelectorAll('.ped-block-name');if(blocks.length){const last=blocks[blocks.length-1];last.focus();last.select();}}
+
+function pedRenderWeek(){
+  const box=document.getElementById('pedWeekContent');
+  const items=_pedPlan[_pedWeek]||[];
+  if(!items.length){box.innerHTML=`<div style="text-align:center;padding:24px;color:var(--mu2);font-size:13px">Нажми «+ Добавить блок» чтобы начать</div>`;return;}
+  const blockOrder=[],blockMap={};
+  items.forEach((item,idx)=>{
+    const b=item.block||'';
+    if(!blockMap[b]){blockMap[b]=[];blockOrder.push(b);}
+    blockMap[b].push({...item,_globalIdx:idx});
+  });
+  let html='';
+  for(const blockName of blockOrder){
+    const bItems=blockMap[blockName];
+    html+=`<div class="ped-block" data-blockkey="${esc(blockName)}">
+      <div class="ped-block-head">
+        <span style="font-size:16px">💪</span>
+        <input class="ped-block-name" placeholder="Название блока (Верх, Ноги, Руки...)" value="${esc(blockName)}" data-original="${esc(blockName)}" onblur="pedRenameBlock(this)"/>
+        <button class="ped-block-del" onclick="pedDeleteBlock('${esc(blockName)}')" title="Удалить блок">✕</button>
+      </div>
+      <div class="ped-col-heads"><span>Упражнение</span><span style="text-align:center">Подходы</span><span style="text-align:center">Повторения</span><span></span></div>`;
+    bItems.forEach(item=>{
+      html+=`<div class="ped-ex-row" data-idx="${item._globalIdx}" data-block="${esc(blockName)}">
+        <input class="ped-fi ped-ex-name" placeholder="Название упражнения" value="${esc(item.exercise)}"/>
+        <input class="ped-fi ped-fi sm ped-sets" placeholder="4" value="${esc(item.sets)}"/>
+        <input class="ped-fi ped-fi sm ped-reps" placeholder="12" value="${esc(item.reps)}"/>
+        <button class="ped-del-ex" onclick="pedDeleteEx(${item._globalIdx})">✕</button>
+      </div>`;
+    });
+    html+=`<button class="ped-add-ex" data-block="${esc(blockName)}" onclick="pedAddExBtn(this)">＋ добавить упражнение</button></div>`;
+  }
+  box.innerHTML=html;
+}
+
+function pedAddBlock(){
+  pedReadDOM();
+  const existingBlocks=[...new Set((_pedPlan[_pedWeek]||[]).map(e=>e.block))];
+  let newBlockName='Новый блок',counter=2;
+  while(existingBlocks.includes(newBlockName)){newBlockName=`Новый блок ${counter}`;counter++;}
+  _pedPlan[_pedWeek].push({block:newBlockName,exercise:'',sets:'',reps:''});
+  pedRenderWeek();
+  const blocks=document.querySelectorAll('.ped-block-name');
+  if(blocks.length){const last=blocks[blocks.length-1];last.focus();last.select();}
+}
+
 function pedAddExBtn(btn){pedAddEx(btn.dataset.block);}
-function pedAddEx(blockName){pedReadDOM();const plan=_pedPlan[_pedWeek];let lastIdx=-1;plan.forEach((e,i)=>{if(e.block===blockName)lastIdx=i;});const insertAt=lastIdx>=0?lastIdx+1:plan.length;plan.splice(insertAt,0,{block:blockName,exercise:'',sets:'',reps:''});pedRenderWeek();const rows=document.querySelectorAll('.ped-ex-row');if(rows[insertAt])rows[insertAt].querySelector('.ped-ex-name')?.focus();}
+
+function pedAddEx(blockName){
+  pedReadDOM();
+  const plan=_pedPlan[_pedWeek];
+  let lastIdx=-1;
+  plan.forEach((e,i)=>{if(e.block===blockName)lastIdx=i;});
+  const insertAt=lastIdx>=0?lastIdx+1:plan.length;
+  plan.splice(insertAt,0,{block:blockName,exercise:'',sets:'',reps:''});
+  pedRenderWeek();
+  const rows=document.querySelectorAll('.ped-ex-row');
+  if(rows[insertAt])rows[insertAt].querySelector('.ped-ex-name')?.focus();
+}
+
 function pedDeleteEx(idx){pedReadDOM();_pedPlan[_pedWeek].splice(idx,1);pedRenderWeek();}
-function pedDeleteBlock(blockName){if(!confirm(`Удалить блок "${blockName}" со всеми упражнениями?`))return;pedReadDOM();_pedPlan[_pedWeek]=_pedPlan[_pedWeek].filter(e=>e.block!==blockName);pedRenderWeek();}
-function pedRenameBlock(input){const oldName=input.dataset.original,newName=input.value.trim()||oldName;if(oldName===newName)return;(_pedPlan[_pedWeek]||[]).forEach(e=>{if(e.block===oldName)e.block=newName;});const blockEl=input.closest('.ped-block');if(blockEl){blockEl.dataset.blockkey=newName;blockEl.querySelectorAll('.ped-ex-row').forEach(row=>{row.dataset.block=newName;});const delBtn=blockEl.querySelector('.ped-block-del');if(delBtn)delBtn.setAttribute('onclick',`pedDeleteBlock('${esc(newName)}')`);const addBtn=blockEl.querySelector('.ped-add-ex');if(addBtn){addBtn.dataset.block=newName;}}input.dataset.original=newName;}
-function copyWeekAny(){pedReadDOM();const from=parseInt(document.getElementById('pedCopyFrom').value);const toVal=document.getElementById('pedCopyTo').value;if(toVal!=='all' && parseInt(toVal)===from){toast('Выберите другую неделю','e');return;}const src=JSON.parse(JSON.stringify(_pedPlan[from]));if(toVal==='all'){const others=[1,2,3,4].filter(w=>w!==from);if(!confirm(`Скопировать Неделю ${from} на все остальные (${others.join(', ')})? Данные будут заменены.`))return;others.forEach(w=>{_pedPlan[w]=JSON.parse(JSON.stringify(src));});toast(`✅ Неделя ${from} скопирована на недели ${others.join(', ')}`,'s');}else{const to=parseInt(toVal);if(!confirm(`Скопировать Неделю ${from} → Неделю ${to}? Данные недели ${to} будут заменены.`))return;_pedPlan[to]=JSON.parse(JSON.stringify(src));toast(`✅ Неделя ${from} → Неделя ${to}`,'s');}pedRenderWeekTabs();}
-async function savePlanEditor(){pedReadDOM();const clean={};for(let w=1;w<=4;w++){clean[w]=(_pedPlan[w]||[]).filter(e=>e.exercise.trim());}const total=Object.values(clean).reduce((s,a)=>s+a.length,0);if(!total){toast('Добавьте хотя бы одно упражнение','e');return;}try{await api('/api/users/'+_pedUserId+'/plan','POST',{trainingPlan:clean});toast(`✅ План сохранён: ${total} упражнений`,'s');closeMo('mPlanEditor');allStudents=[];loadAdminHome();}catch(e){toast('Ошибка: '+e.message,'e');}}
+
+function pedDeleteBlock(blockName){
+  if(!confirm(`Удалить блок "${blockName}" со всеми упражнениями?`))return;
+  pedReadDOM();
+  _pedPlan[_pedWeek]=_pedPlan[_pedWeek].filter(e=>e.block!==blockName);
+  pedRenderWeek();
+}
+
+function pedRenameBlock(input){
+  const oldName=input.dataset.original,newName=input.value.trim()||oldName;
+  if(oldName===newName)return;
+  (_pedPlan[_pedWeek]||[]).forEach(e=>{if(e.block===oldName)e.block=newName;});
+  const blockEl=input.closest('.ped-block');
+  if(blockEl){
+    blockEl.dataset.blockkey=newName;
+    blockEl.querySelectorAll('.ped-ex-row').forEach(row=>{row.dataset.block=newName;});
+    const delBtn=blockEl.querySelector('.ped-block-del');
+    if(delBtn)delBtn.setAttribute('onclick',`pedDeleteBlock('${esc(newName)}')`);
+    const addBtn=blockEl.querySelector('.ped-add-ex');
+    if(addBtn){addBtn.dataset.block=newName;}
+  }
+  input.dataset.original=newName;
+}
+
+function copyWeekAny(){
+  pedReadDOM();
+  const from=parseInt(document.getElementById('pedCopyFrom').value);
+  const toVal=document.getElementById('pedCopyTo').value;
+  if(toVal!=='all' && parseInt(toVal)===from){toast('Выберите другую неделю','e');return;}
+  const src=JSON.parse(JSON.stringify(_pedPlan[from]));
+  if(toVal==='all'){
+    const others=[1,2,3,4].filter(w=>w!==from);
+    if(!confirm(`Скопировать Неделю ${from} на все остальные (${others.join(', ')})? Данные будут заменены.`))return;
+    others.forEach(w=>{_pedPlan[w]=JSON.parse(JSON.stringify(src));});
+    toast(`✅ Неделя ${from} скопирована на недели ${others.join(', ')}`,'s');
+  }else{
+    const to=parseInt(toVal);
+    if(!confirm(`Скопировать Неделю ${from} → Неделю ${to}? Данные недели ${to} будут заменены.`))return;
+    _pedPlan[to]=JSON.parse(JSON.stringify(src));
+    toast(`✅ Неделя ${from} → Неделя ${to}`,'s');
+  }
+  pedRenderWeekTabs();
+}
+
+async function savePlanEditor(){
+  pedReadDOM();
+  const clean={};
+  for(let w=1;w<=4;w++){clean[w]=(_pedPlan[w]||[]).filter(e=>e.exercise.trim());}
+  const total=Object.values(clean).reduce((s,a)=>s+a.length,0);
+  if(!total){toast('Добавьте хотя бы одно упражнение','e');return;}
+  try{
+    await api('/api/users/'+_pedUserId+'/plan','POST',{trainingPlan:clean});
+    toast(`✅ План сохранён: ${total} упражнений`,'s');
+    closeMo('mPlanEditor');allStudents=[];loadAdminHome();
+  }catch(e){toast('Ошибка: '+e.message,'e');}
+}
 
 let _trainingPlan=null,_currentWeek=1;
-async function loadUserPlan(){const box=document.getElementById('uPlanContent');box.innerHTML=`<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>`;try{const data=await api('/api/users/'+ME.id+'/plan');if(!data.trainingPlan){box.innerHTML=`<div class="plan-upload-hint"><div style="font-size:36px;margin-bottom:10px">📋</div><div style="font-weight:600;margin-bottom:6px">План тренировок ещё не загружен</div><div>Тренер загрузит ваш персональный план — он появится здесь автоматически</div></div>`;return;}_trainingPlan=data.trainingPlan;if(data.planUpdatedAt){const d=new Date(data.planUpdatedAt);document.getElementById('planUpdatedAt').textContent='обновлён '+d.toLocaleDateString('ru-RU');}renderPlanWeek(_currentWeek);}catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}}
-function renderPlanWeek(week){_currentWeek=week;const box=document.getElementById('uPlanContent');if(!_trainingPlan)return;const exercises=_trainingPlan[week]||[];const BLOCK_ICONS={'верх':'💪','ноги':'🦵','руки':'💪','ягодицы':'🍑','спина':'🏋️','грудь':'🏋️','плечи':'🎯','пресс':'🔥','кардио':'🏃','разминка':'🤸'};function blockIcon(name){const low=(name||'').toLowerCase();for(const[kw,ic]of Object.entries(BLOCK_ICONS)){if(low.startsWith(kw))return ic;}return'💪';}let html=`<div class="week-switcher">`;for(let w=1;w<=4;w++){const cnt=(_trainingPlan[w]||[]).length;html+=`<button class="week-btn${w===week?' active':''}" onclick="renderPlanWeek(${w})">Неделя ${w}<br><span style="font-size:10px;opacity:.6">${cnt} упр.</span></button>`;}html+=`</div>`;if(!exercises.length){html+=`<div class="plan-empty"><div style="font-size:36px;margin-bottom:8px">🏖</div>Неделя ${week} пока пустая</div>`;box.innerHTML=html;return;}const blockOrder=[],blocks={};exercises.forEach((ex,idx)=>{const b=ex.block||'';if(!blocks[b]){blocks[b]=[];blockOrder.push(b);}blocks[b].push({...ex,num:idx+1});});for(const blockName of blockOrder){const exList=blocks[blockName];html+=`<div class="plan-block">`;if(blockName)html+=`<div class="plan-block-title">${blockIcon(blockName)} ${esc(blockName)}</div>`;html+=`<div><table class="ex-table"><thead><tr><th>#</th><th>Упражнение</th><th style="text-align:center">Подходы</th><th style="text-align:center">Повторения</th></tr></thead><tbody>`;exList.forEach(ex=>{html+=`<tr><td class="ex-num">${ex.num}</td><td style="font-weight:500">${esc(ex.exercise)}</td><td style="text-align:center"><span class="ex-sets">${ex.sets||'—'}</span></td><td style="text-align:center"><span class="ex-reps">${ex.reps||'—'}</span></td></tr>`;});html+=`</tbody></table></div><div class="ex-cards">`;exList.forEach(ex=>{html+=`<div class="ex-card"><div class="ex-card-num">${ex.num}</div><div class="ex-card-name">${esc(ex.exercise)}</div><div class="ex-card-meta"><div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase">Подх.</div><div class="ex-card-sets">${ex.sets||'—'}</div></div><div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase">Повт.</div><div class="ex-card-reps">${ex.reps||'—'}</div></div></div></div>`;});html+=`</div></div>`;}box.innerHTML=html;}
 
+async function loadUserPlan(){
+  const box=document.getElementById('uPlanContent');
+  box.innerHTML=`<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>`;
+  try{
+    const data=await api('/api/users/'+ME.id+'/plan');
+    if(!data.trainingPlan){
+      box.innerHTML=`<div class="plan-upload-hint"><div style="font-size:36px;margin-bottom:10px">📋</div><div style="font-weight:600;margin-bottom:6px">План тренировок ещё не загружен</div><div>Тренер загрузит ваш персональный план — он появится здесь автоматически</div></div>`;
+      return;
+    }
+    _trainingPlan=data.trainingPlan;
+    if(data.planUpdatedAt){const d=new Date(data.planUpdatedAt);document.getElementById('planUpdatedAt').textContent='обновлён '+d.toLocaleDateString('ru-RU');}
+    renderPlanWeek(_currentWeek);
+  }catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}
+}
+
+function renderPlanWeek(week){
+  _currentWeek=week;
+  const box=document.getElementById('uPlanContent');
+  if(!_trainingPlan)return;
+  const exercises=_trainingPlan[week]||[];
+  const BLOCK_ICONS={'верх':'💪','ноги':'🦵','руки':'💪','ягодицы':'🍑','спина':'🏋️','грудь':'🏋️','плечи':'🎯','пресс':'🔥','кардио':'🏃','разминка':'🤸'};
+  function blockIcon(name){const low=(name||'').toLowerCase();for(const[kw,ic]of Object.entries(BLOCK_ICONS)){if(low.startsWith(kw))return ic;}return'💪';}
+  let html=`<div class="week-switcher">`;
+  for(let w=1;w<=4;w++){
+    const cnt=(_trainingPlan[w]||[]).length;
+    html+=`<button class="week-btn${w===week?' active':''}" onclick="renderPlanWeek(${w})">Неделя ${w}<br><span style="font-size:10px;opacity:.6">${cnt} упр.</span></button>`;
+  }
+  html+=`</div>`;
+  if(!exercises.length){html+=`<div class="plan-empty"><div style="font-size:36px;margin-bottom:8px">🏖</div>Неделя ${week} пока пустая</div>`;box.innerHTML=html;return;}
+  const blockOrder=[],blocks={};
+  exercises.forEach((ex,idx)=>{const b=ex.block||'';if(!blocks[b]){blocks[b]=[];blockOrder.push(b);}blocks[b].push({...ex,num:idx+1});});
+  for(const blockName of blockOrder){
+    const exList=blocks[blockName];
+    html+=`<div class="plan-block">`;
+    if(blockName)html+=`<div class="plan-block-title">${blockIcon(blockName)} ${esc(blockName)}</div>`;
+    html+=`<div><table class="ex-table"><thead><tr><th>#</th><th>Упражнение</th><th style="text-align:center">Подходы</th><th style="text-align:center">Повторения</th></tr></thead><tbody>`;
+    exList.forEach(ex=>{html+=`<tr><td class="ex-num">${ex.num}</td><td style="font-weight:500">${esc(ex.exercise)}</td><td style="text-align:center"><span class="ex-sets">${ex.sets||'—'}</span></td><td style="text-align:center"><span class="ex-reps">${ex.reps||'—'}</span></td></tr>`;});
+    html+=`</tbody></table></div><div class="ex-cards">`;
+    exList.forEach(ex=>{html+=`<div class="ex-card"><div class="ex-card-num">${ex.num}</div><div class="ex-card-name">${esc(ex.exercise)}</div><div class="ex-card-meta"><div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase">Подх.</div><div class="ex-card-sets">${ex.sets||'—'}</div></div><div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase">Повт.</div><div class="ex-card-reps">${ex.reps||'—'}</div></div></div></div>`;});
+    html+=`</div></div>`;
+  }
+  box.innerHTML=html;
+}
+
+// ═══════════════════════════════════════════
+// ГЛАВНАЯ ТРЕНЕРА
+// ═══════════════════════════════════════════
 async function loadAdminHome(){loadAdminStats();loadAdminStudents();loadAdminPosts();}
-async function loadAdminStats(){try{const s=await api('/api/users');allStudents=s;const today=new Date().toISOString().split('T')[0];document.getElementById('aStats').innerHTML=`<div class="sb"><div class="sn cg">${s.length}</div><div class="sl">Учеников</div></div><div class="sb"><div class="sn cw">${s.filter(x=>x.sessions<=2&&x.sessions>0).length}</div><div class="sl">Мало занятий</div></div><div class="sb"><div class="sn cr">${s.filter(x=>x.sessions<=0).length}</div><div class="sl">Абонемент 0</div></div><div class="sb"><div class="sn cw">${s.filter(x=>x.paymentDate===today).length}</div><div class="sl">Оплата сегодня</div></div>`;}catch(e){toast(e.message,'e');}}
-async function loadAdminStudents(){const box=document.getElementById('aStudents');try{if(!allStudents.length){const s=await api('/api/users');allStudents=s;}if(!allStudents.length){box.innerHTML=`<div class="empty"><div class="ei">👥</div>Нет учеников</div>`;return;}const today=new Date().toISOString().split('T')[0];box.innerHTML=[...allStudents].sort((a,b)=>a.sessions-b.sessions).map(u=>{let pillCls='pill-green',sessIcon='✅';if(u.sessions<=0){pillCls='pill-red';sessIcon='❌';}else if(u.sessions<=2){pillCls='pill-yel';sessIcon='⚠️';}const pd=u.paymentDate?new Date(u.paymentDate).toLocaleDateString('ru-RU'):'—';const ptCls=u.paymentDate===today?'pill-yel':'pill-gray';const hasPlan=u.trainingPlan?true:false;return `<div class="student-card"><div class="sc-top"><div class="sc-ava">${u.name.charAt(0).toUpperCase()}</div><div><div class="sc-name">${esc(u.name)}</div><div class="sc-login">🔑 ${esc(u.login)}</div></div></div><div class="sc-pills"><span class="pill ${pillCls}">${sessIcon} ${u.sessions} занятий</span><span class="pill ${ptCls}">💳 Оплата: ${pd}${u.paymentDate===today?' ⚠️':''}</span>${u.telegramId?`<span class="pill pill-gray">✈️ TG</span>`:''}${hasPlan?`<span class="pill pill-green">📋 План готов</span>`:''}</div><div class="sc-btns"><button class="mark-btn" data-id="${u.id}" data-name="${esc(u.name)}" onclick="markAtt(this.dataset.id,this.dataset.name)">✓ Отметить тренировку</button><button class="btn btn-g sm" data-id="${u.id}" data-name="${esc(u.name)}" onclick="openUploadPlan(this.dataset.id,this.dataset.name)">📋 Редактировать план</button><button class="btn btn-g sm" data-id="${u.id}" data-name="${esc(u.name)}" onclick="openNotes(this.dataset.id,this.dataset.name)">💬 Заметки</button><button class="btn btn-w sm" data-id="${u.id}" data-name="${esc(u.name)}" onclick="resetWeight(this.dataset.id,this.dataset.name)">⚖️ Сбросить вес</button><button class="btn btn-g sm" data-id="${u.id}" onclick="openEditUser(this.dataset.id)">✏️ Изменить</button><button class="btn btn-d sm" data-id="${u.id}" onclick="delUser(this.dataset.id)">🗑</button></div></div>`;}).join('');}catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}}
-async function markAtt(id,name){if(!confirm(`Отметить тренировку ${name}? (-1 занятие)`))return;try{const r=await api(`/api/users/${id}/attendance`,'POST');toast(`✅ ${name}: осталось ${r.sessions} занятий`,'s');allStudents=[];loadAdminHome();}catch(e){toast(e.message,'e');}}
-async function loadAdminPosts(){const box=document.getElementById('aPosts');try{const posts=await api('/api/posts');if(!posts.length){box.innerHTML=`<div class="empty"><div class="ei">📢</div>Постов нет</div>`;return;}box.innerHTML=posts.map(p=>renderPost(p,true)).join('');}catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}}
 
-function renderPost(p,isAdmin){const dt=fmtDt(p.createdAt);let pollHtml='';if(p.hasPoll&&p.pollOptions?.length){const votes=p.votes||{};const total=Object.values(votes).reduce((s,a)=>s+(a?.length||0),0);const myVote=Object.entries(votes).find(([,arr])=>arr?.some(v=>v.userId===ME?.id))?.[0];pollHtml=`<div class="poll-wrap">`+p.pollOptions.map(opt=>{const cnt=votes[opt]?.length||0;const pct=total?Math.round(cnt/total*100):0;const isVoted=myVote===opt;let votersHtml='';if(isAdmin&&votes[opt]?.length){votersHtml=`<div class="poll-voters">Проголосовали: `+votes[opt].map(v=>`<b>${esc(v.userName)}</b>`).join(', ')+'</div>';}return `<div class="poll-opt ${isVoted?'voted':''}" onclick="${isAdmin?'':` votePost('${p.id}','${esc(opt)}')`}"><div class="poll-bar" style="width:${pct}%"></div><span class="poll-label">${esc(opt)}</span><span class="poll-count">${cnt} ${pct?'('+pct+'%)':''}</span></div>${votersHtml}`;}).join('')+'</div>';}const reactions=p.reactions||{};let reactHtml='';if(isAdmin){reactHtml=EMOJIS.filter(e=>reactions[e]?.length>0).map(emoji=>{const arr=reactions[emoji]||[];const myR=arr.some(r=>typeof r==='string'?r===ME?.id:r.userId===ME?.id);const count=arr.length;const names=arr.map(r=>typeof r==='string'?'?':esc(r.userName||'?')).join(', ');return `<div class="react-group"><button class="react-btn${myR?' active':''}" onclick="reactPost('${p.id}','${emoji}')">${emoji}<span class="react-count">${count}</span></button><div class="react-names">${names}</div></div>`;}).join('');}else{const myEmoji=EMOJIS.find(emoji=>{const arr=reactions[emoji]||[];return arr.some(r=>typeof r==='string'?r===ME?.id:r.userId===ME?.id);});reactHtml=EMOJIS.map(emoji=>{const arr=reactions[emoji]||[];const count=arr.length;const isMe=emoji===myEmoji;return `<button class="react-btn${isMe?' active':''}" onclick="reactPost('${p.id}','${emoji}')">${emoji}${count>0?`<span class="react-count">${count}</span>`:''}</button>`;}).join('');}return `<div class="post-card" id="post-${p.id}"><div class="post-txt">${esc(p.text)}</div>${p.link?`<a class="post-link" href="${p.link}" target="_blank">🔗 Открыть ссылку</a>`:''}${pollHtml}<div class="reactions-row">${reactHtml}</div><div class="post-meta"><div class="post-dt">${dt}</div>${isAdmin?`<button class="btn btn-d sm" onclick="delPost('${p.id}')">🗑</button>`:''}</div></div>`;}
+async function loadAdminStats(){
+  try{
+    const s=await api('/api/users');allStudents=s;
+    const today=new Date().toISOString().split('T')[0];
+    document.getElementById('aStats').innerHTML=`
+      <div class="sb"><div class="sn cg">${s.length}</div><div class="sl">Учеников</div></div>
+      <div class="sb"><div class="sn cw">${s.filter(x=>x.sessions<=2&&x.sessions>0).length}</div><div class="sl">Мало занятий</div></div>
+      <div class="sb"><div class="sn cr">${s.filter(x=>x.sessions<=0).length}</div><div class="sl">Абонемент 0</div></div>
+      <div class="sb"><div class="sn cw">${s.filter(x=>x.paymentDate===today).length}</div><div class="sl">Оплата сегодня</div></div>`;
+  }catch(e){toast(e.message,'e');}
+}
+
+async function loadAdminStudents(){
+  const box=document.getElementById('aStudents');
+  try{
+    if(!allStudents.length){const s=await api('/api/users');allStudents=s;}
+    if(!allStudents.length){box.innerHTML=`<div class="empty"><div class="ei">👥</div>Нет учеников</div>`;return;}
+    const today=new Date().toISOString().split('T')[0];
+    box.innerHTML=[...allStudents].sort((a,b)=>a.sessions-b.sessions).map(u=>{
+      let pillCls='pill-green',sessIcon='✅';
+      if(u.sessions<=0){pillCls='pill-red';sessIcon='❌';}
+      else if(u.sessions<=2){pillCls='pill-yel';sessIcon='⚠️';}
+      const pd=u.paymentDate?new Date(u.paymentDate).toLocaleDateString('ru-RU'):'—';
+      const ptCls=u.paymentDate===today?'pill-yel':'pill-gray';
+      const hasPlan=u.trainingPlan?true:false;
+      return `<div class="student-card">
+        <div class="sc-top">
+          <div class="sc-ava">${u.name.charAt(0).toUpperCase()}</div>
+          <div><div class="sc-name">${esc(u.name)}</div><div class="sc-login">🔑 ${esc(u.login)}</div></div>
+        </div>
+        <div class="sc-pills">
+          <span class="pill ${pillCls}">${sessIcon} ${u.sessions} занятий</span>
+          <span class="pill ${ptCls}">💳 Оплата: ${pd}${u.paymentDate===today?' ⚠️':''}</span>
+          ${u.telegramId?`<span class="pill pill-gray">✈️ TG</span>`:''}
+          ${hasPlan?`<span class="pill pill-green">📋 План готов</span>`:''}
+        </div>
+        <div class="sc-btns">
+          <button class="mark-btn" data-id="${u.id}" data-name="${esc(u.name)}" onclick="markAtt(this.dataset.id,this.dataset.name)">✓ Отметить тренировку</button>
+          <button class="btn btn-g sm" data-id="${u.id}" data-name="${esc(u.name)}" onclick="openUploadPlan(this.dataset.id,this.dataset.name)">📋 Редактировать план</button>
+          <button class="btn btn-g sm" data-id="${u.id}" data-name="${esc(u.name)}" onclick="openNotes(this.dataset.id,this.dataset.name)">💬 Заметки</button>
+          <button class="btn btn-w sm" data-id="${u.id}" data-name="${esc(u.name)}" onclick="resetWeight(this.dataset.id,this.dataset.name)">⚖️ Сбросить вес</button>
+          <button class="btn btn-g sm" data-id="${u.id}" onclick="openEditUser(this.dataset.id)">✏️ Изменить</button>
+          <button class="btn btn-d sm" data-id="${u.id}" onclick="delUser(this.dataset.id)">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}
+}
+
+async function markAtt(id,name){
+  if(!confirm(`Отметить тренировку ${name}? (-1 занятие)`))return;
+  try{const r=await api(`/api/users/${id}/attendance`,'POST');toast(`✅ ${name}: осталось ${r.sessions} занятий`,'s');allStudents=[];loadAdminHome();}
+  catch(e){toast(e.message,'e');}
+}
+
+async function loadAdminPosts(){
+  const box=document.getElementById('aPosts');
+  try{
+    const posts=await api('/api/posts');
+    if(!posts.length){box.innerHTML=`<div class="empty"><div class="ei">📢</div>Постов нет</div>`;return;}
+    box.innerHTML=posts.map(p=>renderPost(p,true)).join('');
+  }catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}
+}
+
+function renderPost(p,isAdmin){
+  const dt=fmtDt(p.createdAt);
+  let pollHtml='';
+  if(p.hasPoll&&p.pollOptions?.length){
+    const votes=p.votes||{};
+    const total=Object.values(votes).reduce((s,a)=>s+(a?.length||0),0);
+    const myVote=Object.entries(votes).find(([,arr])=>arr?.some(v=>v.userId===ME?.id))?.[0];
+    pollHtml=`<div class="poll-wrap">`+p.pollOptions.map(opt=>{
+      const cnt=votes[opt]?.length||0;
+      const pct=total?Math.round(cnt/total*100):0;
+      const isVoted=myVote===opt;
+      let votersHtml='';
+      if(isAdmin&&votes[opt]?.length){votersHtml=`<div class="poll-voters">Проголосовали: `+votes[opt].map(v=>`<b>${esc(v.userName)}</b>`).join(', ')+'</div>';}
+      return `<div class="poll-opt ${isVoted?'voted':''}" onclick="${isAdmin?'':` votePost('${p.id}','${esc(opt)}')`}">
+        <div class="poll-bar" style="width:${pct}%"></div>
+        <span class="poll-label">${esc(opt)}</span>
+        <span class="poll-count">${cnt} ${pct?'('+pct+'%)':''}</span>
+      </div>${votersHtml}`;
+    }).join('')+'</div>';
+  }
+  const reactions=p.reactions||{};
+  let reactHtml='';
+  if(isAdmin){
+    reactHtml=EMOJIS.filter(e=>reactions[e]?.length>0).map(emoji=>{
+      const arr=reactions[emoji]||[];
+      const myR=arr.some(r=>typeof r==='string'?r===ME?.id:r.userId===ME?.id);
+      const count=arr.length;
+      const names=arr.map(r=>typeof r==='string'?'?':esc(r.userName||'?')).join(', ');
+      return `<div class="react-group"><button class="react-btn${myR?' active':''}" onclick="reactPost('${p.id}','${emoji}')">${emoji}<span class="react-count">${count}</span></button><div class="react-names">${names}</div></div>`;
+    }).join('');
+  }else{
+    const myEmoji=EMOJIS.find(emoji=>{const arr=reactions[emoji]||[];return arr.some(r=>typeof r==='string'?r===ME?.id:r.userId===ME?.id);});
+    reactHtml=EMOJIS.map(emoji=>{
+      const arr=reactions[emoji]||[];
+      const count=arr.length;
+      const isMe=emoji===myEmoji;
+      return `<button class="react-btn${isMe?' active':''}" onclick="reactPost('${p.id}','${emoji}')">${emoji}${count>0?`<span class="react-count">${count}</span>`:''}</button>`;
+    }).join('');
+  }
+  return `<div class="post-card" id="post-${p.id}">
+    <div class="post-txt">${esc(p.text)}</div>
+    ${p.link?`<a class="post-link" href="${p.link}" target="_blank">🔗 Открыть ссылку</a>`:''}
+    ${pollHtml}
+    <div class="reactions-row">${reactHtml}</div>
+    <div class="post-meta"><div class="post-dt">${dt}</div>${isAdmin?`<button class="btn btn-d sm" onclick="delPost('${p.id}')">🗑</button>`:''}</div>
+  </div>`;
+}
+
 function togglePoll(){const on=document.getElementById('pollToggle').checked;document.getElementById('pollEditor').classList.toggle('show',on);}
 function addOpt(){const list=document.getElementById('pollOptsList');const div=document.createElement('div');div.className='poll-opt-input';div.innerHTML=`<input class="fi" placeholder="Вариант"/><button class="del-opt-btn" onclick="delOpt(this)">✕</button>`;list.appendChild(div);}
 function delOpt(btn){const row=btn.closest('.poll-opt-input');if(document.querySelectorAll('.poll-opt-input').length>1)row.remove();}
-async function addPost(){const text=v('postTxt'),link=v('postLnk');if(!text){toast('Текст обязателен','e');return;}const hasPoll=document.getElementById('pollToggle').checked;const opts=hasPoll?[...document.querySelectorAll('#pollOptsList input')].map(i=>i.value.trim()).filter(Boolean):[];try{await api('/api/posts','POST',{text,link:link||null,hasPoll:hasPoll&&opts.length>0,pollOptions:opts});toast('✅ Опубликовано','s');closeMo('mPost');clr(['postTxt','postLnk']);document.getElementById('pollToggle').checked=false;document.getElementById('pollEditor').classList.remove('show');document.getElementById('pollOptsList').innerHTML=`<div class="poll-opt-input"><input class="fi" placeholder="Да" value="Да"/><button class="del-opt-btn" onclick="delOpt(this)">✕</button></div><div class="poll-opt-input"><input class="fi" placeholder="Нет" value="Нет"/><button class="del-opt-btn" onclick="delOpt(this)">✕</button></div>`;loadAdminPosts();}catch(e){toast(e.message,'e');}}
-async function delPost(id){if(!confirm('Удалить пост?'))return;try{await api('/api/posts/'+id,'DELETE');loadAdminPosts();}catch(e){toast(e.message,'e');}}
-async function reactPost(postId,emoji){if(!ME)return;try{await api(`/api/posts/${postId}/react`,'POST',{userId:ME.id,userName:ME.name,emoji,single:true});const posts=await api('/api/posts');const p=posts.find(x=>x.id===postId);if(!p)return;const el=document.getElementById('post-'+postId);if(el)el.outerHTML=renderPost(p,ME.role==='admin');}catch(e){toast(e.message,'e');}}
-async function votePost(postId,option){if(!ME)return;try{await api(`/api/posts/${postId}/vote`,'POST',{userId:ME.id,userName:ME.name,option});const posts=await api('/api/posts');const p=posts.find(x=>x.id===postId);if(!p)return;const el=document.getElementById('post-'+postId);if(el)el.outerHTML=renderPost(p,false);}catch(e){toast(e.message,'e');}}
 
-async function addUser(){const name=v('uN'),login=v('uL'),pwd=v('uPw'),tg=v('uTg'),sess=v('uSe'),pd=v('uPd');if(!name||!login||!pwd){toast('Имя, логин и пароль обязательны','e');return;}try{await api('/api/users','POST',{name,login,password:pwd,telegramId:tg||null,sessions:parseInt(sess)||0,paymentDate:pd||null});toast(`✅ Ученик ${name} добавлен`,'s');closeMo('mAddU');clr(['uN','uL','uPw','uTg','uPd']);document.getElementById('uSe').value='8';allStudents=[];loadAdminHome();}catch(e){toast(e.message,'e');}}
-async function openEditUser(id){try{const u=await api('/api/users/'+id);document.getElementById('eId').value=u.id;document.getElementById('eN').value=u.name;document.getElementById('ePw').value='';document.getElementById('eTg').value=u.telegramId||'';document.getElementById('eSe').value=u.sessions;document.getElementById('ePd').value=u.paymentDate||'';openMo('mEditU');}catch(e){toast(e.message,'e');}}
-async function saveEditUser(){const id=document.getElementById('eId').value;const d={name:v('eN'),telegramId:v('eTg')||null,sessions:parseInt(v('eSe'))||0,paymentDate:v('ePd')||null};const np=v('ePw');if(np)d.password=np;try{await api('/api/users/'+id,'PUT',d);toast('✅ Сохранено','s');closeMo('mEditU');allStudents=[];loadAdminHome();}catch(e){toast(e.message,'e');}}
+async function addPost(){
+  const text=v('postTxt'),link=v('postLnk');
+  if(!text){toast('Текст обязателен','e');return;}
+  const hasPoll=document.getElementById('pollToggle').checked;
+  const opts=hasPoll?[...document.querySelectorAll('#pollOptsList input')].map(i=>i.value.trim()).filter(Boolean):[];
+  try{
+    await api('/api/posts','POST',{text,link:link||null,hasPoll:hasPoll&&opts.length>0,pollOptions:opts});
+    toast('✅ Опубликовано','s');closeMo('mPost');clr(['postTxt','postLnk']);
+    document.getElementById('pollToggle').checked=false;
+    document.getElementById('pollEditor').classList.remove('show');
+    document.getElementById('pollOptsList').innerHTML=`<div class="poll-opt-input"><input class="fi" placeholder="Да" value="Да"/><button class="del-opt-btn" onclick="delOpt(this)">✕</button></div><div class="poll-opt-input"><input class="fi" placeholder="Нет" value="Нет"/><button class="del-opt-btn" onclick="delOpt(this)">✕</button></div>`;
+    loadAdminPosts();
+  }catch(e){toast(e.message,'e');}
+}
+
+async function delPost(id){if(!confirm('Удалить пост?'))return;try{await api('/api/posts/'+id,'DELETE');loadAdminPosts();}catch(e){toast(e.message,'e');}}
+
+async function reactPost(postId,emoji){
+  if(!ME)return;
+  try{
+    await api(`/api/posts/${postId}/react`,'POST',{userId:ME.id,userName:ME.name,emoji,single:true});
+    const posts=await api('/api/posts');
+    const p=posts.find(x=>x.id===postId);if(!p)return;
+    const el=document.getElementById('post-'+postId);
+    if(el)el.outerHTML=renderPost(p,ME.role==='admin');
+  }catch(e){toast(e.message,'e');}
+}
+
+async function votePost(postId,option){
+  if(!ME)return;
+  try{
+    await api(`/api/posts/${postId}/vote`,'POST',{userId:ME.id,userName:ME.name,option});
+    const posts=await api('/api/posts');
+    const p=posts.find(x=>x.id===postId);if(!p)return;
+    const el=document.getElementById('post-'+postId);
+    if(el)el.outerHTML=renderPost(p,false);
+  }catch(e){toast(e.message,'e');}
+}
+
+// ═══════════════════════════════════════════
+// ПОЛЬЗОВАТЕЛИ
+// ═══════════════════════════════════════════
+async function addUser(){
+  const name=v('uN'),login=v('uL'),pwd=v('uPw'),tg=v('uTg'),sess=v('uSe'),pd=v('uPd');
+  if(!name||!login||!pwd){toast('Имя, логин и пароль обязательны','e');return;}
+  try{
+    await api('/api/users','POST',{name,login,password:pwd,telegramId:tg||null,sessions:parseInt(sess)||0,paymentDate:pd||null});
+    toast(`✅ Ученик ${name} добавлен`,'s');closeMo('mAddU');clr(['uN','uL','uPw','uTg','uPd']);
+    document.getElementById('uSe').value='8';allStudents=[];loadAdminHome();
+  }catch(e){toast(e.message,'e');}
+}
+
+async function openEditUser(id){
+  try{
+    const u=await api('/api/users/'+id);
+    document.getElementById('eId').value=u.id;document.getElementById('eN').value=u.name;
+    document.getElementById('ePw').value='';document.getElementById('eTg').value=u.telegramId||'';
+    document.getElementById('eSe').value=u.sessions;document.getElementById('ePd').value=u.paymentDate||'';
+    openMo('mEditU');
+  }catch(e){toast(e.message,'e');}
+}
+
+async function saveEditUser(){
+  const id=document.getElementById('eId').value;
+  const d={name:v('eN'),telegramId:v('eTg')||null,sessions:parseInt(v('eSe'))||0,paymentDate:v('ePd')||null};
+  const np=v('ePw');if(np)d.password=np;
+  try{await api('/api/users/'+id,'PUT',d);toast('✅ Сохранено','s');closeMo('mEditU');allStudents=[];loadAdminHome();}
+  catch(e){toast(e.message,'e');}
+}
+
 async function delUser(id){if(!confirm('Удалить ученика?'))return;try{await api('/api/users/'+id,'DELETE');toast('Удалён','w');allStudents=[];loadAdminHome();}catch(e){toast(e.message,'e');}}
 
-async function loadAdminWorkouts(){const box=document.getElementById('aWorkouts');try{const ws=await api('/api/workouts');if(!ws.length){box.innerHTML=`<div class="empty"><div class="ei">🏋️</div>Тренировок нет. Создайте первую!</div>`;return;}const byDate={};ws.forEach(w=>{const d=new Date(w.datetime).toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});if(!byDate[d])byDate[d]=[];byDate[d].push(w);});box.innerHTML=Object.entries(byDate).map(([date,items])=>`<div style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu2);margin-bottom:8px">${date}</div>${items.map(w=>renderWCard(w,true)).join('')}</div>`).join('');}catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}}
-function renderWCard(w,isAdmin){const time=new Date(w.datetime).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});const isGrp=w.type==='group';const chips=(w.studentIds||[]).map(sid=>{const s=allStudents.find(x=>x.id===sid);return`<span class="chip">${s?esc(s.name):sid}</span>`;}).join('');return `<div class="wcard ${isGrp?'group':''}"><div class="w-title">${esc(w.title)}<span class="wbadge ${isGrp?'wb-g':'wb-p'}">${isGrp?'Группа':'Персональная'}</span></div><div class="w-meta">🕐 ${time} · ⏱ ${w.duration} мин</div>${chips?`<div class="w-chips">${chips}</div>`:''}${w.note?`<div class="w-note">📝 ${esc(w.note)}</div>`:''}${isAdmin?`<div><button class="btn btn-d sm" onclick="delWorkout('${w.id}')">🗑 Удалить</button></div>`:''}</div>`;}
+// ═══════════════════════════════════════════
+// ТРЕНИРОВКИ
+// ═══════════════════════════════════════════
+async function loadAdminWorkouts(){
+  const box=document.getElementById('aWorkouts');
+  try{
+    const ws=await api('/api/workouts');
+    if(!ws.length){box.innerHTML=`<div class="empty"><div class="ei">🏋️</div>Тренировок нет. Создайте первую!</div>`;return;}
+    const byDate={};
+    ws.forEach(w=>{const d=new Date(w.datetime).toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});if(!byDate[d])byDate[d]=[];byDate[d].push(w);});
+    box.innerHTML=Object.entries(byDate).map(([date,items])=>`
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu2);margin-bottom:8px">${date}</div>
+        ${items.map(w=>renderWCard(w,true)).join('')}
+      </div>`).join('');
+  }catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}
+}
+
+function renderWCard(w,isAdmin){
+  const time=new Date(w.datetime).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  const isGrp=w.type==='group';
+  const chips=(w.studentIds||[]).map(sid=>{const s=allStudents.find(x=>x.id===sid);return`<span class="chip">${s?esc(s.name):sid}</span>`;}).join('');
+  return `<div class="wcard ${isGrp?'group':''}">
+    <div class="w-title">${esc(w.title)}<span class="wbadge ${isGrp?'wb-g':'wb-p'}">${isGrp?'Группа':'Персональная'}</span></div>
+    <div class="w-meta">🕐 ${time} · ⏱ ${w.duration} мин</div>
+    ${chips?`<div class="w-chips">${chips}</div>`:''}
+    ${w.note?`<div class="w-note">📝 ${esc(w.note)}</div>`:''}
+    ${isAdmin?`<div><button class="btn btn-d sm" onclick="delWorkout('${w.id}')">🗑 Удалить</button></div>`:''}
+  </div>`;
+}
+
 async function delWorkout(id){if(!confirm('Удалить?'))return;try{await api('/api/workouts/'+id,'DELETE');loadAdminWorkouts();}catch(e){toast(e.message,'e');}}
-async function onOpenAddW(){const now=new Date();now.setMinutes(now.getMinutes()-now.getTimezoneOffset());document.getElementById('wDt').value=now.toISOString().slice(0,16);const box=document.getElementById('wChecks');try{const s=allStudents.length?allStudents:await api('/api/users');allStudents=s;if(!s.length){box.innerHTML='<div style="color:var(--mu);font-size:13px">Нет учеников</div>';return;}box.innerHTML=s.map(u=>`<label class="stu-check" id="sc-${u.id}"><input type="checkbox" value="${u.id}" onchange="document.getElementById('sc-${u.id}').classList.toggle('sel',this.checked)"/><span style="font-size:13px">${esc(u.name)}</span><span style="font-size:11px;color:var(--mu2);margin-left:auto">${u.sessions} зан.</span></label>`).join('');}catch(e){box.innerHTML=`<div style="color:var(--red);font-size:13px">${e.message}</div>`;}}
+
+async function onOpenAddW(){
+  const now=new Date();now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
+  document.getElementById('wDt').value=now.toISOString().slice(0,16);
+  const box=document.getElementById('wChecks');
+  try{
+    const s=allStudents.length?allStudents:await api('/api/users');allStudents=s;
+    if(!s.length){box.innerHTML='<div style="color:var(--mu);font-size:13px">Нет учеников</div>';return;}
+    box.innerHTML=s.map(u=>`
+      <label class="stu-check" id="sc-${u.id}">
+        <input type="checkbox" value="${u.id}" onchange="document.getElementById('sc-${u.id}').classList.toggle('sel',this.checked)"/>
+        <span style="font-size:13px">${esc(u.name)}</span>
+        <span style="font-size:11px;color:var(--mu2);margin-left:auto">${u.sessions} зан.</span>
+      </label>`).join('');
+  }catch(e){box.innerHTML=`<div style="color:var(--red);font-size:13px">${e.message}</div>`;}
+}
 function onWType(){document.getElementById('wStuLbl').textContent=document.getElementById('wType').value==='group'?'Ученики группы':'Ученик';}
-async function createWorkout(){const title=v('wTitle'),type=document.getElementById('wType').value,dt=v('wDt'),dur=v('wDur'),note=v('wNote');if(!title||!dt){toast('Название и дата обязательны','e');return;}const ids=[...document.querySelectorAll('#wChecks input:checked')].map(c=>c.value);if(!ids.length){toast('Выберите хотя бы одного ученика','e');return;}try{await api('/api/workouts','POST',{title,type,datetime:new Date(dt).toISOString(),duration:parseInt(dur)||60,studentIds:ids,note:note||''});toast('✅ Тренировка создана','s');closeMo('mAddW');clr(['wTitle','wNote']);document.getElementById('wDur').value='60';document.querySelectorAll('#wChecks input').forEach(c=>{c.checked=false;});document.querySelectorAll('.stu-check').forEach(l=>l.classList.remove('sel'));loadAdminWorkouts();}catch(e){toast(e.message,'e');}}
 
-async function loadProgPanel(){try{const s=allStudents.length?allStudents:await api('/api/users');allStudents=s;const sel=document.getElementById('progSel');sel.innerHTML='<option value="">— выберите ученика —</option>'+s.map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join('');document.getElementById('progContent').innerHTML='';}catch(e){toast(e.message,'e');}}
-async function loadAdminProg(){const uid=document.getElementById('progSel').value;const box=document.getElementById('progContent');if(!uid){box.innerHTML='';return;}box.innerHTML=`<div class="empty"><div class="sp-ring" style="margin:30px auto"></div></div>`;try{const[progressData,diaryData]=await Promise.all([fetch('/api/progress/'+uid,{headers:{'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[]),fetch('/api/diary/'+uid,{headers:{'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[])]);const weights=(Array.isArray(progressData)?progressData:[]).filter(d=>d.type==='weight');const photos=(Array.isArray(progressData)?progressData:[]).filter(d=>d.type==='photo');const entries=Array.isArray(diaryData)?diaryData:[];let html='';html+=`<div class="card card-a"><div class="ct">⚖️ График веса</div>`;html+=weights.length?`<div class="chart-w"><canvas id="adm-wc"></canvas></div>`:`<div class="empty" style="padding:20px 0"><div class="ei">⚖️</div>Нет данных о весе</div>`;html+=`</div>`;if(photos.length){html+=`<div class="st" style="margin-bottom:10px">📸 Фото прогресса</div><div class="ph-g">`;html+=photos.map(p=>`<img class="ph-img" src="${p.photoUrl}" onclick="openLightbox('${p.photoUrl}')"/>`).join('');html+=`</div><div style="margin-bottom:16px"></div>`;}html+=`<div class="sh" style="margin-bottom:12px"><div class="st">📊 Дневник тренировок</div><span style="font-size:12px;color:var(--mu2)">${entries.length} записей</span></div>`;if(!entries.length){html+=`<div class="empty" style="padding:20px 0"><div class="ei">📊</div>Ученик ещё не вёл дневник</div>`;}else{html+=entries.map(e=>{const stars=e.rating?'⭐'.repeat(e.rating):'';const d=new Date(e.date).toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short',year:'numeric'});const exCount=(e.exercises||[]).length;return `<div class="diary-day" style="cursor:default"><div class="diary-day-head"><span style="font-size:18px">🏋️</span><div><div class="diary-day-date">${d}</div><div class="diary-day-excount">${exCount} упражнений${e.note?' · '+esc(e.note.slice(0,50)):''}</div></div><div class="diary-day-rating">${stars}</div></div>${(e.exercises||[]).length?`<div style="margin-top:10px">`+e.exercises.map(ex=>{const chips=(ex.sets||[]).map(s=>`<span class="diary-set-chip">${s.weight?s.weight+'кг×':''}${s.reps}</span>`).join('');return`<div class="diary-ex-row"><span class="diary-ex-name">${esc(ex.name)}</span><div class="diary-ex-sets">${chips}</div></div>`;}).join('')+`</div>`:''}</div>`;}).join('');}box.innerHTML=html;if(weights.length)new Chart(document.getElementById('adm-wc'),chartCfg(weights));}catch(e){box.innerHTML=`<div class="empty">${esc(e.message)}</div>`;}}
+async function createWorkout(){
+  const title=v('wTitle'),type=document.getElementById('wType').value,dt=v('wDt'),dur=v('wDur'),note=v('wNote');
+  if(!title||!dt){toast('Название и дата обязательны','e');return;}
+  const ids=[...document.querySelectorAll('#wChecks input:checked')].map(c=>c.value);
+  if(!ids.length){toast('Выберите хотя бы одного ученика','e');return;}
+  try{
+    await api('/api/workouts','POST',{title,type,datetime:new Date(dt).toISOString(),duration:parseInt(dur)||60,studentIds:ids,note:note||''});
+    toast('✅ Тренировка создана','s');closeMo('mAddW');clr(['wTitle','wNote']);document.getElementById('wDur').value='60';
+    document.querySelectorAll('#wChecks input').forEach(c=>{c.checked=false;});
+    document.querySelectorAll('.stu-check').forEach(l=>l.classList.remove('sel'));
+    loadAdminWorkouts();
+  }catch(e){toast(e.message,'e');}
+}
 
-async function loadUserHome(){try{ME=await api('/api/me/'+ME.id);}catch{}const n=document.getElementById('subN');n.textContent=ME.sessions;n.style.color=ME.sessions<=0?'var(--red)':ME.sessions<=2?'var(--yel)':'var(--ac)';document.getElementById('subPay').textContent=ME.paymentDate?new Date(ME.paymentDate).toLocaleDateString('ru-RU'):'—';document.getElementById('streak').style.display=ME.sessions>0?'flex':'none';document.getElementById('planBtn').innerHTML='';loadUserPosts();if(!document.getElementById('reviewHomeBtn')){const tgBtn=document.querySelector('.tg-a');if(tgBtn){const btn=document.createElement('button');btn.id='reviewHomeBtn';btn.className='tg-a';btn.style.cssText='cursor:pointer;border:none;text-align:left;width:100%;background:rgba(255,255,255,.03)';btn.innerHTML='<span style="font-size:26px">⭐</span><div><b style="font-size:14px">Оставить отзыв</b><br><span style="font-size:12px;color:var(--mu2)">Оцените тренировку</span></div>';btn.onclick=()=>openMo('mReview');tgBtn.parentNode.insertBefore(btn,tgBtn.nextSibling);}}}
-async function loadUserPosts(){const box=document.getElementById('uPosts');try{const posts=await api('/api/posts');if(!posts.length){box.innerHTML=`<div class="empty"><div class="ei">📢</div>Новостей пока нет</div>`;return;}box.innerHTML=posts.map(p=>renderPost(p,false)).join('');}catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}}
-async function loadUserWorkouts(){const box=document.getElementById('uWorkouts');try{const ws=await api('/api/workouts?userId='+ME.id);if(!ws.length){box.innerHTML=`<div class="empty"><div class="ei">🏋️</div>Тренировок пока нет</div>`;return;}const now=Date.now();const future=ws.filter(w=>new Date(w.datetime).getTime()>=now);const past=ws.filter(w=>new Date(w.datetime).getTime()<now).reverse();let html='';if(future.length){html+=`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--ac);margin-bottom:10px">Предстоящие</div>`;html+=future.map(w=>`<div class="wcard ${w.type==='group'?'group':''}"><div class="w-title">${esc(w.title)}<span class="wbadge ${w.type==='group'?'wb-g':'wb-p'}">${w.type==='group'?'Группа':'Личная'}</span></div><div class="w-meta">📅 ${new Date(w.datetime).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} · ⏱ ${w.duration} мин</div>${w.note?`<div class="w-note">📝 ${esc(w.note)}</div>`:''}</div>`).join('');}if(past.length){html+=`<div class="div"></div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu2);margin-bottom:10px">История</div>`;html+=past.slice(0,8).map(w=>`<div class="wcard" style="opacity:.5;border-left-color:var(--mu)"><div class="w-title">${esc(w.title)}</div><div class="w-meta">📅 ${new Date(w.datetime).toLocaleDateString('ru-RU')} · ⏱ ${w.duration} мин</div></div>`).join('');}box.innerHTML=html;}catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}}
+// ═══════════════════════════════════════════
+// ПРОГРЕСС ТРЕНЕРА
+// ═══════════════════════════════════════════
+async function loadProgPanel(){
+  try{
+    const s=allStudents.length?allStudents:await api('/api/users');allStudents=s;
+    const sel=document.getElementById('progSel');
+    sel.innerHTML='<option value="">— выберите ученика —</option>'+s.map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join('');
+    document.getElementById('progContent').innerHTML='';
+  }catch(e){toast(e.message,'e');}
+}
 
-async function loadUserProgress(){document.getElementById('wtD').value=new Date().toISOString().split('T')[0];try{const data=await api('/api/progress/'+ME.id);const weights=data.filter(d=>d.type==='weight');const photos=data.filter(d=>d.type==='photo');if(wChartInst){wChartInst.destroy();wChartInst=null;}const chartBox=document.querySelector('#p-uprog .chart-w');if(chartBox){if(weights.length){chartBox.innerHTML='<canvas id="wChart"></canvas>';wChartInst=new Chart(document.getElementById('wChart'),chartCfg(weights));}else{chartBox.innerHTML=`<div class="empty"><div class="ei">⚖️</div>Добавьте первую запись веса</div>`;}}const pg=document.getElementById('phGrid');pg.innerHTML=photos.length?photos.map(p=>`<div class="ph-wrap"><img class="ph-img" src="${p.photoUrl}" onclick="openLightbox('${esc(p.photoUrl)}')"/><button class="ph-del" onclick="deletePhoto('${p.id}',event)" title="Удалить фото">✕</button></div>`).join(''):`<div class="empty" style="grid-column:1/-1"><div class="ei">📸</div>Нет фото</div>`;}catch(e){toast('Ошибка загрузки прогресса: '+e.message,'e');}}
-async function addWeight(){const w=v('wtV'),d=v('wtD');if(!w){toast('Введите вес','e');return;}try{await api('/api/progress','POST',{userId:ME.id,weight:w,date:d});toast('✅ Вес сохранён','s');closeMo('mAddWt');document.getElementById('wtV').value='';loadUserProgress();}catch(e){toast(e.message,'e');}}
+async function loadAdminProg(){
+  const uid=document.getElementById('progSel').value;
+  const box=document.getElementById('progContent');
+  if(!uid){box.innerHTML='';return;}
+  box.innerHTML=`<div class="empty"><div class="sp-ring" style="margin:30px auto"></div></div>`;
+  try{
+    const[progressData,diaryData]=await Promise.all([
+      fetch('/api/progress/'+uid,{headers:{'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[]),
+      fetch('/api/diary/'+uid,{headers:{'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[])
+    ]);
+    const weights=(Array.isArray(progressData)?progressData:[]).filter(d=>d.type==='weight');
+    const photos=(Array.isArray(progressData)?progressData:[]).filter(d=>d.type==='photo');
+    const entries=Array.isArray(diaryData)?diaryData:[];
+    let html='';
+    html+=`<div class="card card-a"><div class="ct">⚖️ График веса</div>`;
+    html+=weights.length?`<div class="chart-w"><canvas id="adm-wc"></canvas></div>`:`<div class="empty" style="padding:20px 0"><div class="ei">⚖️</div>Нет данных о весе</div>`;
+    html+=`</div>`;
+    if(photos.length){
+      html+=`<div class="st" style="margin-bottom:10px">📸 Фото прогресса</div><div class="ph-g">`;
+      html+=photos.map(p=>`<img class="ph-img" src="${p.photoUrl}" onclick="openLightbox('${p.photoUrl}')"/>`).join('');
+      html+=`</div><div style="margin-bottom:16px"></div>`;
+    }
+    html+=`<div class="sh" style="margin-bottom:12px"><div class="st">📊 Дневник тренировок</div><span style="font-size:12px;color:var(--mu2)">${entries.length} записей</span></div>`;
+    if(!entries.length){
+      html+=`<div class="empty" style="padding:20px 0"><div class="ei">📊</div>Ученик ещё не вёл дневник</div>`;
+    }else{
+      html+=entries.map(e=>{
+        const stars=e.rating?'⭐'.repeat(e.rating):'';
+        const d=new Date(e.date).toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+        const exCount=(e.exercises||[]).length;
+        return `<div class="diary-day" style="cursor:default">
+          <div class="diary-day-head">
+            <span style="font-size:18px">🏋️</span>
+            <div><div class="diary-day-date">${d}</div><div class="diary-day-excount">${exCount} упражнений${e.note?' · '+esc(e.note.slice(0,50)):''}</div></div>
+            <div class="diary-day-rating">${stars}</div>
+          </div>
+          ${(e.exercises||[]).length?`<div style="margin-top:10px">`+e.exercises.map(ex=>{const chips=(ex.sets||[]).map(s=>`<span class="diary-set-chip">${s.weight?s.weight+'кг×':''}${s.reps}</span>`).join('');return`<div class="diary-ex-row"><span class="diary-ex-name">${esc(ex.name)}</span><div class="diary-ex-sets">${chips}</div></div>`;}).join('')+`</div>`:''}
+        </div>`;
+      }).join('');
+    }
+    box.innerHTML=html;
+    if(weights.length)new Chart(document.getElementById('adm-wc'),chartCfg(weights));
+  }catch(e){box.innerHTML=`<div class="empty">${esc(e.message)}</div>`;}
+}
+
+// ═══════════════════════════════════════════
+// ГЛАВНАЯ УЧЕНИКА
+// ═══════════════════════════════════════════
+async function loadUserHome(){
+  try{ME=await api('/api/me/'+ME.id);}catch{}
+  const n=document.getElementById('subN');
+  n.textContent=ME.sessions;
+  n.style.color=ME.sessions<=0?'var(--red)':ME.sessions<=2?'var(--yel)':'var(--ac)';
+  document.getElementById('subPay').textContent=ME.paymentDate?new Date(ME.paymentDate).toLocaleDateString('ru-RU'):'—';
+  document.getElementById('streak').style.display=ME.sessions>0?'flex':'none';
+  document.getElementById('planBtn').innerHTML='';
+  loadUserPosts();
+  if(!document.getElementById('reviewHomeBtn')){
+    const tgBtn=document.querySelector('.tg-a');
+    if(tgBtn){
+      const btn=document.createElement('button');
+      btn.id='reviewHomeBtn';btn.className='tg-a';
+      btn.style.cssText='cursor:pointer;border:none;text-align:left;width:100%;background:rgba(255,255,255,.03)';
+      btn.innerHTML='<span style="font-size:26px">⭐</span><div><b style="font-size:14px">Оставить отзыв</b><br><span style="font-size:12px;color:var(--mu2)">Оцените тренировку</span></div>';
+      btn.onclick=()=>openMo('mReview');
+      tgBtn.parentNode.insertBefore(btn,tgBtn.nextSibling);
+    }
+  }
+}
+
+async function loadUserPosts(){
+  const box=document.getElementById('uPosts');
+  try{
+    const posts=await api('/api/posts');
+    if(!posts.length){box.innerHTML=`<div class="empty"><div class="ei">📢</div>Новостей пока нет</div>`;return;}
+    box.innerHTML=posts.map(p=>renderPost(p,false)).join('');
+  }catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}
+}
+
+async function loadUserWorkouts(){
+  const box=document.getElementById('uWorkouts');
+  try{
+    const ws=await api('/api/workouts?userId='+ME.id);
+    if(!ws.length){box.innerHTML=`<div class="empty"><div class="ei">🏋️</div>Тренировок пока нет</div>`;return;}
+    const now=Date.now();
+    const future=ws.filter(w=>new Date(w.datetime).getTime()>=now);
+    const past=ws.filter(w=>new Date(w.datetime).getTime()<now).reverse();
+    let html='';
+    if(future.length){
+      html+=`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--ac);margin-bottom:10px">Предстоящие</div>`;
+      html+=future.map(w=>`<div class="wcard ${w.type==='group'?'group':''}">
+        <div class="w-title">${esc(w.title)}<span class="wbadge ${w.type==='group'?'wb-g':'wb-p'}">${w.type==='group'?'Группа':'Личная'}</span></div>
+        <div class="w-meta">📅 ${new Date(w.datetime).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} · ⏱ ${w.duration} мин</div>
+        ${w.note?`<div class="w-note">📝 ${esc(w.note)}</div>`:''}
+      </div>`).join('');
+    }
+    if(past.length){
+      html+=`<div class="div"></div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu2);margin-bottom:10px">История</div>`;
+      html+=past.slice(0,8).map(w=>`<div class="wcard" style="opacity:.5;border-left-color:var(--mu)"><div class="w-title">${esc(w.title)}</div><div class="w-meta">📅 ${new Date(w.datetime).toLocaleDateString('ru-RU')} · ⏱ ${w.duration} мин</div></div>`).join('');
+    }
+    box.innerHTML=html;
+  }catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}
+}
+
+// ═══════════════════════════════════════════
+// ПРОГРЕСС УЧЕНИКА
+// ═══════════════════════════════════════════
+async function loadUserProgress(){
+  document.getElementById('wtD').value=new Date().toISOString().split('T')[0];
+  try{
+    const data=await api('/api/progress/'+ME.id);
+    const weights=data.filter(d=>d.type==='weight');
+    const photos=data.filter(d=>d.type==='photo');
+    if(wChartInst){wChartInst.destroy();wChartInst=null;}
+    const chartBox=document.querySelector('#p-uprog .chart-w');
+    if(chartBox){
+      if(weights.length){
+        chartBox.innerHTML='<canvas id="wChart"></canvas>';
+        wChartInst=new Chart(document.getElementById('wChart'),chartCfg(weights));
+      }else{
+        chartBox.innerHTML=`<div class="empty"><div class="ei">⚖️</div>Добавьте первую запись веса</div>`;
+      }
+    }
+    const pg=document.getElementById('phGrid');
+    pg.innerHTML=photos.length
+      ?photos.map(p=>`<div class="ph-wrap">
+          <img class="ph-img" src="${p.photoUrl}" onclick="openLightbox('${esc(p.photoUrl)}')"/>
+          <button class="ph-del" onclick="deletePhoto('${p.id}',event)" title="Удалить фото">✕</button>
+        </div>`).join('')
+      :`<div class="empty" style="grid-column:1/-1"><div class="ei">📸</div>Нет фото</div>`;
+  }catch(e){toast('Ошибка загрузки прогресса: '+e.message,'e');}
+}
+
+async function addWeight(){
+  const w=v('wtV'),d=v('wtD');
+  if(!w){toast('Введите вес','e');return;}
+  try{await api('/api/progress','POST',{userId:ME.id,weight:w,date:d});toast('✅ Вес сохранён','s');closeMo('mAddWt');document.getElementById('wtV').value='';loadUserProgress();}
+  catch(e){toast(e.message,'e');}
+}
+
 function prevPhoto(e){const f=e.target.files[0];if(!f)return;const p=document.getElementById('phPrev');p.src=URL.createObjectURL(f);p.style.display='block';document.getElementById('phUpLbl').style.display='none';}
-async function uploadPhoto(){const file=document.getElementById('phFile').files[0];if(!file){toast('Выберите фото','e');return;}toast('⏳ Загрузка фото...','w');const fd=new FormData();fd.append('userId',ME.id);fd.append('photo',file);try{const r=await fetch('/api/progress/photo',{method:'POST',body:fd});const d=await r.json();if(!r.ok)throw new Error(d.error);toast('✅ Фото загружено','s');closeMo('mAddPh');document.getElementById('phFile').value='';document.getElementById('phPrev').style.display='none';document.getElementById('phUpLbl').style.display='flex';loadUserProgress();}catch(e){toast('Ошибка: '+e.message,'e');}}
-async function deletePhoto(photoId, e) {if (e) e.stopPropagation();if (!confirm('Удалить это фото?')) return;try {await api('/api/progress/photo/' + photoId, 'DELETE');toast('🗑 Фото удалено', 'w');loadUserProgress();} catch(err) {toast('Ошибка: ' + err.message, 'e');}}
 
+async function uploadPhoto(){
+  const file=document.getElementById('phFile').files[0];
+  if(!file){toast('Выберите фото','e');return;}
+  toast('⏳ Загрузка фото...','w');
+  const fd=new FormData();fd.append('userId',ME.id);fd.append('photo',file);
+  try{
+    const r=await fetch('/api/progress/photo',{method:'POST',body:fd});
+    const d=await r.json();if(!r.ok)throw new Error(d.error);
+    toast('✅ Фото загружено','s');closeMo('mAddPh');
+    document.getElementById('phFile').value='';document.getElementById('phPrev').style.display='none';document.getElementById('phUpLbl').style.display='flex';
+    loadUserProgress();
+  }catch(e){toast('Ошибка: '+e.message,'e');}
+}
+
+// ✅ ИСПРАВЛЕНО: удаление фото прогресса — подтверждение + корректный вызов API
+async function deletePhoto(photoId, e) {
+  if (e) e.stopPropagation();
+  if (!confirm('Удалить это фото?')) return;
+  try {
+    await api('/api/progress/photo/' + photoId, 'DELETE');
+    toast('🗑 Фото удалено', 'w');
+    loadUserProgress();
+  } catch(err) {
+    toast('Ошибка: ' + err.message, 'e');
+  }
+}
+
+// ═══════════════════════════════════════════
+// ДНЕВНИК — с планом и быстрым вводом
+// ═══════════════════════════════════════════
 let _diaryRating = 0;
-let _diaryPlan = null, _diaryWeek = 1, _diaryActiveBlock = null, _diaryEntryId = null;
-let _diaryExercises = [], _diaryAllExercises = [], _diaryCustomCount = 0;
+let _diaryPlan = null;        // план текущего ученика
+let _diaryWeek = 1;           // активная неделя
+let _diaryActiveBlock = null; // активный блок
+let _diaryEntryId = null;     // null = новая, string = редактирование
+let _diaryExercises = [];     // упражнения текущего блока
+let _diaryAllExercises = [];  // все упражнения всех блоков (накопленные)
+let _diaryCustomCount = 0;
 
+// ─── Picker (барабанный выбор чисел) ──────
 let _pickerCb = null;
 const _drumState = { drum1: 0, drum2: 0 };
 const _drumItems = { drum1: [], drum2: [] };
-function drumBuild(drumId, items) {_drumItems[drumId] = items;_drumState[drumId] = 0;const track = document.getElementById(drumId + '-track');track.innerHTML = items.map(v => `<div class="drum-item">${v}</div>`).join('');drumApply(drumId);}
-function drumApply(drumId) {const idx = _drumState[drumId];const track = document.getElementById(drumId + '-track');track.style.transform = `translateY(${-idx * 56}px)`;track.querySelectorAll('.drum-item').forEach((el, i) => {el.style.opacity = i === idx ? '1' : '0.3';el.style.fontSize = i === idx ? '22px' : '16px';});}
-function drumScroll(drumId, dir) {const items = _drumItems[drumId];_drumState[drumId] = Math.max(0, Math.min(items.length - 1, _drumState[drumId] + dir));drumApply(drumId);}
-function openPicker(title, subtitle, opts, cb) {_pickerCb = cb;document.getElementById('pickerTitle').textContent = title;document.getElementById('pickerSubtitle').textContent = subtitle || '';if (opts.type === 'weight') {const integers = Array.from({length:301}, (_,i) => i);const decimals = ['0', '5'];const cur = parseFloat(opts.currentVal) || 0;const intPart = Math.floor(cur);const decPart = (Math.round((cur - intPart) * 10) === 5) ? 1 : 0;drumBuild('drum1', integers);drumBuild('drum2', decimals);_drumState.drum1 = Math.max(0, Math.min(300, intPart));_drumState.drum2 = decPart;drumApply('drum1');drumApply('drum2');document.getElementById('drum2').style.display = 'flex';document.getElementById('pickerSep').style.display = 'flex';} else {const reps = Array.from({length:50}, (_,i) => i+1);const cur = parseInt(opts.currentVal) || 1;drumBuild('drum1', reps);_drumState.drum1 = Math.max(0, Math.min(49, cur - 1));drumApply('drum1');document.getElementById('drum2').style.display = 'none';document.getElementById('pickerSep').style.display = 'none';}openMo('mPicker');setTimeout(initDrumTouchSupport, 80);}
-function pickerConfirm() {if (!_pickerCb) { closeMo('mPicker'); return; }const d2 = document.getElementById('drum2');let val;if (d2.style.display !== 'none') {const intPart = _drumItems.drum1[_drumState.drum1];const decPart = _drumItems.drum2[_drumState.drum2];val = parseFloat(`${intPart}.${decPart}`);} else {val = _drumItems.drum1[_drumState.drum1];}_pickerCb(val);closeMo('mPicker');}
-function initDrumTouchSupport() {['drum1','drum2'].forEach(drumId => {const vp = document.querySelector(`#${drumId} .drum-viewport`);if (!vp || vp._touchBound) return;vp._touchBound = true;let lastY = 0;vp.addEventListener('touchstart', e => { lastY = e.touches[0].clientY; }, { passive: true });vp.addEventListener('touchmove', e => {const dy = lastY - e.touches[0].clientY;lastY = e.touches[0].clientY;if (Math.abs(dy) > 12) drumScroll(drumId, dy > 0 ? 1 : -1);}, { passive: true });vp.addEventListener('wheel', e => {e.preventDefault();drumScroll(drumId, e.deltaY > 0 ? 1 : -1);}, { passive: false });});}
 
+function drumBuild(drumId, items) {
+  _drumItems[drumId] = items;
+  _drumState[drumId] = 0;
+  const track = document.getElementById(drumId + '-track');
+  track.innerHTML = items.map(v => `<div class="drum-item">${v}</div>`).join('');
+  drumApply(drumId);
+}
+
+function drumApply(drumId) {
+  const idx = _drumState[drumId];
+  const track = document.getElementById(drumId + '-track');
+  track.style.transform = `translateY(${-idx * 56}px)`;
+  // Highlight active
+  track.querySelectorAll('.drum-item').forEach((el, i) => {
+    el.style.opacity = i === idx ? '1' : '0.3';
+    el.style.fontSize = i === idx ? '22px' : '16px';
+  });
+}
+
+function drumScroll(drumId, dir) {
+  const items = _drumItems[drumId];
+  _drumState[drumId] = Math.max(0, Math.min(items.length - 1, _drumState[drumId] + dir));
+  drumApply(drumId);
+}
+
+function openPicker(title, subtitle, opts, cb) {
+  // opts: { type:'weight'|'reps', currentVal }
+  _pickerCb = cb;
+  document.getElementById('pickerTitle').textContent = title;
+  document.getElementById('pickerSubtitle').textContent = subtitle || '';
+
+  if (opts.type === 'weight') {
+    // Drum1 = целая часть (0–300), Drum2 = дробная (.0 .5)
+    const integers = Array.from({length:301}, (_,i) => i);  // 0..300
+    const decimals = ['0', '5'];
+    const cur = parseFloat(opts.currentVal) || 0;
+    const intPart = Math.floor(cur);
+    const decPart = (Math.round((cur - intPart) * 10) === 5) ? 1 : 0;
+    drumBuild('drum1', integers);
+    drumBuild('drum2', decimals);
+    _drumState.drum1 = Math.max(0, Math.min(300, intPart));
+    _drumState.drum2 = decPart;
+    drumApply('drum1');
+    drumApply('drum2');
+    document.getElementById('drum2').style.display = 'flex';
+    document.getElementById('pickerSep').style.display = 'flex';
+  } else {
+    // Повторения 1–50
+    const reps = Array.from({length:50}, (_,i) => i+1);
+    const cur = parseInt(opts.currentVal) || 1;
+    drumBuild('drum1', reps);
+    _drumState.drum1 = Math.max(0, Math.min(49, cur - 1));
+    drumApply('drum1');
+    document.getElementById('drum2').style.display = 'none';
+    document.getElementById('pickerSep').style.display = 'none';
+  }
+
+  openMo('mPicker');
+  setTimeout(initDrumTouchSupport, 80);
+}
+
+function pickerConfirm() {
+  if (!_pickerCb) { closeMo('mPicker'); return; }
+  const d2 = document.getElementById('drum2');
+  let val;
+  if (d2.style.display !== 'none') {
+    const intPart = _drumItems.drum1[_drumState.drum1];
+    const decPart = _drumItems.drum2[_drumState.drum2];
+    val = parseFloat(`${intPart}.${decPart}`);
+  } else {
+    val = _drumItems.drum1[_drumState.drum1];
+  }
+  _pickerCb(val);
+  closeMo('mPicker');
+}
+
+// ─── Touch/wheel на барабанах ─────────────
+function initDrumTouchSupport() {
+  ['drum1','drum2'].forEach(drumId => {
+    const vp = document.querySelector(`#${drumId} .drum-viewport`);
+    if (!vp || vp._touchBound) return;
+    vp._touchBound = true;
+    let lastY = 0;
+    vp.addEventListener('touchstart', e => { lastY = e.touches[0].clientY; }, { passive: true });
+    vp.addEventListener('touchmove', e => {
+      const dy = lastY - e.touches[0].clientY;
+      lastY = e.touches[0].clientY;
+      if (Math.abs(dy) > 12) drumScroll(drumId, dy > 0 ? 1 : -1);
+    }, { passive: true });
+    vp.addEventListener('wheel', e => {
+      e.preventDefault();
+      drumScroll(drumId, e.deltaY > 0 ? 1 : -1);
+    }, { passive: false });
+  });
+}
+
+// ─── Структура упражнений ─────────────────
 function diaryExerciseHTML(ex, idx) {
-  const setsHTML = ex.sets.map((s, si) => `<div class="diary-set-row" id="setrow-${idx}-${si}"><div class="diary-set-num">${si + 1}</div><div class="diary-set-field"><div class="diary-set-label">Вес кг</div><div class="diary-set-val wt" onclick="pickWeight(${idx},${si})">${s.weight !== '' && s.weight !== undefined ? s.weight : '—'}</div></div><div class="diary-set-field"><div class="diary-set-label">Повт</div><div class="diary-set-val rp" onclick="pickReps(${idx},${si})">${s.reps || '—'}</div></div><div class="diary-set-done ${s.done ? 'ok' : ''}" onclick="toggleSetDone(${idx},${si})">${s.done ? '✓' : '○'}</div><button class="diary-set-del" onclick="delDiarySet(${idx},${si})">✕</button></div>`).join('');
+  const setsHTML = ex.sets.map((s, si) => `
+    <div class="diary-set-row" id="setrow-${idx}-${si}">
+      <div class="diary-set-num">${si + 1}</div>
+      <div class="diary-set-field">
+        <div class="diary-set-label">Вес кг</div>
+        <div class="diary-set-val wt" onclick="pickWeight(${idx},${si})">${s.weight !== '' && s.weight !== undefined ? s.weight : '—'}</div>
+      </div>
+      <div class="diary-set-field">
+        <div class="diary-set-label">Повт</div>
+        <div class="diary-set-val rp" onclick="pickReps(${idx},${si})">${s.reps || '—'}</div>
+      </div>
+      <div class="diary-set-done ${s.done ? 'ok' : ''}" onclick="toggleSetDone(${idx},${si})">${s.done ? '✓' : '○'}</div>
+      <button class="diary-set-del" onclick="delDiarySet(${idx},${si})">✕</button>
+    </div>`).join('');
+
   const isFromPlan = !ex.custom;
   const planHint = ex.planSets ? `${ex.planSets}×${ex.planReps}` : '';
-  return `<div class="diary-ex-card ${ex.expanded ? 'active' : ''}" id="dex-${idx}"><div class="diary-ex-header" onclick="toggleDiaryEx(${idx})"><div class="diary-ex-icon">${isFromPlan ? '📋' : '➕'}</div><div class="diary-ex-name-label">${esc(ex.name)}</div>${planHint ? `<div class="diary-ex-plan-hint">${planHint}</div>` : ''}<div class="diary-ex-toggle">▾</div></div><div class="diary-ex-body"><div class="diary-sets-list" id="setslist-${idx}">${setsHTML}</div><button class="diary-add-set-btn" onclick="addDiarySet(${idx})">+ Добавить подход</button><button class="diary-ex-del-btn" onclick="removeDiaryEx(${idx})">✕ Убрать упражнение</button></div></div>`;
-}
-function renderDiaryExList() {const box = document.getElementById('diaryExList');if (!_diaryExercises.length) { box.innerHTML = ''; return; }const blockOrder = [], blockMap = {};_diaryExercises.forEach((ex, idx) => {const b = ex.block || '';if (!blockMap[b]) { blockMap[b] = []; blockOrder.push(b); }blockMap[b].push({ ex, idx });});let html = '';for (const blockName of blockOrder) {const items = blockMap[blockName];if (blockName) {html += `<div class="diary-plan-block-title">💪 ${esc(blockName)}</div>`;}html += items.map(({ ex, idx }) => diaryExerciseHTML(ex, idx)).join('');}box.innerHTML = html;}
-function toggleDiaryEx(idx) {_diaryExercises[idx].expanded = !_diaryExercises[idx].expanded;renderDiaryExList();}
-function pickWeight(exIdx, setIdx) {const cur = _diaryExercises[exIdx].sets[setIdx].weight;openPicker('⚖️ Вес', _diaryExercises[exIdx].name, { type: 'weight', currentVal: cur }, val => {_diaryExercises[exIdx].sets[setIdx].weight = val;renderDiaryExList();});}
-function pickReps(exIdx, setIdx) {const cur = _diaryExercises[exIdx].sets[setIdx].reps;openPicker('🔁 Повторения', _diaryExercises[exIdx].name, { type: 'reps', currentVal: cur }, val => {_diaryExercises[exIdx].sets[setIdx].reps = val;renderDiaryExList();});}
-function toggleSetDone(exIdx, setIdx) {_diaryExercises[exIdx].sets[setIdx].done = !_diaryExercises[exIdx].sets[setIdx].done;renderDiaryExList();}
-function delDiarySet(exIdx, setIdx) {_diaryExercises[exIdx].sets.splice(setIdx, 1);renderDiaryExList();}
-function addDiarySet(exIdx) {const sets = _diaryExercises[exIdx].sets;const lastSet = sets.length ? sets[sets.length - 1] : {};_diaryExercises[exIdx].sets.push({weight: lastSet.weight !== undefined ? lastSet.weight : '',reps: lastSet.reps || (_diaryExercises[exIdx].planReps || ''),done: false});_diaryExercises[exIdx].expanded = true;renderDiaryExList();}
-function removeDiaryEx(idx) {_diaryExercises.splice(idx, 1);renderDiaryExList();}
-function addDiaryEx() {const name = prompt('Название упражнения:');if (!name || !name.trim()) return;_diaryExercises.push({name: name.trim(),block: '',custom: true,planSets: '',planReps: '',expanded: true,sets: [{ weight: '', reps: '', done: false }]});renderDiaryExList();}
-function buildDefaultSets(ex) {const count = parseInt(ex.sets) || 3;const reps = ex.reps || '';return Array.from({ length: count }, () => ({ weight: '', reps: reps, done: false }));}
-function diarySelectWeek(week) {_diaryWeek = week;_diaryActiveBlock = null;document.querySelectorAll('.diary-week-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.week) === week));renderBlockBtns();}
-function renderBlockBtns() {const bar = document.getElementById('diaryBlockBar');const btns = document.getElementById('diaryBlockBtns');if (!_diaryPlan) { bar.style.display = 'none'; return; }const planWeek = _diaryPlan[_diaryWeek] || [];const exList = planWeek.filter(ex => ex.exercise && ex.exercise.trim());const blocks = [];const seen = new Set();exList.forEach(ex => {const b = ex.block || 'Без блока';if (!seen.has(b)) { seen.add(b); blocks.push(b); }});if (!blocks.length) { bar.style.display = 'none'; _diaryExercises = []; renderDiaryExList(); return; }bar.style.display = 'block';if (!_diaryActiveBlock) _diaryActiveBlock = blocks[0];btns.innerHTML = blocks.map(b => {const cnt = exList.filter(e => (e.block||'Без блока') === b).length;const isActive = b === _diaryActiveBlock;return `<button class="block-btn${isActive?' active':''}" onclick="diarySelectBlock('${b.replace(/'/g,"\'")}')">${b}<span class="block-cnt">${cnt}</span></button>`;}).join('');loadBlockExercises();}
-function diarySelectBlock(blockName) {_diaryActiveBlock = blockName;document.querySelectorAll('.block-btn').forEach(b => b.classList.toggle('active', b.textContent.trim().startsWith(blockName)));loadBlockExercises();}
-function loadBlockExercises() {if (!_diaryPlan) return;flushCurrentBlockToStore();const planWeek = _diaryPlan[_diaryWeek] || [];const exList = planWeek.filter(ex => ex.exercise && ex.exercise.trim() && (ex.block || 'Без блока') === _diaryActiveBlock);const stored = _diaryAllExercises.filter(e => e.block === _diaryActiveBlock);if (stored.length) {_diaryExercises = stored;} else {_diaryExercises = exList.map(ex => ({name: ex.exercise,block: ex.block || 'Без блока',custom: false,planSets: ex.sets || '',planReps: ex.reps || '',expanded: true,sets: buildDefaultSets(ex)}));_diaryAllExercises = _diaryAllExercises.filter(e => e.block !== _diaryActiveBlock);_diaryAllExercises.push(..._diaryExercises);}renderDiaryExList();}
-function flushCurrentBlockToStore() {if (!_diaryExercises.length) return;const curBlock = _diaryExercises[0]?.block;if (curBlock !== undefined) {_diaryAllExercises = _diaryAllExercises.filter(e => e.block !== curBlock);_diaryAllExercises.push(..._diaryExercises);}}
-async function openDiaryModal() {_diaryEntryId = null;_diaryRating = 0;_diaryExercises = [];_diaryAllExercises = [];_diaryActiveBlock = null;document.getElementById('diaryDate').value = new Date().toISOString().split('T')[0];document.getElementById('diaryNote').value = '';document.getElementById('diaryModalTitle').textContent = '📊 Запись тренировки';document.getElementById('diarySaveBtn').setAttribute('onclick', 'saveDiary()');document.querySelectorAll('#starRow .star-btn').forEach(b => b.classList.remove('active'));try {const data = await api('/api/users/' + ME.id + '/plan');_diaryPlan = data.trainingPlan || null;} catch { _diaryPlan = null; }const weekBar = document.getElementById('diaryWeekBar');const weekBtns = document.getElementById('diaryWeekBtns');if (_diaryPlan) {weekBar.style.display = 'block';weekBtns.innerHTML = [1,2,3,4].map(w => {const cnt = (_diaryPlan[w]||[]).filter(e=>e.exercise).length;return `<button class="week-btn diary-week-btn${w===1?' active':''}" data-week="${w}" onclick="diarySelectWeek(${w})">Нед. ${w}<span class="block-cnt">${cnt}</span></button>`;}).join('');_diaryWeek = 1;renderBlockBtns();} else {weekBar.style.display = 'none';document.getElementById('diaryBlockBar').style.display = 'none';renderDiaryExList();}openMo('mDiary');}
-function setStar(n){_diaryRating=n;document.querySelectorAll('#starRow .star-btn').forEach((b,i)=>b.classList.toggle('active',i<n));}
-async function saveDiary() {const date = document.getElementById('diaryDate').value;if (!date) { toast('Укажите дату', 'e'); return; }flushCurrentBlockToStore();const allEx = [..._diaryAllExercises, ..._diaryExercises.filter(e => e.custom && !_diaryAllExercises.find(x => x === e))];const exercises = allEx.map(ex => ({name: ex.name,sets: ex.sets.filter(s => s.reps).map(s => ({ weight: s.weight !== '' ? s.weight : '', reps: parseInt(s.reps) || 0 }))})).filter(ex => ex.sets.length);if (!exercises.length) { toast('Добавьте хотя бы одно упражнение с подходами', 'e'); return; }const note = document.getElementById('diaryNote').value;try {const r = await fetch('/api/diary/' + ME.id, {method: 'POST',headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },body: JSON.stringify({ date, exercises, note, rating: _diaryRating || null })});const d = await r.json();if (!r.ok) throw new Error(d.error || 'Ошибка сохранения');toast('✅ Тренировка сохранена!', 's');closeMo('mDiary');loadDiary();} catch(e) { toast(e.message, 'e'); }}
-async function saveDiaryEdit(entryId) {const date = document.getElementById('diaryDate').value;if (!date) { toast('Укажите дату', 'e'); return; }const exercises = _diaryExercises.map(ex => ({name: ex.name,sets: ex.sets.filter(s => s.reps).map(s => ({ weight: s.weight !== '' ? s.weight : '', reps: parseInt(s.reps) || 0 }))})).filter(ex => ex.sets.length);if (!exercises.length) { toast('Добавьте хотя бы одно упражнение с подходами', 'e'); return; }const note = document.getElementById('diaryNote').value;try {await api('/api/diary/' + ME.id + '/' + entryId, 'PUT', { date, exercises, note, rating: _diaryRating || null });toast('✅ Запись обновлена!', 's');closeMo('mDiary');loadDiary();} catch(e) { toast(e.message, 'e'); }}
-async function loadDiary() {const box = document.getElementById('diaryList');box.innerHTML = '<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';try {const r = await fetch('/api/diary/' + ME.id, { headers: { 'Accept': 'application/json' } });if (!r.ok) throw new Error('Статус ' + r.status);const ct = r.headers.get('content-type') || '';if (!ct.includes('application/json')) throw new Error('Сервер вернул не JSON. Проверьте server.js');const entries = await r.json();if (!entries.length) {box.innerHTML = '<div class="empty"><div class="ei">📊</div>Начни записывать тренировки!<br><small style="color:var(--mu)">Нажми «+ Запись» чтобы добавить</small></div>';return;}box.innerHTML = entries.map(e => {const stars = e.rating ? '⭐'.repeat(e.rating) : '';const exCount = (e.exercises || []).length;const d = new Date(e.date).toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' });return `<div class="diary-day" id="diary-${e.id}"><div class="diary-day-head"><span style="font-size:18px">🏋️</span><div><div class="diary-day-date">${d}</div><div class="diary-day-excount">${exCount} упражнений${e.note ? ' · ' + esc(e.note.slice(0, 40)) : ''}</div></div><div class="diary-day-rating">${stars}</div></div>${(e.exercises || []).length ? '<div style="margin-top:10px">' + e.exercises.map(ex => {const chips = (ex.sets || []).map(s => `<span class="diary-set-chip">${s.weight ? s.weight + 'кг×' : ''}${s.reps}</span>`).join('');return `<div class="diary-ex-row"><span class="diary-ex-name">${esc(ex.name)}</span><div class="diary-ex-sets">${chips}</div></div>`;}).join('') + '</div>' : ''}<div class="diary-day-actions"><button class="btn btn-g sm" onclick="editDiary('${e.id}')">✏️ Редактировать</button><button class="btn btn-d sm" onclick="deleteDiary('${e.id}')">🗑 Удалить</button></div></div>`;}).join('');} catch(e) { box.innerHTML = `<div class="empty"><div class="ei">📊</div>${esc(e.message)}</div>`; }}
-function resetDiaryModal() {document.getElementById('diarySaveBtn').setAttribute('onclick', 'saveDiary()');document.getElementById('diaryModalTitle').textContent = '📊 Запись тренировки';}
-async function deleteDiary(entryId) {if (!confirm('Удалить запись тренировки?')) return;try { await api('/api/diary/' + ME.id + '/' + entryId, 'DELETE'); toast('🗑 Запись удалена', 'w'); loadDiary(); }catch(e) { toast('Ошибка: ' + e.message, 'e'); }}
-async function editDiary(entryId) {try {const r = await fetch('/api/diary/' + ME.id, { headers: { 'Accept': 'application/json' } });const entries = await r.json();const e = entries.find(x => x.id === entryId);if (!e) { toast('Запись не найдена', 'e'); return; }_diaryEntryId = entryId;_diaryRating = e.rating || 0;document.getElementById('diaryDate').value = e.date;document.getElementById('diaryNote').value = e.note || '';document.getElementById('diaryModalTitle').textContent = '✏️ Редактировать запись';document.getElementById('diarySaveBtn').setAttribute('onclick', `saveDiaryEdit('${entryId}')`);document.querySelectorAll('#starRow .star-btn').forEach((b, i) => b.classList.toggle('active', i < _diaryRating));document.getElementById('diaryWeekBar').style.display = 'none';_diaryExercises = (e.exercises || []).map(ex => ({name: ex.name,block: '',custom: true,planSets: '',planReps: '',expanded: true,sets: (ex.sets || []).map(s => ({ weight: s.weight !== undefined ? s.weight : '', reps: s.reps || '', done: false }))}));renderDiaryExList();openMo('mDiary');} catch(err) { toast('Ошибка: ' + err.message, 'e'); }}
 
+  return `<div class="diary-ex-card ${ex.expanded ? 'active' : ''}" id="dex-${idx}">
+    <div class="diary-ex-header" onclick="toggleDiaryEx(${idx})">
+      <div class="diary-ex-icon">${isFromPlan ? '📋' : '➕'}</div>
+      <div class="diary-ex-name-label">${esc(ex.name)}</div>
+      ${planHint ? `<div class="diary-ex-plan-hint">${planHint}</div>` : ''}
+      <div class="diary-ex-toggle">▾</div>
+    </div>
+    <div class="diary-ex-body">
+      <div class="diary-sets-list" id="setslist-${idx}">${setsHTML}</div>
+      <button class="diary-add-set-btn" onclick="addDiarySet(${idx})">+ Добавить подход</button>
+      <button class="diary-ex-del-btn" onclick="removeDiaryEx(${idx})">✕ Убрать упражнение</button>
+    </div>
+  </div>`;
+}
+
+function renderDiaryExList() {
+  const box = document.getElementById('diaryExList');
+  if (!_diaryExercises.length) { box.innerHTML = ''; return; }
+
+  // Группируем по блокам
+  const blockOrder = [], blockMap = {};
+  _diaryExercises.forEach((ex, idx) => {
+    const b = ex.block || '';
+    if (!blockMap[b]) { blockMap[b] = []; blockOrder.push(b); }
+    blockMap[b].push({ ex, idx });
+  });
+
+  let html = '';
+  for (const blockName of blockOrder) {
+    const items = blockMap[blockName];
+    if (blockName) {
+      html += `<div class="diary-plan-block-title">💪 ${esc(blockName)}</div>`;
+    }
+    html += items.map(({ ex, idx }) => diaryExerciseHTML(ex, idx)).join('');
+  }
+  box.innerHTML = html;
+}
+
+function toggleDiaryEx(idx) {
+  _diaryExercises[idx].expanded = !_diaryExercises[idx].expanded;
+  renderDiaryExList();
+}
+
+function pickWeight(exIdx, setIdx) {
+  const cur = _diaryExercises[exIdx].sets[setIdx].weight;
+  openPicker('⚖️ Вес', _diaryExercises[exIdx].name, { type: 'weight', currentVal: cur }, val => {
+    _diaryExercises[exIdx].sets[setIdx].weight = val;
+    renderDiaryExList();
+  });
+}
+
+function pickReps(exIdx, setIdx) {
+  const cur = _diaryExercises[exIdx].sets[setIdx].reps;
+  openPicker('🔁 Повторения', _diaryExercises[exIdx].name, { type: 'reps', currentVal: cur }, val => {
+    _diaryExercises[exIdx].sets[setIdx].reps = val;
+    renderDiaryExList();
+  });
+}
+
+function toggleSetDone(exIdx, setIdx) {
+  _diaryExercises[exIdx].sets[setIdx].done = !_diaryExercises[exIdx].sets[setIdx].done;
+  renderDiaryExList();
+}
+
+function delDiarySet(exIdx, setIdx) {
+  _diaryExercises[exIdx].sets.splice(setIdx, 1);
+  renderDiaryExList();
+}
+
+function addDiarySet(exIdx) {
+  // Предзаполняем последними значениями
+  const sets = _diaryExercises[exIdx].sets;
+  const lastSet = sets.length ? sets[sets.length - 1] : {};
+  _diaryExercises[exIdx].sets.push({
+    weight: lastSet.weight !== undefined ? lastSet.weight : '',
+    reps: lastSet.reps || (_diaryExercises[exIdx].planReps || ''),
+    done: false
+  });
+  _diaryExercises[exIdx].expanded = true;
+  renderDiaryExList();
+}
+
+function removeDiaryEx(idx) {
+  _diaryExercises.splice(idx, 1);
+  renderDiaryExList();
+}
+
+function addDiaryEx() {
+  // Добавляем своё упражнение
+  _diaryCustomCount++;
+  const name = prompt('Название упражнения:');
+  if (!name || !name.trim()) return;
+  _diaryExercises.push({
+    name: name.trim(),
+    block: '',
+    custom: true,
+    planSets: '',
+    planReps: '',
+    expanded: true,
+    sets: [{ weight: '', reps: '', done: false }]
+  });
+  renderDiaryExList();
+}
+
+// ─── Неделя плана ─────────────────────────
+function buildDefaultSets(ex) {
+  const count = parseInt(ex.sets) || 3;
+  const reps = ex.reps || '';
+  return Array.from({ length: count }, () => ({ weight: '', reps: reps, done: false }));
+}
+
+// ─── Выбор недели ─────────────────────────
+function diarySelectWeek(week) {
+  _diaryWeek = week;
+  _diaryActiveBlock = null;
+
+  document.querySelectorAll('.diary-week-btn').forEach(b =>
+    b.classList.toggle('active', parseInt(b.dataset.week) === week));
+
+  // Обновить блоки
+  renderBlockBtns();
+}
+
+// ─── Рендер кнопок блоков ─────────────────
+function renderBlockBtns() {
+  const bar = document.getElementById('diaryBlockBar');
+  const btns = document.getElementById('diaryBlockBtns');
+  if (!_diaryPlan) { bar.style.display = 'none'; return; }
+
+  const planWeek = _diaryPlan[_diaryWeek] || [];
+  const exList = planWeek.filter(ex => ex.exercise && ex.exercise.trim());
+
+  // Собираем уникальные блоки
+  const blocks = [];
+  const seen = new Set();
+  exList.forEach(ex => {
+    const b = ex.block || 'Без блока';
+    if (!seen.has(b)) { seen.add(b); blocks.push(b); }
+  });
+
+  if (!blocks.length) { bar.style.display = 'none'; _diaryExercises = []; renderDiaryExList(); return; }
+
+  bar.style.display = 'block';
+
+  // Если блок не выбран — выбираем первый
+  if (!_diaryActiveBlock) _diaryActiveBlock = blocks[0];
+
+  btns.innerHTML = blocks.map(b => {
+    const cnt = exList.filter(e => (e.block||'Без блока') === b).length;
+    const isActive = b === _diaryActiveBlock;
+    return `<button class="block-btn${isActive?' active':''}" onclick="diarySelectBlock('${b.replace(/'/g,"\'")}')">${b}<span class="block-cnt">${cnt}</span></button>`;
+  }).join('');
+
+  loadBlockExercises();
+}
+
+// ─── Выбор блока ──────────────────────────
+function diarySelectBlock(blockName) {
+  _diaryActiveBlock = blockName;
+  document.querySelectorAll('.block-btn').forEach(b =>
+    b.classList.toggle('active', b.textContent.trim().startsWith(blockName)));
+  loadBlockExercises();
+}
+
+function loadBlockExercises() {
+  if (!_diaryPlan) return;
+
+  // Сохраняем текущий блок в накопитель перед переключением
+  flushCurrentBlockToStore();
+
+  const planWeek = _diaryPlan[_diaryWeek] || [];
+  const exList = planWeek.filter(ex =>
+    ex.exercise && ex.exercise.trim() &&
+    (ex.block || 'Без блока') === _diaryActiveBlock
+  );
+
+  // Берём из накопителя если уже редактировали этот блок
+  const stored = _diaryAllExercises.filter(e => e.block === _diaryActiveBlock);
+
+  if (stored.length) {
+    _diaryExercises = stored;
+  } else {
+    _diaryExercises = exList.map(ex => ({
+      name: ex.exercise,
+      block: ex.block || 'Без блока',
+      custom: false,
+      planSets: ex.sets || '',
+      planReps: ex.reps || '',
+      expanded: true,
+      sets: buildDefaultSets(ex)
+    }));
+    // Сохраняем в накопитель
+    _diaryAllExercises = _diaryAllExercises.filter(e => e.block !== _diaryActiveBlock);
+    _diaryAllExercises.push(..._diaryExercises);
+  }
+
+  renderDiaryExList();
+}
+
+function flushCurrentBlockToStore() {
+  if (!_diaryExercises.length) return;
+  // Удаляем старые записи этого блока и заменяем актуальными
+  const curBlock = _diaryExercises[0]?.block;
+  if (curBlock !== undefined) {
+    _diaryAllExercises = _diaryAllExercises.filter(e => e.block !== curBlock);
+    _diaryAllExercises.push(..._diaryExercises);
+  }
+}
+
+// ─── Открытие модалки ─────────────────────
+async function openDiaryModal() {
+  _diaryEntryId = null;
+  _diaryRating = 0;
+  _diaryExercises = [];
+  _diaryAllExercises = [];  // все упражнения всех блоков
+  _diaryActiveBlock = null;
+  document.getElementById('diaryDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('diaryNote').value = '';
+  document.getElementById('diaryModalTitle').textContent = '📊 Запись тренировки';
+  document.getElementById('diarySaveBtn').setAttribute('onclick', 'saveDiary()');
+  document.querySelectorAll('#starRow .star-btn').forEach(b => b.classList.remove('active'));
+
+  // Загружаем план ученика
+  try {
+    const data = await api('/api/users/' + ME.id + '/plan');
+    _diaryPlan = data.trainingPlan || null;
+  } catch { _diaryPlan = null; }
+
+  const weekBar = document.getElementById('diaryWeekBar');
+  const weekBtns = document.getElementById('diaryWeekBtns');
+  if (_diaryPlan) {
+    weekBar.style.display = 'block';
+    weekBtns.innerHTML = [1,2,3,4].map(w => {
+      const cnt = (_diaryPlan[w]||[]).filter(e=>e.exercise).length;
+      return `<button class="week-btn diary-week-btn${w===1?' active':''}" data-week="${w}" onclick="diarySelectWeek(${w})">Нед. ${w}<span class="block-cnt">${cnt}</span></button>`;
+    }).join('');
+    _diaryWeek = 1;
+    renderBlockBtns();
+  } else {
+    weekBar.style.display = 'none';
+    document.getElementById('diaryBlockBar').style.display = 'none';
+    renderDiaryExList();
+  }
+
+  openMo('mDiary');
+}
+
+function setStar(n){_diaryRating=n;document.querySelectorAll('#starRow .star-btn').forEach((b,i)=>b.classList.toggle('active',i<n));}
+
+// ─── Сохранение ──────────────────────────
+async function saveDiary() {
+  const date = document.getElementById('diaryDate').value;
+  if (!date) { toast('Укажите дату', 'e'); return; }
+
+  // Сохраняем текущий блок в накопитель
+  flushCurrentBlockToStore();
+
+  // Берём все упражнения из накопителя + кастомные
+  const allEx = [..._diaryAllExercises, ..._diaryExercises.filter(e => e.custom && !_diaryAllExercises.find(x => x === e))];
+
+  const exercises = allEx
+    .map(ex => ({
+      name: ex.name,
+      sets: ex.sets
+        .filter(s => s.reps)
+        .map(s => ({ weight: s.weight !== '' ? s.weight : '', reps: parseInt(s.reps) || 0 }))
+    }))
+    .filter(ex => ex.sets.length);
+
+  if (!exercises.length) { toast('Добавьте хотя бы одно упражнение с подходами', 'e'); return; }
+  const note = document.getElementById('diaryNote').value;
+
+  try {
+    const r = await fetch('/api/diary/' + ME.id, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ date, exercises, note, rating: _diaryRating || null })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Ошибка сохранения');
+    toast('✅ Тренировка сохранена!', 's');
+    closeMo('mDiary');
+    loadDiary();
+  } catch(e) { toast(e.message, 'e'); }
+}
+
+async function saveDiaryEdit(entryId) {
+  const date = document.getElementById('diaryDate').value;
+  if (!date) { toast('Укажите дату', 'e'); return; }
+
+  const exercises = _diaryExercises
+    .map(ex => ({
+      name: ex.name,
+      sets: ex.sets
+        .filter(s => s.reps)
+        .map(s => ({ weight: s.weight !== '' ? s.weight : '', reps: parseInt(s.reps) || 0 }))
+    }))
+    .filter(ex => ex.sets.length);
+
+  if (!exercises.length) { toast('Добавьте хотя бы одно упражнение с подходами', 'e'); return; }
+  const note = document.getElementById('diaryNote').value;
+
+  try {
+    await api('/api/diary/' + ME.id + '/' + entryId, 'PUT', { date, exercises, note, rating: _diaryRating || null });
+    toast('✅ Запись обновлена!', 's');
+    closeMo('mDiary');
+    loadDiary();
+  } catch(e) { toast(e.message, 'e'); }
+}
+
+// ─── Список записей ───────────────────────
+async function loadDiary() {
+  const box = document.getElementById('diaryList');
+  box.innerHTML = '<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';
+  try {
+    const r = await fetch('/api/diary/' + ME.id, { headers: { 'Accept': 'application/json' } });
+    if (!r.ok) throw new Error('Статус ' + r.status);
+    const ct = r.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) throw new Error('Сервер вернул не JSON. Проверьте server.js');
+    const entries = await r.json();
+    if (!entries.length) {
+      box.innerHTML = '<div class="empty"><div class="ei">📊</div>Начни записывать тренировки!<br><small style="color:var(--mu)">Нажми «+ Запись» чтобы добавить</small></div>';
+      return;
+    }
+    box.innerHTML = entries.map(e => {
+      const stars = e.rating ? '⭐'.repeat(e.rating) : '';
+      const exCount = (e.exercises || []).length;
+      const d = new Date(e.date).toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' });
+      return `<div class="diary-day" id="diary-${e.id}">
+        <div class="diary-day-head">
+          <span style="font-size:18px">🏋️</span>
+          <div><div class="diary-day-date">${d}</div><div class="diary-day-excount">${exCount} упражнений${e.note ? ' · ' + esc(e.note.slice(0, 40)) : ''}</div></div>
+          <div class="diary-day-rating">${stars}</div>
+        </div>
+        ${(e.exercises || []).length ? '<div style="margin-top:10px">' + e.exercises.map(ex => {
+          const chips = (ex.sets || []).map(s => `<span class="diary-set-chip">${s.weight ? s.weight + 'кг×' : ''}${s.reps}</span>`).join('');
+          return `<div class="diary-ex-row"><span class="diary-ex-name">${esc(ex.name)}</span><div class="diary-ex-sets">${chips}</div></div>`;
+        }).join('') + '</div>' : ''}
+        <div class="diary-day-actions">
+          <button class="btn btn-g sm" onclick="editDiary('${e.id}')">✏️ Редактировать</button>
+          <button class="btn btn-d sm" onclick="deleteDiary('${e.id}')">🗑 Удалить</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { box.innerHTML = `<div class="empty"><div class="ei">📊</div>${esc(e.message)}</div>`; console.error('loadDiary:', e); }
+}
+
+function resetDiaryModal() {
+  document.getElementById('diarySaveBtn').setAttribute('onclick', 'saveDiary()');
+  document.getElementById('diaryModalTitle').textContent = '📊 Запись тренировки';
+}
+
+async function deleteDiary(entryId) {
+  if (!confirm('Удалить запись тренировки?')) return;
+  try { await api('/api/diary/' + ME.id + '/' + entryId, 'DELETE'); toast('🗑 Запись удалена', 'w'); loadDiary(); }
+  catch(e) { toast('Ошибка: ' + e.message, 'e'); }
+}
+
+async function editDiary(entryId) {
+  try {
+    const r = await fetch('/api/diary/' + ME.id, { headers: { 'Accept': 'application/json' } });
+    const entries = await r.json();
+    const e = entries.find(x => x.id === entryId);
+    if (!e) { toast('Запись не найдена', 'e'); return; }
+
+    _diaryEntryId = entryId;
+    _diaryRating = e.rating || 0;
+    document.getElementById('diaryDate').value = e.date;
+    document.getElementById('diaryNote').value = e.note || '';
+    document.getElementById('diaryModalTitle').textContent = '✏️ Редактировать запись';
+    document.getElementById('diarySaveBtn').setAttribute('onclick', `saveDiaryEdit('${entryId}')`);
+    document.querySelectorAll('#starRow .star-btn').forEach((b, i) => b.classList.toggle('active', i < _diaryRating));
+    document.getElementById('diaryWeekBar').style.display = 'none';
+
+    // Восстанавливаем упражнения из сохранённой записи
+    _diaryExercises = (e.exercises || []).map(ex => ({
+      name: ex.name,
+      block: '',
+      custom: true,
+      planSets: '',
+      planReps: '',
+      expanded: true,
+      sets: (ex.sets || []).map(s => ({ weight: s.weight !== undefined ? s.weight : '', reps: s.reps || '', done: false }))
+    }));
+
+    renderDiaryExList();
+    openMo('mDiary');
+  } catch(err) { toast('Ошибка: ' + err.message, 'e'); }
+}
+
+// ═══════════════════════════════════════════
+// КАЛЕНДАРЬ
+// ═══════════════════════════════════════════
 let _calYear=new Date().getFullYear(),_calMonth=new Date().getMonth(),_calWorkouts=[];
 const RU_MONTHS=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const RU_DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-async function loadCalendar(){try{const [ws, students] = await Promise.all([api('/api/workouts'),allStudents.length ? Promise.resolve(allStudents) : api('/api/users')]);_calWorkouts = ws;if(students.length) allStudents = students;renderCalendar();}catch(e){console.error(e);}}
+
+async function loadCalendar(){
+  try{
+    const [ws, students] = await Promise.all([
+      api('/api/workouts'),
+      allStudents.length ? Promise.resolve(allStudents) : api('/api/users')
+    ]);
+    _calWorkouts = ws;
+    if(students.length) allStudents = students;
+    renderCalendar();
+  }catch(e){console.error(e);}
+}
 function calPrev(){_calMonth--;if(_calMonth<0){_calMonth=11;_calYear--;}renderCalendar();}
 function calNext(){_calMonth++;if(_calMonth>11){_calMonth=0;_calYear++;}renderCalendar();}
-function renderCalendar(){document.getElementById('calMonthLabel').textContent=RU_MONTHS[_calMonth]+' '+_calYear;const grid=document.getElementById('calGrid');const today=new Date().toISOString().split('T')[0];const paymentDates=new Set(allStudents.map(s=>s.paymentDate).filter(Boolean));let html=RU_DAYS.map(d=>`<div class="cal-head-cell">${d}</div>`).join('');const firstDay=new Date(_calYear,_calMonth,1);const startDow=(firstDay.getDay()+6)%7;const daysInMonth=new Date(_calYear,_calMonth+1,0).getDate();const daysInPrevM=new Date(_calYear,_calMonth,0).getDate();for(let i=0;i<startDow;i++) html+=`<div class="cal-cell other-month">${daysInPrevM-startDow+1+i}</div>`;for(let d=1;d<=daysInMonth;d++){const dateStr=`${_calYear}-${String(_calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const hasW=_calWorkouts.some(w=>w.datetime&&w.datetime.startsWith(dateStr));const hasP=paymentDates.has(dateStr);const isToday=dateStr===today;let cls='cal-cell';if(hasW) cls+=' has-workout';if(hasP) cls+=' has-payment';if(isToday) cls+=' today';let dots='';if(hasW||hasP){dots='<div class="cal-dots">';if(hasW) dots+=`<div class="cal-dot cal-dot-w"></div>`;if(hasP) dots+=`<div class="cal-dot cal-dot-p"></div>`;dots+='</div>';}html+=`<div class="${cls}" onclick="showCalDay('${dateStr}')">${d}${dots}</div>`;}const total=startDow+daysInMonth;const remain=total%7===0?0:7-(total%7);for(let i=1;i<=remain;i++) html+=`<div class="cal-cell other-month">${i}</div>`;grid.innerHTML=html;document.getElementById('calEvents').innerHTML='';}
-function showCalDay(dateStr){const ws=_calWorkouts.filter(w=>w.datetime&&w.datetime.startsWith(dateStr));const payers=allStudents.filter(s=>s.paymentDate===dateStr);const evBox=document.getElementById('calEvents');const d=new Date(dateStr).toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});if(!ws.length && !payers.length){evBox.innerHTML=`<div style="color:var(--mu2);font-size:13px;padding:10px 0">${d} — событий нет</div>`;return;}let html=`<div style="font-size:12px;font-weight:700;color:var(--mu2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">${d}</div>`;ws.forEach(w=>{const t=new Date(w.datetime).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});html+=`<div class="cal-event" style="border-left:3px solid var(--ac)"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">🏋️</span><div><div style="font-weight:600;font-size:13px">${esc(w.title)}</div><div style="font-size:12px;color:var(--mu2)">${t} · ${w.type==='group'?'👥 Группа':'👤 Личная'} · ${w.duration} мин</div></div></div></div>`;});payers.forEach(s=>{const sessColor=s.sessions<=0?'var(--red)':s.sessions<=2?'var(--yel)':'var(--ac)';html+=`<div class="cal-event" style="border-left:3px solid var(--yel);background:rgba(251,191,36,.06)"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">💳</span><div><div style="font-weight:600;font-size:13px">${esc(s.name)}</div><div style="font-size:12px;color:var(--mu2)">Дата оплаты · <span style="color:${sessColor};font-weight:600">${s.sessions} занятий</span></div></div></div></div>`;});evBox.innerHTML=html;}
 
+function renderCalendar(){
+  document.getElementById('calMonthLabel').textContent=RU_MONTHS[_calMonth]+' '+_calYear;
+  const grid=document.getElementById('calGrid');
+  const today=new Date().toISOString().split('T')[0];
+  const paymentDates=new Set(allStudents.map(s=>s.paymentDate).filter(Boolean));
+  let html=RU_DAYS.map(d=>`<div class="cal-head-cell">${d}</div>`).join('');
+  const firstDay=new Date(_calYear,_calMonth,1);
+  const startDow=(firstDay.getDay()+6)%7;
+  const daysInMonth=new Date(_calYear,_calMonth+1,0).getDate();
+  const daysInPrevM=new Date(_calYear,_calMonth,0).getDate();
+  for(let i=0;i<startDow;i++) html+=`<div class="cal-cell other-month">${daysInPrevM-startDow+1+i}</div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr=`${_calYear}-${String(_calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasW=_calWorkouts.some(w=>w.datetime&&w.datetime.startsWith(dateStr));
+    const hasP=paymentDates.has(dateStr);
+    const isToday=dateStr===today;
+    let cls='cal-cell';
+    if(hasW) cls+=' has-workout';
+    if(hasP) cls+=' has-payment';
+    if(isToday) cls+=' today';
+    let dots='';
+    if(hasW||hasP){
+      dots='<div class="cal-dots">';
+      if(hasW) dots+=`<div class="cal-dot cal-dot-w"></div>`;
+      if(hasP) dots+=`<div class="cal-dot cal-dot-p"></div>`;
+      dots+='</div>';
+    }
+    html+=`<div class="${cls}" onclick="showCalDay('${dateStr}')">${d}${dots}</div>`;
+  }
+  const total=startDow+daysInMonth;
+  const remain=total%7===0?0:7-(total%7);
+  for(let i=1;i<=remain;i++) html+=`<div class="cal-cell other-month">${i}</div>`;
+  grid.innerHTML=html;
+  document.getElementById('calEvents').innerHTML='';
+}
+
+function showCalDay(dateStr){
+  const ws=_calWorkouts.filter(w=>w.datetime&&w.datetime.startsWith(dateStr));
+  const payers=allStudents.filter(s=>s.paymentDate===dateStr);
+  const evBox=document.getElementById('calEvents');
+  const d=new Date(dateStr).toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+  if(!ws.length && !payers.length){evBox.innerHTML=`<div style="color:var(--mu2);font-size:13px;padding:10px 0">${d} — событий нет</div>`;return;}
+  let html=`<div style="font-size:12px;font-weight:700;color:var(--mu2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">${d}</div>`;
+  ws.forEach(w=>{
+    const t=new Date(w.datetime).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+    html+=`<div class="cal-event" style="border-left:3px solid var(--ac)"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">🏋️</span><div><div style="font-weight:600;font-size:13px">${esc(w.title)}</div><div style="font-size:12px;color:var(--mu2)">${t} · ${w.type==='group'?'👥 Группа':'👤 Личная'} · ${w.duration} мин</div></div></div></div>`;
+  });
+  payers.forEach(s=>{
+    const sessColor=s.sessions<=0?'var(--red)':s.sessions<=2?'var(--yel)':'var(--ac)';
+    html+=`<div class="cal-event" style="border-left:3px solid var(--yel);background:rgba(251,191,36,.06)"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">💳</span><div><div style="font-weight:600;font-size:13px">${esc(s.name)}</div><div style="font-size:12px;color:var(--mu2)">Дата оплаты · <span style="color:${sessColor};font-weight:600">${s.sessions} занятий</span></div></div></div></div>`;
+  });
+  evBox.innerHTML=html;
+}
+
+// ═══════════════════════════════════════════
+// ОТЗЫВЫ
+// ═══════════════════════════════════════════
 let _reviewRating=0;
 function setReviewStar(n){_reviewRating=n;document.querySelectorAll('#reviewStarRow .star-btn').forEach((b,i)=>b.classList.toggle('active',i<n));}
-async function submitReview(){if(!_reviewRating){toast('Выберите оценку','e');return;}const text=document.getElementById('reviewText').value.trim();try{await api('/api/reviews','POST',{userId:ME.id,userName:ME.name,rating:_reviewRating,text});toast('⭐ Спасибо за отзыв!','s');closeMo('mReview');_reviewRating=0;setReviewStar(0);document.getElementById('reviewText').value='';}catch(e){toast(e.message,'e');}}
-async function loadReviews(){const box=document.getElementById('reviewsList'),avgBox=document.getElementById('avgRating');box.innerHTML='<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';avgBox.innerHTML='';try{const r=await fetch('/api/reviews',{headers:{'Accept':'application/json'}});if(!r.ok)throw new Error('Сервер вернул статус '+r.status);const ct=r.headers.get('content-type')||'';if(!ct.includes('application/json')){box.innerHTML='<div class="empty"><div class="ei">⭐</div>Отзывов пока нет</div>';return;}const reviews=await r.json();if(!reviews.length){box.innerHTML='<div class="empty"><div class="ei">⭐</div>Отзывов пока нет</div>';return;}reviews.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));const avg=(reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1);const stars=Math.round(avg);avgBox.innerHTML=`<div class="avg-rating"><div class="avg-num">${avg}</div><div class="avg-stars">${'⭐'.repeat(stars)}${'☆'.repeat(5-stars)}</div><div class="avg-count">${reviews.length} отзывов</div></div>`;box.innerHTML=reviews.map(rv=>{const d=new Date(rv.createdAt).toLocaleDateString('ru-RU');const ratingStars='⭐'.repeat(Math.min(5,Math.max(1,rv.rating)));const delBtn=ME?.role==='admin'?`<button class="btn btn-d sm" style="margin-top:8px" onclick="delReview('${rv.id}')">🗑 Удалить</button>`:'';return `<div class="review-card"><div class="review-head"><div class="review-ava">${(rv.userName||'?').charAt(0).toUpperCase()}</div><div><div class="review-name">${esc(rv.userName||'Ученик')}</div><div class="review-stars">${ratingStars}</div></div><div class="review-date">${d}</div></div>${rv.text?`<div class="review-text">${esc(rv.text)}</div>`:''}${delBtn}</div>`;}).join('');}catch(e){box.innerHTML=`<div class="empty"><div class="ei">⭐</div>${esc(e.message)}</div>`;}}
-async function delReview(id){if(!confirm('Удалить этот отзыв?'))return;try{await api('/api/reviews/'+id,'DELETE');toast('🗑 Отзыв удалён','w');loadReviews();}catch(e){toast(e.message,'e');}}
-async function testNotifications(){const chatId=prompt('Telegram ID для теста (оставьте пустым = отправить тренеру):');if(chatId===null)return;try{const r=await api('/api/notifications/test','POST',{chatId:chatId||null});if(r.success)toast('✅ Тест отправлен → '+r.sentTo,'s');else toast('❌ Уведомления не работают: '+r.reason,'e');}catch(e){toast(e.message,'e');}}
 
-async function openNotes(userId,userName){document.getElementById('notesUserId').value=userId;document.getElementById('notesUserName').textContent='👤 '+userName;document.getElementById('noteText').value='';openMo('mNotes');loadNotes(userId);}
-async function loadNotes(userId){const box=document.getElementById('notesList');box.innerHTML='<div class="sp-ring" style="margin:10px auto"></div>';try{const notes=await api('/api/notes/'+userId);if(!notes.length){box.innerHTML='<div style="color:var(--mu2);font-size:13px">Заметок пока нет</div>';return;}box.innerHTML=notes.map(n=>`<div class="note-item"><div class="note-date">${new Date(n.createdAt).toLocaleDateString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div><div class="note-text">${esc(n.text)}</div><button class="note-del" onclick="deleteNote('${n.id}','${userId}')">✕</button></div>`).join('');}catch(e){box.innerHTML='<div style="color:var(--red)">'+e.message+'</div>';}}
-async function saveNote(){const userId=document.getElementById('notesUserId').value,text=document.getElementById('noteText').value.trim();if(!text){toast('Введите текст заметки','e');return;}try{await api('/api/notes/'+userId,'POST',{text});document.getElementById('noteText').value='';toast('✅ Заметка сохранена','s');loadNotes(userId);}catch(e){toast(e.message,'e');}}
-async function deleteNote(noteId,userId){try{await api('/api/notes/'+userId+'/'+noteId,'DELETE');loadNotes(userId);}catch(e){toast(e.message,'e');}}
+async function submitReview(){
+  if(!_reviewRating){toast('Выберите оценку','e');return;}
+  const text=document.getElementById('reviewText').value.trim();
+  try{
+    await api('/api/reviews','POST',{userId:ME.id,userName:ME.name,rating:_reviewRating,text});
+    toast('⭐ Спасибо за отзыв!','s');closeMo('mReview');_reviewRating=0;setReviewStar(0);document.getElementById('reviewText').value='';
+  }catch(e){toast(e.message,'e');}
+}
 
-async function resetWeight(userId, userName){if(!confirm(`Удалить все записи веса «${userName}»?\n\nЭто действие нельзя отменить.`)) return;try{const r = await api(`/api/progress/${userId}/weight`, 'DELETE');toast(`⚖️ График веса «${userName}» очищен (${r.deleted} записей)`, 'w');}catch(e){ toast('Ошибка: '+e.message, 'e'); }}
+async function loadReviews(){
+  const box=document.getElementById('reviewsList'),avgBox=document.getElementById('avgRating');
+  box.innerHTML='<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';avgBox.innerHTML='';
+  try{
+    const r=await fetch('/api/reviews',{headers:{'Accept':'application/json'}});
+    if(!r.ok)throw new Error('Сервер вернул статус '+r.status);
+    const ct=r.headers.get('content-type')||'';
+    if(!ct.includes('application/json')){box.innerHTML='<div class="empty"><div class="ei">⭐</div>Отзывов пока нет</div>';return;}
+    const reviews=await r.json();
+    if(!reviews.length){box.innerHTML='<div class="empty"><div class="ei">⭐</div>Отзывов пока нет</div>';return;}
+    reviews.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+    const avg=(reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1);
+    const stars=Math.round(avg);
+    avgBox.innerHTML=`<div class="avg-rating"><div class="avg-num">${avg}</div><div class="avg-stars">${'⭐'.repeat(stars)}${'☆'.repeat(5-stars)}</div><div class="avg-count">${reviews.length} отзывов</div></div>`;
+    box.innerHTML=reviews.map(rv=>{
+      const d=new Date(rv.createdAt).toLocaleDateString('ru-RU');
+      const ratingStars='⭐'.repeat(Math.min(5,Math.max(1,rv.rating)));
+      const delBtn=ME?.role==='admin'
+        ?`<button class="btn btn-d sm" style="margin-top:8px" onclick="delReview('${rv.id}')">🗑 Удалить</button>`
+        :'';
+      return `<div class="review-card"><div class="review-head"><div class="review-ava">${(rv.userName||'?').charAt(0).toUpperCase()}</div><div><div class="review-name">${esc(rv.userName||'Ученик')}</div><div class="review-stars">${ratingStars}</div></div><div class="review-date">${d}</div></div>${rv.text?`<div class="review-text">${esc(rv.text)}</div>`:''}${delBtn}</div>`;
+    }).join('');
+  }catch(e){box.innerHTML=`<div class="empty"><div class="ei">⭐</div>${esc(e.message)}</div>`;}
+}
 
-function toggleRules() {document.getElementById('rulesCard').classList.toggle('open');}
-function toggleRulesUser() {document.getElementById('rulesCardUser').classList.toggle('open');}
+async function delReview(id){
+  if(!confirm('Удалить этот отзыв?'))return;
+  try{await api('/api/reviews/'+id,'DELETE');toast('🗑 Отзыв удалён','w');loadReviews();}
+  catch(e){toast(e.message,'e');}
+}
 
+async function testNotifications(){
+  const chatId=prompt('Telegram ID для теста (оставьте пустым = отправить тренеру):');
+  if(chatId===null)return;
+  try{
+    const r=await api('/api/notifications/test','POST',{chatId:chatId||null});
+    if(r.success)toast('✅ Тест отправлен → '+r.sentTo,'s');
+    else toast('❌ Уведомления не работают: '+r.reason,'e');
+  }catch(e){toast(e.message,'e');}
+}
+
+// ═══════════════════════════════════════════
+// ЗАМЕТКИ
+// ═══════════════════════════════════════════
+async function openNotes(userId,userName){
+  document.getElementById('notesUserId').value=userId;document.getElementById('notesUserName').textContent='👤 '+userName;
+  document.getElementById('noteText').value='';openMo('mNotes');loadNotes(userId);
+}
+async function loadNotes(userId){
+  const box=document.getElementById('notesList');box.innerHTML='<div class="sp-ring" style="margin:10px auto"></div>';
+  try{
+    const notes=await api('/api/notes/'+userId);
+    if(!notes.length){box.innerHTML='<div style="color:var(--mu2);font-size:13px">Заметок пока нет</div>';return;}
+    box.innerHTML=notes.map(n=>`<div class="note-item"><div class="note-date">${new Date(n.createdAt).toLocaleDateString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div><div class="note-text">${esc(n.text)}</div><button class="note-del" onclick="deleteNote('${n.id}','${userId}')">✕</button></div>`).join('');
+  }catch(e){box.innerHTML='<div style="color:var(--red)">'+e.message+'</div>';}
+}
+async function saveNote(){
+  const userId=document.getElementById('notesUserId').value,text=document.getElementById('noteText').value.trim();
+  if(!text){toast('Введите текст заметки','e');return;}
+  try{await api('/api/notes/'+userId,'POST',{text});document.getElementById('noteText').value='';toast('✅ Заметка сохранена','s');loadNotes(userId);}
+  catch(e){toast(e.message,'e');}
+}
+async function deleteNote(noteId,userId){
+  try{await api('/api/notes/'+userId+'/'+noteId,'DELETE');loadNotes(userId);}catch(e){toast(e.message,'e');}
+}
+
+// ═══════════════════════════════════════════
+// СБРОС ВЕСА
+// ═══════════════════════════════════════════
+async function resetWeight(userId, userName){
+  if(!confirm(`Удалить все записи веса «${userName}»?\n\nЭто действие нельзя отменить.`)) return;
+  try{
+    const r = await api(`/api/progress/${userId}/weight`, 'DELETE');
+    toast(`⚖️ График веса «${userName}» очищен (${r.deleted} записей)`, 'w');
+  }catch(e){ toast('Ошибка: '+e.message, 'e'); }
+}
+
+// ═══════════════════════════════════════════
+// ПРАВИЛА
+// ═══════════════════════════════════════════
+function toggleRules() {
+  document.querySelectorAll('.rules-card').forEach(card => {
+    card.classList.toggle('open');
+  });
+}
+
+// ═══════════════════════════════════════════
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ═══════════════════════════════════════════
 function v(id){return document.getElementById(id).value.trim();}
 function clr(a){a.forEach(id=>document.getElementById(id).value='');}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fmtDt(iso){return new Date(iso).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
-function toast(msg,type='s'){const ic={s:'✅',e:'❌',w:'⚠️'};const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=`${ic[type]||'•'} ${msg}`;document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),4500);}
+
+function toast(msg,type='s'){
+  const ic={s:'✅',e:'❌',w:'⚠️'};
+  const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=`${ic[type]||'•'} ${msg}`;
+  document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),4500);
+}
 function openMo(id){document.getElementById(id).classList.add('open');if(id==='mAddW')onOpenAddW();}
 function closeMo(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
-function chartCfg(weights){return{type:'line',data:{labels:weights.map(w=>w.date),datasets:[{label:'Вес (кг)',data:weights.map(w=>w.weight),borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.07)',borderWidth:2.5,pointBackgroundColor:'#6ee7b7',pointRadius:5,tension:.35,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748b',font:{size:11}},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#64748b',font:{size:11}},grid:{color:'rgba(255,255,255,.04)'}}}}}}
+
+function chartCfg(weights){
+  return{type:'line',data:{labels:weights.map(w=>w.date),datasets:[{label:'Вес (кг)',data:weights.map(w=>w.weight),borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.07)',borderWidth:2.5,pointBackgroundColor:'#6ee7b7',pointRadius:5,tension:.35,fill:true}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748b',font:{size:11}},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#64748b',font:{size:11}},grid:{color:'rgba(255,255,255,.04)'}}}}}
+}
+
 function openLightbox(url){document.getElementById('lightbox-img').src=url;document.getElementById('lightbox').classList.add('open');document.body.style.overflow='hidden';}
 function closeLightbox(e){if(e&&e.target===document.getElementById('lightbox-img'))return;document.getElementById('lightbox').classList.remove('open');document.getElementById('lightbox-img').src='';document.body.style.overflow='';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox();});
+
 function exportExcel(){toast('⏳ Подготовка файла...','w');const a=document.createElement('a');a.href='/api/export/students';a.download='';document.body.appendChild(a);a.click();document.body.removeChild(a);}
 
+// ═══════════════════════════════════════════
+// ИНИЦИАЛИЗАЦИЯ
+// ═══════════════════════════════════════════
 (async function init(){
   const splash=document.getElementById('splash');
   const ok=await tryAutoLogin();
