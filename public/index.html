@@ -410,6 +410,33 @@
     .tg-status-icon{font-size:22px;}
     .tg-status-text{font-size:13px;color:var(--mu2);flex:1;}
     .tg-status-text b{color:var(--tx);}
+
+    /* ═══════════════════════════════════════
+       ПРАВИЛА COACH SPACE
+    ═══════════════════════════════════════ */
+    .rules-card{background:linear-gradient(135deg,rgba(13,18,32,.9),rgba(9,13,22,.95));border:1px solid rgba(110,231,183,.18);border-radius:var(--r);padding:0;margin-bottom:14px;overflow:hidden;}
+    .rules-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;cursor:pointer;user-select:none;transition:background .15s;}
+    .rules-header:hover{background:rgba(110,231,183,.04);}
+    .rules-header-left{display:flex;align-items:center;gap:11px;}
+    .rules-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,rgba(110,231,183,.18),rgba(52,211,153,.1));border:1px solid rgba(110,231,183,.25);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+    .rules-title{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;color:var(--tx);}
+    .rules-sub{font-size:10px;color:var(--mu2);margin-top:1px;}
+    .rules-chevron{font-size:18px;color:var(--mu);transition:transform .25s;flex-shrink:0;}
+    .rules-card.open .rules-chevron{transform:rotate(180deg);}
+    .rules-body{display:none;border-top:1px solid rgba(255,255,255,.06);}
+    .rules-card.open .rules-body{display:block;}
+    .rules-list{padding:14px 10px;}
+    .rule-item{display:flex;gap:10px;padding:10px 8px;border-radius:var(--r3);margin-bottom:4px;transition:background .15s;cursor:default;}
+    .rule-item:hover{background:rgba(255,255,255,.025);}
+    .rule-num{width:26px;height:26px;border-radius:8px;background:rgba(110,231,183,.1);border:1px solid rgba(110,231,183,.2);display:flex;align-items:center;justify-content:center;font-family:'Unbounded',sans-serif;font-size:10px;font-weight:700;color:var(--ac);flex-shrink:0;margin-top:1px;}
+    .rule-content{flex:1;min-width:0;}
+    .rule-name{font-size:12px;font-weight:700;color:var(--tx);margin-bottom:3px;display:flex;align-items:center;gap:6px;}
+    .rule-emoji{font-size:14px;}
+    .rule-text{font-size:12px;color:var(--mu2);line-height:1.55;}
+    .rule-text b{color:var(--tx);}
+    .rule-text .warn{color:var(--red);font-weight:600;}
+    .rule-text .money{color:var(--yel);font-weight:600;}
+    .rules-sep{height:1px;background:rgba(255,255,255,.04);margin:4px 0;}
   </style>
 </head>
 <body>
@@ -436,6 +463,109 @@
   <div class="content">
     <div class="panel" id="p-ah">
       <div class="sg" id="aStats"></div>
+      <div class="rules-card" id="rulesCard">
+        <div class="rules-header" onclick="toggleRules()">
+          <div class="rules-header-left">
+            <div class="rules-icon">📋</div>
+            <div>
+              <div class="rules-title">Правила Coach Space</div>
+              <div class="rules-sub">11 правил проекта — обязательно к прочтению</div>
+            </div>
+          </div>
+          <div class="rules-chevron">▾</div>
+        </div>
+        <div class="rules-body">
+          <div class="rules-list">
+            <div class="rule-item">
+              <div class="rule-num">1</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🏋️</span>Посещение тренировок</div>
+                <div class="rule-text">Тренировки проходят по программе. Пропуск без уважительной причины — <span class="warn">100 берпи</span> на следующей тренировке.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">2</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">⚠️</span>Предупреждение</div>
+                <div class="rule-text">Если не можешь прийти — предупреди заранее. Игнорирование тренировки без предупреждения — <span class="warn">отработка</span>.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">3</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🤝</span>Командные активности</div>
+                <div class="rule-text">Съёмки, совместные тренировки и сборы — часть проекта. Неучастие без серьёзной причины — <span class="warn">отработка</span>.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">4</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">📱</span>Социальные сети</div>
+                <div class="rule-text">После тренировки — <b>сторис или пост</b> с отметкой тренера.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">5</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">📸</span>Фото и видео</div>
+                <div class="rule-text">В рамках проекта ведётся съёмка. Фото и видео могут использоваться в соцсетях Coach Space. <b>Отказ от съёмок в проекте не предусмотрен.</b></div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">6</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🤜</span>Субординация и поведение</div>
+                <div class="rule-text">Несмотря на дружескую атмосферу, в проекте соблюдается уважение и субординация. Крики, оскорбления и агрессивное поведение — <span class="warn">основание для исключения</span>.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">7</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🎯</span>Формат тренировок</div>
+                <div class="rule-text">Coach Space — это <b>не персональные тренировки</b>. Участники работают по программе и самостоятельно поддерживают дисциплину. Тренер даёт систему и контроль, но не бегает за участниками.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">8</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">📈</span>Работа на результат</div>
+                <div class="rule-text">Проект для людей, которые хотят прогрессировать. Отсутствие результата из-за недисциплинированности — <span class="warn">основание для исключения</span>.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">9</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">💳</span>Оплата</div>
+                <div class="rule-text">Оплата производится раз в месяц в установленную дату. Если нужно перенести — предупреди заранее. Отсутствие оплаты без предупреждения — <span class="warn">исключение</span>.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">10</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">👕</span>Форма проекта</div>
+                <div class="rule-text">Брендированная футболка Coach Space — <span class="money">обязательное условие</span>. Стоимость: <span class="money">4 500 ₸</span>. Своя футболка + нанесение бренда — <span class="money">2 500 ₸</span>. Должна быть через несколько недель тренировок.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">11</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🚫</span>Исключение из проекта</div>
+                <div class="rule-text">Исключение означает окончание абонемента <span class="warn">без перерасчёта и возврата</span> денежных средств.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="sh"><div class="st">👥 Ученики</div><button class="btn btn-p sm" onclick="openMo('mAddU')">+ Добавить</button></div>
       <div id="aStudents"></div>
       <div class="div"></div>
@@ -465,6 +595,109 @@
         <div class="streak" id="streak" style="display:none"><div class="fire">🔥</div><span style="font-size:13px;color:var(--mu2)">Ты в деле! <b style="color:var(--tx)">Продолжай!</b></span></div>
       </div>
       <div id="planBtn"></div>
+      <div class="rules-card" id="rulesCard">
+        <div class="rules-header" onclick="toggleRules()">
+          <div class="rules-header-left">
+            <div class="rules-icon">📋</div>
+            <div>
+              <div class="rules-title">Правила Coach Space</div>
+              <div class="rules-sub">11 правил проекта — обязательно к прочтению</div>
+            </div>
+          </div>
+          <div class="rules-chevron">▾</div>
+        </div>
+        <div class="rules-body">
+          <div class="rules-list">
+            <div class="rule-item">
+              <div class="rule-num">1</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🏋️</span>Посещение тренировок</div>
+                <div class="rule-text">Тренировки проходят по программе. Пропуск без уважительной причины — <span class="warn">100 берпи</span> на следующей тренировке.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">2</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">⚠️</span>Предупреждение</div>
+                <div class="rule-text">Если не можешь прийти — предупреди заранее. Игнорирование тренировки без предупреждения — <span class="warn">отработка</span>.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">3</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🤝</span>Командные активности</div>
+                <div class="rule-text">Съёмки, совместные тренировки и сборы — часть проекта. Неучастие без серьёзной причины — <span class="warn">отработка</span>.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">4</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">📱</span>Социальные сети</div>
+                <div class="rule-text">После тренировки — <b>сторис или пост</b> с отметкой тренера.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">5</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">📸</span>Фото и видео</div>
+                <div class="rule-text">В рамках проекта ведётся съёмка. Фото и видео могут использоваться в соцсетях Coach Space. <b>Отказ от съёмок в проекте не предусмотрен.</b></div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">6</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🤜</span>Субординация и поведение</div>
+                <div class="rule-text">Несмотря на дружескую атмосферу, в проекте соблюдается уважение и субординация. Крики, оскорбления и агрессивное поведение — <span class="warn">основание для исключения</span>.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">7</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🎯</span>Формат тренировок</div>
+                <div class="rule-text">Coach Space — это <b>не персональные тренировки</b>. Участники работают по программе и самостоятельно поддерживают дисциплину. Тренер даёт систему и контроль, но не бегает за участниками.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">8</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">📈</span>Работа на результат</div>
+                <div class="rule-text">Проект для людей, которые хотят прогрессировать. Отсутствие результата из-за недисциплинированности — <span class="warn">основание для исключения</span>.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">9</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">💳</span>Оплата</div>
+                <div class="rule-text">Оплата производится раз в месяц в установленную дату. Если нужно перенести — предупреди заранее. Отсутствие оплаты без предупреждения — <span class="warn">исключение</span>.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">10</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">👕</span>Форма проекта</div>
+                <div class="rule-text">Брендированная футболка Coach Space — <span class="money">обязательное условие</span>. Стоимость: <span class="money">4 500 ₸</span>. Своя футболка + нанесение бренда — <span class="money">2 500 ₸</span>. Должна быть через несколько недель тренировок.</div>
+              </div>
+            </div>
+            <div class="rules-sep"></div>
+            <div class="rule-item">
+              <div class="rule-num">11</div>
+              <div class="rule-content">
+                <div class="rule-name"><span class="rule-emoji">🚫</span>Исключение из проекта</div>
+                <div class="rule-text">Исключение означает окончание абонемента <span class="warn">без перерасчёта и возврата</span> денежных средств.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <a class="tg-a" href="https://t.me/klim_fit" target="_blank">
         <span style="font-size:26px">✈️</span>
         <div><b style="font-size:14px">Связаться с тренером</b><br><span style="font-size:12px;color:var(--mu2)">Написать в Telegram</span></div>
@@ -2368,6 +2601,15 @@ async function resetWeight(userId, userName){
     const r = await api(`/api/progress/${userId}/weight`, 'DELETE');
     toast(`⚖️ График веса «${userName}» очищен (${r.deleted} записей)`, 'w');
   }catch(e){ toast('Ошибка: '+e.message, 'e'); }
+}
+
+// ═══════════════════════════════════════════
+// ПРАВИЛА
+// ═══════════════════════════════════════════
+function toggleRules() {
+  document.querySelectorAll('.rules-card').forEach(card => {
+    card.classList.toggle('open');
+  });
 }
 
 // ═══════════════════════════════════════════
