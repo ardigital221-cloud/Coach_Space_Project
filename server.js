@@ -888,6 +888,44 @@ app.delete('/api/exercise-videos/:id', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════
+// ПИТАНИЕ
+// ═══════════════════════════════════════════
+app.get('/api/nutrition/:userId', async (req, res) => {
+  try {
+    let query = db.collection('nutrition').where('userId', '==', req.params.userId);
+    if (req.query.date) query = query.where('date', '==', req.query.date);
+    const snap = await query.orderBy('createdAt').get();
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/nutrition/:userId', async (req, res) => {
+  try {
+    const { name, type, kcal, protein, fat, carbs, date } = req.body;
+    if (!name) return res.status(400).json({ error: 'Название обязательно' });
+    const ref = await db.collection('nutrition').add({
+      userId: req.params.userId,
+      name,
+      type: type || 'snack',
+      kcal: parseInt(kcal) || 0,
+      protein: parseFloat(protein) || 0,
+      fat: parseFloat(fat) || 0,
+      carbs: parseFloat(carbs) || 0,
+      date: date || new Date().toISOString().split('T')[0],
+      createdAt: new Date().toISOString()
+    });
+    res.json({ id: ref.id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/nutrition/:userId/:entryId', async (req, res) => {
+  try {
+    await db.collection('nutrition').doc(req.params.entryId).delete();
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ═══════════════════════════════════════════
 // ЭКСПОРТ EXCEL
 // ═══════════════════════════════════════════
 app.get('/api/export/students', async (req, res) => {
