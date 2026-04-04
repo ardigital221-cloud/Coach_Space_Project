@@ -55,7 +55,8 @@ async function tgSend(chatId, text) {
 // ─────────────────────────────────────────────────────────────────
 
 // Multer — загрузка в память
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+const upload      = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+const uploadVideo = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
 app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
@@ -749,6 +750,81 @@ app.delete('/api/notes/:userId/:noteId', async (req, res) => {
     await db.collection('notes').doc(req.params.noteId).delete();
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ═══════════════════════════════════════════
+// ВИДЕОТЕКА УПРАЖНЕНИЙ
+// ═══════════════════════════════════════════
+
+// GET /api/exercise-videos — возвращает объект { exerciseName: { id, url } }
+app.get('/api/exercise-videos', async (req, res) => {
+  try {
+    const snap = await db.collection('exerciseVideos').get();
+    const result = {};
+    snap.docs.forEach(d => {
+      result[d.data().exerciseName] = { id: d.id, url: d.data().videoUrl };
+    });
+    res.json(result);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// POST /api/exercise-videos — загрузить видео для упражнения
+app.post('/api/exercise-videos', uploadVideo.single('video'), async (req, res) => {
+  try {
+    const exerciseName = (req.body.exerciseName || '').trim();
+    if (!exerciseName) return res.status(400).json({ error: 'exerciseName обязателен' });
+    if (!req.file)     return res.status(400).json({ error: 'Видео файл обязателен' });
+
+    const safeName = require('path').basename(req.file.originalname).replace(/[^a-zA-Z0-9._-]/g, '_');
+    const fileName = `exercise-videos/${Date.now()}_${safeName}`;
+    const file = bucket.file(fileName);
+    await file.save(req.file.buffer, {
+      metadata: { contentType: req.file.mimetype, cacheControl: 'public, max-age=31536000' }
+    });
+    const videoUrl = `/api/img/${encodeURIComponent(fileName)}`;
+
+    // Если для этого упражнения уже есть видео — удаляем старое
+    const existing = await db.collection('exerciseVideos')
+      .where('exerciseName', '==', exerciseName).limit(1).get();
+    if (!existing.empty) {
+      const old = existing.docs[0];
+      if (old.data().storagePath) {
+        await bucket.file(old.data().storagePath).delete().catch(() => {});
+      }
+      await old.ref.delete();
+    }
+
+    const ref = await db.collection('exerciseVideos').add({
+      exerciseName,
+      videoUrl,
+      storagePath: fileName,
+      createdAt: new Date().toISOString()
+    });
+    console.log(`[VIDEO-UPLOAD] "${exerciseName}" → ${fileName}`);
+    res.json({ id: ref.id, videoUrl });
+  } catch (e) {
+    console.error('[VIDEO-UPLOAD-ERR]', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// DELETE /api/exercise-videos/:id — удалить видео по ID документа
+app.delete('/api/exercise-videos/:id', async (req, res) => {
+  try {
+    const doc = await db.collection('exerciseVideos').doc(req.params.id).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Видео не найдено' });
+    if (doc.data().storagePath) {
+      await bucket.file(doc.data().storagePath).delete().catch(e => {
+        console.warn(`[VIDEO-DEL] Storage: ${e.message}`);
+      });
+    }
+    await doc.ref.delete();
+    console.log(`[VIDEO-DEL] "${doc.data().exerciseName}" удалено`);
+    res.json({ success: true });
+  } catch (e) {
+    console.error('[VIDEO-DEL-ERR]', e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ═══════════════════════════════════════════
