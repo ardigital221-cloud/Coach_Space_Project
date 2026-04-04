@@ -433,6 +433,22 @@
     .diary-day-date{font-weight:700;font-size:13px;}
     .diary-day-rating{margin-left:auto;font-size:16px;}
     .diary-day-excount{font-size:11px;color:var(--mu2);}
+    /* ═══ ВИДЕОТЕКА ═══ */
+    .video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+    .video-card{background:rgba(255,255,255,.03);border:1px solid var(--b);border-radius:var(--r);overflow:hidden;transition:border-color .2s;}
+    .video-card:hover{border-color:rgba(110,231,183,.25);}
+    .video-thumb{position:relative;aspect-ratio:16/9;background:#000;cursor:pointer;}
+    .video-thumb video{width:100%;height:100%;object-fit:cover;display:block;}
+    .video-play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35);transition:background .2s;}
+    .video-thumb:hover .video-play-overlay{background:rgba(0,0,0,.15);}
+    .video-play-icon{width:44px;height:44px;border-radius:50%;background:rgba(110,231,183,.9);display:flex;align-items:center;justify-content:center;font-size:18px;color:#062010;}
+    .video-info{padding:10px 12px;}
+    .video-name{font-weight:700;font-size:13px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .upload-zone{border:2px dashed var(--b);border-radius:var(--r);padding:28px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:rgba(255,255,255,.02);}
+    .upload-zone:hover{border-color:var(--ac);background:rgba(110,231,183,.04);}
+    .upload-zone.dragover{border-color:var(--ac);background:rgba(110,231,183,.08);}
+    .upload-progress{height:4px;background:rgba(255,255,255,.08);border-radius:2px;margin-top:10px;overflow:hidden;display:none;}
+    .upload-progress-bar{height:100%;background:var(--ac);border-radius:2px;transition:width .3s;width:0%;}
   </style>
 </head>
 <body>
@@ -602,6 +618,56 @@
       <div id="avgRating"></div>
       <div id="reviewsList"></div>
     </div>
+    <div class="panel" id="p-avid">
+      <div class="sh">
+        <div class="st">🎬 Видеотека упражнений</div>
+        <span style="font-size:12px;color:var(--mu2)" id="vidCount"></span>
+      </div>
+
+      <div class="card card-a" style="margin-bottom:18px">
+        <div class="ct">Загрузить видео</div>
+        <div class="fg">
+          <label class="fl">Название упражнения</label>
+          <input class="fi" id="vidExName" placeholder="Жим штанги лёжа" list="vidExSuggest"/>
+          <datalist id="vidExSuggest"></datalist>
+        </div>
+        <div class="upload-zone" id="vidUploadZone"
+          onclick="document.getElementById('vidFile').click()">
+          <input type="file" id="vidFile" accept="video/*" style="display:none"
+            onchange="onVidFileSelected(event)"/>
+          <div id="vidUploadContent">
+            <div style="font-size:32px;margin-bottom:8px;opacity:.4">🎬</div>
+            <div style="font-weight:600;font-size:14px;margin-bottom:4px">
+              Нажмите или перетащите видео
+            </div>
+            <div style="font-size:12px;color:var(--mu2)">
+              MP4, MOV, WebM · до 50 МБ · рекомендуется до 10 сек
+            </div>
+          </div>
+        </div>
+        <div class="upload-progress" id="vidProgress">
+          <div class="upload-progress-bar" id="vidProgressBar"></div>
+        </div>
+        <div style="margin-top:12px;display:none" id="vidPreviewWrap">
+          <video id="vidPreview" controls playsinline
+            style="width:100%;max-height:220px;border-radius:var(--r2);background:#000">
+          </video>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn btn-g sm" onclick="clearVidPreview()">✕ Отменить</button>
+            <button class="btn btn-p" style="flex:1" onclick="uploadExerciseVideo()">
+              ⬆️ Загрузить
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;
+        letter-spacing:.9px;color:var(--mu2);margin-bottom:12px">
+        Загруженные видео
+      </div>
+      <div class="video-grid" id="vidGrid"></div>
+    </div>
+
     <div class="panel" id="p-ushop">
       <div class="st" style="margin-bottom:14px">🛒 Магазин</div>
       <div class="shop-g" id="uShopGrid"></div>
@@ -905,6 +971,20 @@
   </div>
 </div></div>
 
+<div class="mo" id="mVideo">
+  <div class="modal" style="max-width:480px;padding:18px">
+    <div class="mh"></div>
+    <div class="mt" id="videoModalTitle" style="margin-bottom:14px">▶ Видео</div>
+    <video id="videoPlayer" controls playsinline
+      style="width:100%;border-radius:var(--r2);background:#000;
+      max-height:65vh;display:block">
+    </video>
+    <div class="mf">
+      <button class="btn btn-g" onclick="closeVideoModal()">Закрыть</button>
+    </div>
+  </div>
+</div>
+
 <div id="lightbox" onclick="closeLightbox(event)">
   <button id="lightbox-close" onclick="closeLightbox()">✕</button>
   <img id="lightbox-img" src="" alt=""/>
@@ -916,6 +996,8 @@
 let ME = null;
 let wChartInst = null;
 let allStudents = [];
+let _exerciseVideos = {};
+let _vidSelectedFile = null;
 const EMOJIS = ['👍','❤️','🔥','😂','😮','👏','💪','✅'];
 
 async function api(url, method='GET', body=null) {
@@ -951,11 +1033,12 @@ function startApp(){
   document.getElementById('hName').textContent=ME.name;
   const r=document.getElementById('hRole');
   ME.role==='admin'?(r.textContent='Тренер',r.className='t-role ra'):(r.textContent='Ученик',r.className='t-role rs');
+  loadExerciseVideos();
   buildNav();
 }
 
 const TABS={
-  admin:[{id:'ah',icon:'🏠',lbl:'Главная'},{id:'acal',icon:'📅',lbl:'Календарь'},{id:'aw',icon:'🏋️',lbl:'Тренировки'},{id:'aprog',icon:'📈',lbl:'Прогресс'},{id:'arev',icon:'⭐',lbl:'Отзывы'},{id:'ashop',icon:'🛒',lbl:'Магазин'}],
+  admin:[{id:'ah',icon:'🏠',lbl:'Главная'},{id:'acal',icon:'📅',lbl:'Календарь'},{id:'aw',icon:'🏋️',lbl:'Тренировки'},{id:'aprog',icon:'📈',lbl:'Прогресс'},{id:'arev',icon:'⭐',lbl:'Отзывы'},{id:'avid',icon:'🎬',lbl:'Видео'},{id:'ashop',icon:'🛒',lbl:'Магазин'}],
   user: [{id:'uh',icon:'🏠',lbl:'Главная'},{id:'uplan',icon:'📋',lbl:'План'},{id:'udiary',icon:'📊',lbl:'Дневник'},{id:'uprog',icon:'📈',lbl:'Прогресс'},{id:'ushop',icon:'🛒',lbl:'Магазин'}]
 };
 function buildNav(){
@@ -980,6 +1063,7 @@ function showTab(id,btn){
   if(id==='udiary') loadDiary();
   if(id==='acal')  loadCalendar();
   if(id==='arev')  loadReviews();
+  if(id==='avid')  loadVideoLibrary();
 }
 
 // ═══ МАГАЗИН ═══
@@ -1026,7 +1110,14 @@ async function savePlanEditor(){pedReadDOM();const clean={};for(let w=1;w<=4;w++
 
 let _trainingPlan=null,_currentWeek=1;
 async function loadUserPlan(){const box=document.getElementById('uPlanContent');box.innerHTML=`<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>`;try{const data=await api('/api/users/'+ME.id+'/plan');if(!data.trainingPlan){box.innerHTML=`<div class="plan-upload-hint"><div style="font-size:36px;margin-bottom:10px">📋</div><div style="font-weight:600;margin-bottom:6px">План тренировок ещё не загружен</div><div>Тренер загрузит ваш персональный план — он появится здесь автоматически</div></div>`;return;}_trainingPlan=data.trainingPlan;if(data.planUpdatedAt){const d=new Date(data.planUpdatedAt);document.getElementById('planUpdatedAt').textContent='обновлён '+d.toLocaleDateString('ru-RU');}renderPlanWeek(_currentWeek);}catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}}
-function renderPlanWeek(week){_currentWeek=week;const box=document.getElementById('uPlanContent');if(!_trainingPlan)return;const exercises=_trainingPlan[week]||[];const BLOCK_ICONS={'верх':'💪','ноги':'🦵','руки':'💪','ягодицы':'🍑','спина':'🏋️','грудь':'🏋️','плечи':'🎯','пресс':'🔥','кардио':'🏃','разминка':'🤸'};function blockIcon(name){const low=(name||'').toLowerCase();for(const[kw,ic]of Object.entries(BLOCK_ICONS)){if(low.startsWith(kw))return ic;}return'💪';}let html=`<div class="week-switcher">`;for(let w=1;w<=4;w++){const cnt=(_trainingPlan[w]||[]).length;html+=`<button class="week-btn${w===week?' active':''}" onclick="renderPlanWeek(${w})">Неделя ${w}<br><span style="font-size:10px;opacity:.6">${cnt} упр.</span></button>`;}html+=`</div>`;if(!exercises.length){html+=`<div class="plan-empty"><div style="font-size:36px;margin-bottom:8px">🏖</div>Неделя ${week} пока пустая</div>`;box.innerHTML=html;return;}const blockOrder=[],blocks={};exercises.forEach((ex,idx)=>{const b=ex.block||'';if(!blocks[b]){blocks[b]=[];blockOrder.push(b);}blocks[b].push({...ex,num:idx+1});});for(const blockName of blockOrder){const exList=blocks[blockName];html+=`<div class="plan-block">`;if(blockName)html+=`<div class="plan-block-title">${blockIcon(blockName)} ${esc(blockName)}</div>`;html+=`<div><table class="ex-table"><thead><tr><th>#</th><th>Упражнение</th><th style="text-align:center">Подходы</th><th style="text-align:center">Повторения</th></tr></thead><tbody>`;exList.forEach(ex=>{html+=`<tr><td class="ex-num">${ex.num}</td><td style="font-weight:500">${esc(ex.exercise)}</td><td style="text-align:center"><span class="ex-sets">${ex.sets||'—'}</span></td><td style="text-align:center"><span class="ex-reps">${ex.reps||'—'}</span></td></tr>`;});html+=`</tbody></table></div><div class="ex-cards">`;exList.forEach(ex=>{html+=`<div class="ex-card"><div class="ex-card-num">${ex.num}</div><div class="ex-card-name">${esc(ex.exercise)}</div><div class="ex-card-meta"><div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase">Подх.</div><div class="ex-card-sets">${ex.sets||'—'}</div></div><div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase">Повт.</div><div class="ex-card-reps">${ex.reps||'—'}</div></div></div></div>`;});html+=`</div></div>`;}box.innerHTML=html;}
+function renderPlanWeek(week){_currentWeek=week;const box=document.getElementById('uPlanContent');if(!_trainingPlan)return;const exercises=_trainingPlan[week]||[];const BLOCK_ICONS={'верх':'💪','ноги':'🦵','руки':'💪','ягодицы':'🍑','спина':'🏋️','грудь':'🏋️','плечи':'🎯','пресс':'🔥','кардио':'🏃','разминка':'🤸'};function blockIcon(name){const low=(name||'').toLowerCase();for(const[kw,ic]of Object.entries(BLOCK_ICONS)){if(low.startsWith(kw))return ic;}return'💪';}let html=`<div class="week-switcher">`;for(let w=1;w<=4;w++){const cnt=(_trainingPlan[w]||[]).length;html+=`<button class="week-btn${w===week?' active':''}" onclick="renderPlanWeek(${w})">Неделя ${w}<br><span style="font-size:10px;opacity:.6">${cnt} упр.</span></button>`;}html+=`</div>`;if(!exercises.length){html+=`<div class="plan-empty"><div style="font-size:36px;margin-bottom:8px">🏖</div>Неделя ${week} пока пустая</div>`;box.innerHTML=html;return;}const blockOrder=[],blocks={};exercises.forEach((ex,idx)=>{const b=ex.block||'';if(!blocks[b]){blocks[b]=[];blockOrder.push(b);}blocks[b].push({...ex,num:idx+1});});for(const blockName of blockOrder){const exList=blocks[blockName];html+=`<div class="plan-block">`;if(blockName)html+=`<div class="plan-block-title">${blockIcon(blockName)} ${esc(blockName)}</div>`;html+=`<div><table class="ex-table"><thead><tr><th>#</th><th>Упражнение</th><th style="text-align:center">Подходы</th><th style="text-align:center">Повторения</th></tr></thead><tbody>`;exList.forEach(ex=>{
+  const _vid=_exerciseVideos[ex.exercise];
+  const _vBtn=_vid?`<button class="btn btn-g" style="padding:3px 8px;font-size:11px;margin-left:6px;vertical-align:middle" onclick="openVideoModal('${esc(ex.exercise)}','${esc(_vid.url)}')">▶</button>`:'';
+  html+=`<tr><td class="ex-num">${ex.num}</td><td style="font-weight:500">${esc(ex.exercise)}${_vBtn}</td><td style="text-align:center"><span class="ex-sets">${ex.sets||'—'}</span></td><td style="text-align:center"><span class="ex-reps">${ex.reps||'—'}</span></td></tr>`;
+});html+=`</tbody></table></div><div class="ex-cards">`;exList.forEach(ex=>{
+  const _vid2=_exerciseVideos[ex.exercise];
+  const _vBtn2=_vid2?`<button class="btn btn-g" style="padding:3px 8px;font-size:11px;flex-shrink:0" onclick="openVideoModal('${esc(ex.exercise)}','${esc(_vid2.url)}')">▶</button>`:'';
+  html+=`<div class="ex-card"><div class="ex-card-num">${ex.num}</div><div class="ex-card-name" style="display:flex;align-items:center;gap:6px">${esc(ex.exercise)}${_vBtn2}</div><div class="ex-card-meta"><div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase">Подх.</div><div class="ex-card-sets">${ex.sets||'—'}</div></div><div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase">Повт.</div><div class="ex-card-reps">${ex.reps||'—'}</div></div></div></div>`;});html+=`</div></div>`;}box.innerHTML=html;}
 
 // ═══ ГЛАВНАЯ ТРЕНЕРА ═══
 async function loadAdminHome(){loadAdminStats();loadAdminStudents();loadAdminPosts();}
@@ -1130,7 +1221,7 @@ function drumScroll(drumId,dir){const items=_drumItems[drumId];_drumState[drumId
 function openPicker(title,subtitle,opts,cb){_pickerCb=cb;document.getElementById('pickerTitle').textContent=title;document.getElementById('pickerSubtitle').textContent=subtitle||'';if(opts.type==='weight'){const integers=Array.from({length:301},(_,i)=>i);const decimals=['0','5'];const cur=parseFloat(opts.currentVal)||0;const intPart=Math.floor(cur);const decPart=(Math.round((cur-intPart)*10)===5)?1:0;drumBuild('drum1',integers);drumBuild('drum2',decimals);_drumState.drum1=Math.max(0,Math.min(300,intPart));_drumState.drum2=decPart;drumApply('drum1');drumApply('drum2');document.getElementById('drum2').style.display='flex';document.getElementById('pickerSep').style.display='flex';}else{const reps=Array.from({length:50},(_,i)=>i+1);const cur=parseInt(opts.currentVal)||1;drumBuild('drum1',reps);_drumState.drum1=Math.max(0,Math.min(49,cur-1));drumApply('drum1');document.getElementById('drum2').style.display='none';document.getElementById('pickerSep').style.display='none';}openMo('mPicker');setTimeout(initDrumTouchSupport,80);}
 function pickerConfirm(){if(!_pickerCb){closeMo('mPicker');return;}const d2=document.getElementById('drum2');let val;if(d2.style.display!=='none'){const intPart=_drumItems.drum1[_drumState.drum1];const decPart=_drumItems.drum2[_drumState.drum2];val=parseFloat(`${intPart}.${decPart}`);}else{val=_drumItems.drum1[_drumState.drum1];}_pickerCb(val);closeMo('mPicker');}
 function initDrumTouchSupport(){['drum1','drum2'].forEach(drumId=>{const vp=document.querySelector(`#${drumId} .drum-viewport`);if(!vp||vp._touchBound)return;vp._touchBound=true;let lastY=0;vp.addEventListener('touchstart',e=>{lastY=e.touches[0].clientY;},{passive:true});vp.addEventListener('touchmove',e=>{const dy=lastY-e.touches[0].clientY;lastY=e.touches[0].clientY;if(Math.abs(dy)>12)drumScroll(drumId,dy>0?1:-1);},{passive:true});vp.addEventListener('wheel',e=>{e.preventDefault();drumScroll(drumId,e.deltaY>0?1:-1);},{passive:false});});}
-function diaryExerciseHTML(ex,idx){const setsHTML=ex.sets.map((s,si)=>`<div class="diary-set-row" id="setrow-${idx}-${si}"><div class="diary-set-num">${si+1}</div><div class="diary-set-field"><div class="diary-set-label">Вес кг</div><div class="diary-set-val wt" onclick="pickWeight(${idx},${si})">${s.weight!==''&&s.weight!==undefined?s.weight:'—'}</div></div><div class="diary-set-field"><div class="diary-set-label">Повт</div><div class="diary-set-val rp" onclick="pickReps(${idx},${si})">${s.reps||'—'}</div></div><div class="diary-set-done ${s.done?'ok':''}" onclick="toggleSetDone(${idx},${si})">${s.done?'✓':'○'}</div><button class="diary-set-del" onclick="delDiarySet(${idx},${si})">✕</button></div>`).join('');const isFromPlan=!ex.custom;const planHint=ex.planSets?`${ex.planSets}×${ex.planReps}`:'';return`<div class="diary-ex-card ${ex.expanded?'active':''}" id="dex-${idx}"><div class="diary-ex-header" onclick="toggleDiaryEx(${idx})"><div class="diary-ex-icon">${isFromPlan?'📋':'➕'}</div><div class="diary-ex-name-label">${esc(ex.name)}</div>${planHint?`<div class="diary-ex-plan-hint">${planHint}</div>`:''}<div class="diary-ex-toggle">▾</div></div><div class="diary-ex-body"><div class="diary-sets-list" id="setslist-${idx}">${setsHTML}</div><button class="diary-add-set-btn" onclick="addDiarySet(${idx})">+ Добавить подход</button><button class="diary-ex-del-btn" onclick="removeDiaryEx(${idx})">✕ Убрать упражнение</button></div></div>`;}
+function diaryExerciseHTML(ex,idx){const setsHTML=ex.sets.map((s,si)=>`<div class="diary-set-row" id="setrow-${idx}-${si}"><div class="diary-set-num">${si+1}</div><div class="diary-set-field"><div class="diary-set-label">Вес кг</div><div class="diary-set-val wt" onclick="pickWeight(${idx},${si})">${s.weight!==''&&s.weight!==undefined?s.weight:'—'}</div></div><div class="diary-set-field"><div class="diary-set-label">Повт</div><div class="diary-set-val rp" onclick="pickReps(${idx},${si})">${s.reps||'—'}</div></div><div class="diary-set-done ${s.done?'ok':''}" onclick="toggleSetDone(${idx},${si})">${s.done?'✓':'○'}</div><button class="diary-set-del" onclick="delDiarySet(${idx},${si})">✕</button></div>`).join('');const isFromPlan=!ex.custom;const planHint=ex.planSets?`${ex.planSets}×${ex.planReps}`:'';return`<div class="diary-ex-card ${ex.expanded?'active':''}" id="dex-${idx}"><div class="diary-ex-header" onclick="toggleDiaryEx(${idx})"><div class="diary-ex-icon">${isFromPlan?'📋':'➕'}</div><div class="diary-ex-name-label">${esc(ex.name)}</div>${_exerciseVideos[ex.name]?`<button class="btn btn-g" style="padding:3px 9px;font-size:11px;flex-shrink:0" onclick="event.stopPropagation();openVideoModal('${esc(ex.name)}','${esc(_exerciseVideos[ex.name].url)}')">▶</button>`:''  }${planHint?`<div class="diary-ex-plan-hint">${planHint}</div>`:''}<div class="diary-ex-toggle">▾</div></div><div class="diary-ex-body"><div class="diary-sets-list" id="setslist-${idx}">${setsHTML}</div><button class="diary-add-set-btn" onclick="addDiarySet(${idx})">+ Добавить подход</button><button class="diary-ex-del-btn" onclick="removeDiaryEx(${idx})">✕ Убрать упражнение</button></div></div>`;}
 function renderDiaryExList(){const box=document.getElementById('diaryExList');if(!_diaryExercises.length){box.innerHTML='';return;}const blockOrder=[],blockMap={};_diaryExercises.forEach((ex,idx)=>{const b=ex.block||'';if(!blockMap[b]){blockMap[b]=[];blockOrder.push(b);}blockMap[b].push({ex,idx});});let html='';for(const blockName of blockOrder){const items=blockMap[blockName];if(blockName){html+=`<div class="diary-plan-block-title">💪 ${esc(blockName)}</div>`;}html+=items.map(({ex,idx})=>diaryExerciseHTML(ex,idx)).join('');}box.innerHTML=html;}
 function toggleDiaryEx(idx){_diaryExercises[idx].expanded=!_diaryExercises[idx].expanded;renderDiaryExList();}
 function pickWeight(exIdx,setIdx){const cur=_diaryExercises[exIdx].sets[setIdx].weight;openPicker('⚖️ Вес',_diaryExercises[exIdx].name,{type:'weight',currentVal:cur},val=>{_diaryExercises[exIdx].sets[setIdx].weight=val;renderDiaryExList();});}
@@ -1388,6 +1479,201 @@ async function doCopyPlan(){
     allStudents=[];
     loadAdminHome();
   }catch(e){toast(e.message,'e');}
+}
+
+// ═══════════════════════════════════════════
+// ВИДЕОТЕКА УПРАЖНЕНИЙ
+// ═══════════════════════════════════════════
+
+async function loadExerciseVideos(){
+  try{
+    _exerciseVideos=await api('/api/exercise-videos');
+  }catch(e){
+    console.warn('Видео не загружены:',e.message);
+    _exerciseVideos={};
+  }
+}
+
+async function loadVideoLibrary(){
+  await loadExerciseVideos();
+  const grid=document.getElementById('vidGrid');
+  const countEl=document.getElementById('vidCount');
+  const entries=Object.entries(_exerciseVideos);
+  if(countEl)countEl.textContent=entries.length+' видео';
+
+  // Подсказки названий упражнений из планов учеников
+  try{
+    if(!allStudents.length){const s=await api('/api/users');allStudents=s;}
+    const names=new Set();
+    for(const s of allStudents){
+      try{
+        const data=await api('/api/users/'+s.id+'/plan');
+        if(data.trainingPlan){
+          Object.values(data.trainingPlan).forEach(week=>{
+            (week||[]).forEach(ex=>{if(ex.exercise&&ex.exercise.trim())names.add(ex.exercise.trim());});
+          });
+        }
+      }catch{}
+    }
+    const dl=document.getElementById('vidExSuggest');
+    if(dl)dl.innerHTML=[...names].sort().map(n=>`<option value="${esc(n)}">`).join('');
+  }catch{}
+
+  // Drag & drop
+  const zone=document.getElementById('vidUploadZone');
+  if(zone&&!zone._ddBound){
+    zone._ddBound=true;
+    zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('dragover');});
+    zone.addEventListener('dragleave',()=>zone.classList.remove('dragover'));
+    zone.addEventListener('drop',e=>{
+      e.preventDefault();
+      zone.classList.remove('dragover');
+      const file=e.dataTransfer.files[0];
+      if(file&&file.type.startsWith('video/')){_vidSelectedFile=file;showVidPreview(file);}
+      else toast('Выберите видео файл','e');
+    });
+  }
+
+  if(!grid)return;
+  if(!entries.length){
+    grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">🎬</div>Видео пока не загружено.<br><small style="color:var(--mu)">Загрузите первое видео выше</small></div>`;
+    return;
+  }
+
+  grid.innerHTML=entries.map(([name,vid])=>`
+    <div class="video-card" id="vcard-${esc(vid.id)}">
+      <div class="video-thumb" onclick="openVideoModal('${esc(name)}','${esc(vid.url)}')">
+        <video src="${esc(vid.url)}" preload="metadata" muted playsinline
+          style="width:100%;height:100%;object-fit:cover;pointer-events:none"></video>
+        <div class="video-play-overlay">
+          <div class="video-play-icon">▶</div>
+        </div>
+      </div>
+      <div class="video-info">
+        <div class="video-name" title="${esc(name)}">${esc(name)}</div>
+        <div style="display:flex;gap:6px;margin-top:6px">
+          <button class="btn btn-g sm" style="flex:1"
+            onclick="openVideoModal('${esc(name)}','${esc(vid.url)}')">▶ Смотреть</button>
+          <button class="btn btn-d sm"
+            onclick="deleteExerciseVideo('${esc(vid.id)}','${esc(name)}')">🗑</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function onVidFileSelected(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  if(file.size>50*1024*1024){toast('Файл слишком большой (макс. 50 МБ)','e');return;}
+  _vidSelectedFile=file;
+  showVidPreview(file);
+}
+
+function showVidPreview(file){
+  const wrap=document.getElementById('vidPreviewWrap');
+  const preview=document.getElementById('vidPreview');
+  const content=document.getElementById('vidUploadContent');
+  if(!wrap||!preview)return;
+  const sizeMB=(file.size/1024/1024).toFixed(1);
+  preview.src=URL.createObjectURL(file);
+  wrap.style.display='block';
+  if(content)content.style.display='none';
+  const nameInput=document.getElementById('vidExName');
+  if(nameInput&&!nameInput.value){
+    const suggested=file.name.replace(/\.[^.]+$/,'').replace(/[_-]/g,' ');
+    nameInput.placeholder=suggested+' ('+sizeMB+' МБ)';
+  }
+}
+
+function clearVidPreview(){
+  _vidSelectedFile=null;
+  const preview=document.getElementById('vidPreview');
+  const wrap=document.getElementById('vidPreviewWrap');
+  const content=document.getElementById('vidUploadContent');
+  const fileInput=document.getElementById('vidFile');
+  if(preview)preview.src='';
+  if(wrap)wrap.style.display='none';
+  if(content)content.style.display='block';
+  if(fileInput)fileInput.value='';
+  const nameInput=document.getElementById('vidExName');
+  if(nameInput)nameInput.placeholder='Жим штанги лёжа';
+}
+
+async function uploadExerciseVideo(){
+  const name=document.getElementById('vidExName').value.trim();
+  if(!name){toast('Введите название упражнения','e');return;}
+  if(!_vidSelectedFile){toast('Выберите видео файл','e');return;}
+  if(_vidSelectedFile.size>50*1024*1024){toast('Файл слишком большой (макс. 50 МБ)','e');return;}
+
+  const progress=document.getElementById('vidProgress');
+  const bar=document.getElementById('vidProgressBar');
+  if(progress)progress.style.display='block';
+
+  const fd=new FormData();
+  fd.append('exerciseName',name);
+  fd.append('video',_vidSelectedFile);
+
+  const xhr=new XMLHttpRequest();
+
+  xhr.upload.onprogress=e=>{
+    if(e.lengthComputable&&bar){
+      bar.style.width=Math.round(e.loaded/e.total*100)+'%';
+    }
+  };
+
+  xhr.onload=async()=>{
+    if(bar)bar.style.width='100%';
+    setTimeout(()=>{
+      if(progress)progress.style.display='none';
+      if(bar)bar.style.width='0%';
+    },600);
+    try{
+      const d=JSON.parse(xhr.responseText);
+      if(xhr.status!==200)throw new Error(d.error||'Ошибка сервера');
+      _exerciseVideos[name]={id:d.id,url:d.videoUrl};
+      toast('✅ Видео загружено: «'+name+'»','s');
+      clearVidPreview();
+      document.getElementById('vidExName').value='';
+      loadVideoLibrary();
+    }catch(e){toast('Ошибка: '+e.message,'e');}
+  };
+
+  xhr.onerror=()=>{
+    toast('Ошибка сети при загрузке','e');
+    if(progress)progress.style.display='none';
+  };
+
+  toast('⏳ Загружаю видео...','w');
+  xhr.open('POST','/api/exercise-videos');
+  xhr.send(fd);
+}
+
+async function deleteExerciseVideo(id,name){
+  if(!confirm('Удалить видео «'+name+'»?\n\nОно исчезнет у всех учеников в плане и дневнике.'))return;
+  try{
+    await api('/api/exercise-videos/'+id,'DELETE');
+    delete _exerciseVideos[name];
+    toast('🗑 Видео удалено','w');
+    loadVideoLibrary();
+  }catch(e){toast(e.message,'e');}
+}
+
+function openVideoModal(name,url){
+  const titleEl=document.getElementById('videoModalTitle');
+  const player=document.getElementById('videoPlayer');
+  if(titleEl)titleEl.textContent='▶ '+name;
+  if(!player)return;
+  player.src=url;
+  player.load();
+  openMo('mVideo');
+  player.play().catch(()=>{});
+}
+
+function closeVideoModal(){
+  const player=document.getElementById('videoPlayer');
+  if(player){player.pause();player.src='';}
+  closeMo('mVideo');
 }
 
 // ═══ УТИЛИТЫ ═══
