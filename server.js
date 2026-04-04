@@ -820,6 +820,7 @@ app.post('/api/exercise-videos', uploadVideo.single('video'), async (req, res) =
     const categoryId   = (req.body.categoryId   || '').trim();
     const categoryName = (req.body.categoryName || '').trim();
     const title        = (req.body.title        || '').trim();
+    const description  = (req.body.description  || '').trim();
     if (!categoryId) return res.status(400).json({ error: 'categoryId обязателен' });
     if (!title)      return res.status(400).json({ error: 'title обязателен' });
     if (!req.file)   return res.status(400).json({ error: 'Видео файл обязателен' });
@@ -833,7 +834,7 @@ app.post('/api/exercise-videos', uploadVideo.single('video'), async (req, res) =
     const videoUrl = `/api/img/${encodeURIComponent(fileName)}`;
 
     const ref = await db.collection('exerciseVideos').add({
-      categoryId, categoryName, title, videoUrl,
+      categoryId, categoryName, title, description, videoUrl,
       storagePath: fileName,
       fileSize: req.file.size,
       createdAt: new Date().toISOString()
