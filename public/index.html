@@ -380,8 +380,11 @@
     .ped-block-name::placeholder{color:rgba(110,231,183,.35);}
     .ped-block-del{background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;transition:color .15s;}
     .ped-block-del:hover{color:var(--red);}
-    .ped-ex-row{display:grid;grid-template-columns:1fr 72px 72px 32px;gap:8px;align-items:center;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.03);}
+    .ped-ex-row{display:grid;grid-template-columns:18px 1fr 72px 72px 32px;gap:8px;align-items:center;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.03);}
     .ped-ex-row:last-of-type{border-bottom:none;}
+    .ped-drag-handle{color:var(--mu);cursor:grab;font-size:14px;line-height:1;user-select:none;text-align:center;}
+    .ped-ex-row.drag-over{background:rgba(110,231,183,.08);border-radius:var(--r3);}
+    .ped-ex-row.dragging{opacity:.4;}
     .ped-fi{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--b);border-radius:var(--r3);color:var(--tx);padding:7px 10px;font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:border .15s;}
     .ped-fi:focus{border-color:var(--ac);background:rgba(110,231,183,.04);}
     .ped-fi::placeholder{color:var(--mu);}
@@ -391,7 +394,7 @@
     .ped-del-ex{background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:2px;border-radius:4px;transition:color .15s;line-height:1;}
     .ped-del-ex:hover{color:var(--red);}
     .ped-copy-bar{background:rgba(110,231,183,.06);border:1px solid var(--ba);border-radius:var(--r2);padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-    .ped-col-heads{display:grid;grid-template-columns:1fr 72px 72px 32px;gap:8px;padding:4px 14px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);}
+    .ped-col-heads{display:grid;grid-template-columns:18px 1fr 72px 72px 32px;gap:8px;padding:4px 14px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);}
     #mPlanEditor .modal{max-width:96vw;width:100%;}
     @media(min-width:700px){#mPlanEditor .modal{max-width:860px;}}
     .tg-status{background:rgba(110,231,183,.06);border:1px solid var(--ba);border-radius:var(--r);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
@@ -766,6 +769,7 @@
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mAddPh')">Отмена</button><button class="btn btn-p" onclick="uploadPhoto()">Загрузить</button></div>
 </div></div>
 
+<datalist id="pedExSuggest"></datalist>
 <div class="mo" id="mPlanEditor"><div class="modal" style="max-width:680px;width:96vw">
   <div class="mh"></div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:8px">
@@ -788,7 +792,7 @@
   <div id="pedWeekContent"></div>
   <button class="btn btn-g sm" style="margin-bottom:16px;width:100%;justify-content:center" onclick="pedAddBlock()">+ Добавить блок</button>
   <div class="mf">
-    <button class="btn btn-g" onclick="closeMo('mPlanEditor')">Отмена</button>
+    <button class="btn btn-g" onclick="if(_pedDirty&&!confirm('Есть несохранённые изменения. Закрыть?'))return;_pedDirty=false;closeMo('mPlanEditor')">Отмена</button>
     <button class="btn btn-p" onclick="savePlanEditor()">💾 Сохранить план</button>
   </div>
 </div></div>
@@ -975,7 +979,12 @@
       </div>
       <div class="fg">
         <label class="fl">Название видео</label>
-        <input class="fi" id="mVidTitle" placeholder="Сгибание на бицепс"/>
+        <input class="fi" id="mVidTitle" placeholder="Сгибание на бицепс" list="mVidExSuggest" autocomplete="off"/>
+        <datalist id="mVidExSuggest"></datalist>
+      </div>
+      <div class="fg">
+        <label class="fl">Описание (необязательно)</label>
+        <textarea class="fta" id="mVidDesc" placeholder="Техника выполнения, советы..." style="min-height:60px"></textarea>
       </div>
       <div class="upload-zone" id="mVidZone" style="margin-top:10px"
         onclick="document.getElementById('mVidFile').click()">
@@ -1018,6 +1027,8 @@ let allStudents = [];
 let _mVidFile = null;
 let _mVidCatId = null;
 let _mVidCatName = '';
+let _uVidData = {};
+let _pedDirty = false;
 const EMOJIS = ['👍','❤️','🔥','😂','😮','👏','💪','✅'];
 
 async function api(url, method='GET', body=null) {
@@ -1114,11 +1125,24 @@ async function orderItem(id,name){if(!confirm(`Заказать «${name}»? Т�
 
 // ═══ ПЛАН ═══
 let _pedPlan={1:[],2:[],3:[],4:[]},_pedWeek=1,_pedUserId='';
-async function openUploadPlan(userId,userName){_pedUserId=userId;document.getElementById('pedUserId').value=userId;document.getElementById('pedUserName').textContent='👤 '+userName;_pedWeek=1;try{const data=await api('/api/users/'+userId+'/plan');_pedPlan=data.trainingPlan?{1:data.trainingPlan[1]||[],2:data.trainingPlan[2]||[],3:data.trainingPlan[3]||[],4:data.trainingPlan[4]||[]}:{1:[],2:[],3:[],4:[]};}catch{_pedPlan={1:[],2:[],3:[],4:[]};}if(!_pedPlan[1].length){_pedPlan[1]=[{block:'Верх',exercise:'',sets:'',reps:''},{block:'Ноги',exercise:'',sets:'',reps:''}];}pedRenderWeekTabs();pedRenderWeek();openMo('mPlanEditor');}
+async function openUploadPlan(userId,userName){
+  _pedUserId=userId;_pedDirty=false;
+  document.getElementById('pedUserId').value=userId;
+  document.getElementById('pedUserName').textContent='👤 '+userName;
+  _pedWeek=1;
+  try{const data=await api('/api/users/'+userId+'/plan');_pedPlan=data.trainingPlan?{1:data.trainingPlan[1]||[],2:data.trainingPlan[2]||[],3:data.trainingPlan[3]||[],4:data.trainingPlan[4]||[]}:{1:[],2:[],3:[],4:[]};}catch{_pedPlan={1:[],2:[],3:[],4:[]};}
+  if(!_pedPlan[1].length){_pedPlan[1]=[{block:'Верх',exercise:'',sets:'',reps:''},{block:'Ноги',exercise:'',sets:'',reps:''}];}
+  // Populate exercise suggestions from all weeks
+  const exSet=new Set();
+  for(let w=1;w<=4;w++){(_pedPlan[w]||[]).forEach(e=>{if(e.exercise.trim())exSet.add(e.exercise.trim());});}
+  const dl=document.getElementById('pedExSuggest');
+  if(dl)dl.innerHTML=[...exSet].map(x=>`<option value="${esc(x)}">`).join('');
+  pedRenderWeekTabs();pedRenderWeek();openMo('mPlanEditor');
+}
 function pedRenderWeekTabs(){const tabs=document.getElementById('pedWeekTabs');tabs.innerHTML=[1,2,3,4].map(w=>{const cnt=(_pedPlan[w]||[]).filter(e=>e.exercise).length;return`<button class="ped-week-tab${w===_pedWeek?' active':''}" onclick="pedSwitchWeek(${w})">Неделя ${w}<br><span style="font-size:10px;opacity:.6">${cnt} упр.</span></button>`;}).join('');document.getElementById('pedCopyBar').style.display=_pedWeek===1?'flex':'none';}
 function pedReadDOM(){const blockEls=document.querySelectorAll('.ped-block');if(!blockEls.length)return;const result=[];blockEls.forEach(blockEl=>{const blockNameInput=blockEl.querySelector('.ped-block-name');const blockName=blockNameInput?blockNameInput.value.trim():'';const rows=blockEl.querySelectorAll('.ped-ex-row[data-idx]');rows.forEach(row=>{const exercise=row.querySelector('.ped-ex-name')?.value?.trim()||'';const sets=row.querySelector('.ped-sets')?.value?.trim()||'';const reps=row.querySelector('.ped-reps')?.value?.trim()||'';result.push({block:blockName,exercise,sets,reps});});if(!rows.length)result.push({block:blockName,exercise:'',sets:'',reps:''});});_pedPlan[_pedWeek]=result;}
 function pedSwitchWeek(w){pedReadDOM();_pedWeek=w;pedRenderWeekTabs();pedRenderWeek();}
-function pedRenderWeek(){const box=document.getElementById('pedWeekContent');const items=_pedPlan[_pedWeek]||[];if(!items.length){box.innerHTML=`<div style="text-align:center;padding:24px;color:var(--mu2);font-size:13px">Нажми «+ Добавить блок» чтобы начать</div>`;return;}const blockOrder=[],blockMap={};items.forEach((item,idx)=>{const b=item.block||'';if(!blockMap[b]){blockMap[b]=[];blockOrder.push(b);}blockMap[b].push({...item,_globalIdx:idx});});let html='';for(const blockName of blockOrder){const bItems=blockMap[blockName];html+=`<div class="ped-block" data-blockkey="${esc(blockName)}"><div class="ped-block-head"><span style="font-size:16px">💪</span><input class="ped-block-name" placeholder="Название блока (Верх, Ноги, Руки...)" value="${esc(blockName)}" data-original="${esc(blockName)}" onblur="pedRenameBlock(this)"/><button class="ped-block-del" onclick="pedDeleteBlock('${esc(blockName)}')" title="Удалить блок">✕</button></div><div class="ped-col-heads"><span>Упражнение</span><span style="text-align:center">Подходы</span><span style="text-align:center">Повторения</span><span></span></div>`;bItems.forEach(item=>{html+=`<div class="ped-ex-row" data-idx="${item._globalIdx}" data-block="${esc(blockName)}"><input class="ped-fi ped-ex-name" placeholder="Название упражнения" value="${esc(item.exercise)}"/><input class="ped-fi ped-fi sm ped-sets" placeholder="4" value="${esc(item.sets)}"/><input class="ped-fi ped-fi sm ped-reps" placeholder="12" value="${esc(item.reps)}"/><button class="ped-del-ex" onclick="pedDeleteEx(${item._globalIdx})">✕</button></div>`;});html+=`<button class="ped-add-ex" data-block="${esc(blockName)}" onclick="pedAddExBtn(this)">＋ добавить упражнение</button></div>`;}box.innerHTML=html;}
+function pedRenderWeek(){const box=document.getElementById('pedWeekContent');const items=_pedPlan[_pedWeek]||[];if(!items.length){box.innerHTML=`<div style="text-align:center;padding:24px;color:var(--mu2);font-size:13px">Нажми «+ Добавить блок» чтобы начать</div>`;return;}const blockOrder=[],blockMap={};items.forEach((item,idx)=>{const b=item.block||'';if(!blockMap[b]){blockMap[b]=[];blockOrder.push(b);}blockMap[b].push({...item,_globalIdx:idx});});let html='';for(const blockName of blockOrder){const bItems=blockMap[blockName];html+=`<div class="ped-block" data-blockkey="${esc(blockName)}"><div class="ped-block-head"><span style="font-size:16px">💪</span><input class="ped-block-name" placeholder="Название блока (Верх, Ноги, Руки...)" value="${esc(blockName)}" data-original="${esc(blockName)}" onblur="pedRenameBlock(this)"/><button class="ped-block-del" onclick="pedDeleteBlock('${esc(blockName)}')" title="Удалить блок">✕</button></div><div class="ped-col-heads"><span></span><span>Упражнение</span><span style="text-align:center">Подходы</span><span style="text-align:center">Повторения</span><span></span></div>`;bItems.forEach(item=>{html+=`<div class="ped-ex-row" draggable="true" data-idx="${item._globalIdx}" data-block="${esc(blockName)}" ondragstart="pedDragStart(event,this)" ondragover="pedDragOver(event,this)" ondrop="pedDrop(event,this)" ondragend="pedDragEnd()"><span class="ped-drag-handle" title="Перетащить">⠿</span><input class="ped-fi ped-ex-name" placeholder="Название упражнения" value="${esc(item.exercise)}" oninput="_pedDirty=true" list="pedExSuggest"/><input class="ped-fi ped-fi sm ped-sets" placeholder="4" value="${esc(item.sets)}" oninput="_pedDirty=true"/><input class="ped-fi ped-fi sm ped-reps" placeholder="12" value="${esc(item.reps)}" oninput="_pedDirty=true"/><button class="ped-del-ex" onclick="pedDeleteEx(${item._globalIdx})">✕</button></div>`;});html+=`<button class="ped-add-ex" data-block="${esc(blockName)}" onclick="pedAddExBtn(this)">＋ добавить упражнение</button></div>`;}box.innerHTML=html;}
 function pedAddBlock(){pedReadDOM();const existingBlocks=[...new Set((_pedPlan[_pedWeek]||[]).map(e=>e.block))];let newBlockName='Новый блок',counter=2;while(existingBlocks.includes(newBlockName)){newBlockName=`Новый блок ${counter}`;counter++;}_pedPlan[_pedWeek].push({block:newBlockName,exercise:'',sets:'',reps:''});pedRenderWeek();const blocks=document.querySelectorAll('.ped-block-name');if(blocks.length){const last=blocks[blocks.length-1];last.focus();last.select();}}
 function pedAddExBtn(btn){pedAddEx(btn.dataset.block);}
 function pedAddEx(blockName){pedReadDOM();const plan=_pedPlan[_pedWeek];let lastIdx=-1;plan.forEach((e,i)=>{if(e.block===blockName)lastIdx=i;});const insertAt=lastIdx>=0?lastIdx+1:plan.length;plan.splice(insertAt,0,{block:blockName,exercise:'',sets:'',reps:''});pedRenderWeek();const rows=document.querySelectorAll('.ped-ex-row');if(rows[insertAt])rows[insertAt].querySelector('.ped-ex-name')?.focus();}
@@ -1126,7 +1150,40 @@ function pedDeleteEx(idx){pedReadDOM();_pedPlan[_pedWeek].splice(idx,1);pedRende
 function pedDeleteBlock(blockName){if(!confirm(`Удалить блок "${blockName}" со всеми упражнениями?`))return;pedReadDOM();_pedPlan[_pedWeek]=_pedPlan[_pedWeek].filter(e=>e.block!==blockName);pedRenderWeek();}
 function pedRenameBlock(input){const oldName=input.dataset.original,newName=input.value.trim()||oldName;if(oldName===newName)return;(_pedPlan[_pedWeek]||[]).forEach(e=>{if(e.block===oldName)e.block=newName;});const blockEl=input.closest('.ped-block');if(blockEl){blockEl.dataset.blockkey=newName;blockEl.querySelectorAll('.ped-ex-row').forEach(row=>{row.dataset.block=newName;});const delBtn=blockEl.querySelector('.ped-block-del');if(delBtn)delBtn.setAttribute('onclick',`pedDeleteBlock('${esc(newName)}')`);const addBtn=blockEl.querySelector('.ped-add-ex');if(addBtn){addBtn.dataset.block=newName;}}input.dataset.original=newName;}
 function copyWeekAny(){pedReadDOM();const from=parseInt(document.getElementById('pedCopyFrom').value);const toVal=document.getElementById('pedCopyTo').value;if(toVal!=='all'&&parseInt(toVal)===from){toast('Выберите другую неделю','e');return;}const src=JSON.parse(JSON.stringify(_pedPlan[from]));if(toVal==='all'){const others=[1,2,3,4].filter(w=>w!==from);if(!confirm(`Скопировать Неделю ${from} на все остальные (${others.join(', ')})? Данные будут заменены.`))return;others.forEach(w=>{_pedPlan[w]=JSON.parse(JSON.stringify(src));});toast(`✅ Неделя ${from} скопирована на недели ${others.join(', ')}`,'s');}else{const to=parseInt(toVal);if(!confirm(`Скопировать Неделю ${from} → Неделю ${to}? Данные недели ${to} будут заменены.`))return;_pedPlan[to]=JSON.parse(JSON.stringify(src));toast(`✅ Неделя ${from} → Неделя ${to}`,'s');}pedRenderWeekTabs();}
-async function savePlanEditor(){pedReadDOM();const clean={};for(let w=1;w<=4;w++){clean[w]=(_pedPlan[w]||[]).filter(e=>e.exercise.trim());}const total=Object.values(clean).reduce((s,a)=>s+a.length,0);if(!total){toast('Добавьте хотя бы одно упражнение','e');return;}try{await api('/api/users/'+_pedUserId+'/plan','POST',{trainingPlan:clean});toast(`✅ План сохранён: ${total} упражнений`,'s');closeMo('mPlanEditor');allStudents=[];loadAdminHome();}catch(e){toast('Ошибка: '+e.message,'e');}}
+async function savePlanEditor(){pedReadDOM();const clean={};for(let w=1;w<=4;w++){clean[w]=(_pedPlan[w]||[]).filter(e=>e.exercise.trim());}const total=Object.values(clean).reduce((s,a)=>s+a.length,0);if(!total){toast('Добавьте хотя бы одно упражнение','e');return;}try{await api('/api/users/'+_pedUserId+'/plan','POST',{trainingPlan:clean});_pedDirty=false;toast(`✅ План сохранён: ${total} упражнений`,'s');closeMo('mPlanEditor');allStudents=[];loadAdminHome();}catch(e){toast('Ошибка: '+e.message,'e');}}
+
+// ═══ DRAG & DROP для упражнений ═══
+let _pedDragIdx=null,_pedDragBlock=null;
+function pedDragStart(e,row){
+  pedReadDOM();
+  _pedDragIdx=parseInt(row.dataset.idx);
+  _pedDragBlock=row.dataset.block;
+  row.classList.add('dragging');
+  e.dataTransfer.effectAllowed='move';
+}
+function pedDragOver(e,row){
+  e.preventDefault();
+  e.dataTransfer.dropEffect='move';
+  document.querySelectorAll('.ped-ex-row').forEach(r=>r.classList.remove('drag-over'));
+  row.classList.add('drag-over');
+}
+function pedDrop(e,row){
+  e.preventDefault();
+  const toIdx=parseInt(row.dataset.idx);
+  const toBlock=row.dataset.block;
+  if(_pedDragIdx===null||_pedDragIdx===toIdx)return;
+  const plan=_pedPlan[_pedWeek];
+  const item=plan.splice(_pedDragIdx,1)[0];
+  item.block=toBlock;
+  const newTo=toIdx>_pedDragIdx?toIdx-1:toIdx;
+  plan.splice(newTo,0,item);
+  _pedDirty=true;
+  pedRenderWeek();
+}
+function pedDragEnd(){
+  _pedDragIdx=null;_pedDragBlock=null;
+  document.querySelectorAll('.ped-ex-row').forEach(r=>r.classList.remove('dragging','drag-over'));
+}
 
 let _trainingPlan=null,_currentWeek=1;
 async function loadUserPlan(){const box=document.getElementById('uPlanContent');box.innerHTML=`<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>`;try{const data=await api('/api/users/'+ME.id+'/plan');if(!data.trainingPlan){box.innerHTML=`<div class="plan-upload-hint"><div style="font-size:36px;margin-bottom:10px">📋</div><div style="font-weight:600;margin-bottom:6px">План тренировок ещё не загружен</div><div>Тренер загрузит ваш персональный план — он появится здесь автоматически</div></div>`;return;}_trainingPlan=data.trainingPlan;if(data.planUpdatedAt){const d=new Date(data.planUpdatedAt);document.getElementById('planUpdatedAt').textContent='обновлён '+d.toLocaleDateString('ru-RU');}renderPlanWeek(_currentWeek);}catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}}
@@ -1517,9 +1574,12 @@ async function loadVideoLibrary(){
       const cvids=bycat[cat.id]||[];
       const vRows=cvids.map(v=>`
         <div class="vid-item">
-          <span class="vid-item-name">${esc(v.title)}</span>
-          <button class="btn btn-g sm" onclick="openVideoModal('${esc(v.title)}','${esc(v.videoUrl)}')">▶</button>
-          <button class="btn btn-d sm" onclick="deleteVideo('${esc(v.id)}','${esc(v.title)}')">🗑</button>
+          <div class="vid-item-name">
+            <div>${esc(v.title)}</div>
+            ${v.description?`<div style="font-size:11px;color:var(--mu2);margin-top:2px">${esc(v.description)}</div>`:''}
+          </div>
+          <button class="btn btn-g sm" data-vid-title="${esc(v.title)}" data-vid-url="${esc(v.videoUrl)}" onclick="openVideoModal(this.dataset.vidTitle,this.dataset.vidUrl)">▶</button>
+          <button class="btn btn-d sm" data-vid-id="${esc(v.id)}" data-vid-title="${esc(v.title)}" onclick="deleteVideo(this.dataset.vidId,this.dataset.vidTitle)">🗑</button>
         </div>`).join('');
       return`<div class="vid-cat-block">
         <div class="vid-cat-head">
@@ -1560,8 +1620,21 @@ function openUploadVideoModal(catId,catName){
   if(lbl)lbl.textContent=catName;
   const title=document.getElementById('mVidTitle');
   if(title)title.value='';
+  const desc=document.getElementById('mVidDesc');
+  if(desc)desc.value='';
   clearMVidPreview();
   openMo('mAddVideo');
+  // Populate exercise suggestions from student plans
+  api('/api/users').then(users=>{
+    const exSet=new Set();
+    users.forEach(u=>{
+      const tp=u.trainingPlan;
+      if(!tp)return;
+      [1,2,3,4].forEach(w=>{(tp[w]||[]).forEach(e=>{if(e.exercise&&e.exercise.trim())exSet.add(e.exercise.trim());});});
+    });
+    const dl=document.getElementById('mVidExSuggest');
+    if(dl)dl.innerHTML=[...exSet].sort().map(x=>`<option value="${esc(x)}">`).join('');
+  }).catch(()=>{});
   // Drag & drop
   const zone=document.getElementById('mVidZone');
   if(zone&&!zone._ddBound){
@@ -1621,10 +1694,12 @@ async function submitUploadVideo(){
   const bar=document.getElementById('mVidProgressBar');
   if(progress)progress.style.display='block';
 
+  const desc=(document.getElementById('mVidDesc')?.value||'').trim();
   const fd=new FormData();
   fd.append('categoryId',_mVidCatId);
   fd.append('categoryName',_mVidCatName);
   fd.append('title',title);
+  if(desc)fd.append('description',desc);
   fd.append('video',_mVidFile);
 
   const xhr=new XMLHttpRequest();
@@ -1677,6 +1752,7 @@ async function loadUserVideoLibrary(){
     }
     const bycat={};
     videos.forEach(v=>{if(!bycat[v.categoryId])bycat[v.categoryId]=[];bycat[v.categoryId].push(v);});
+    _uVidData={cats,bycat};
     _renderUVidCategories(box,cats,bycat);
   }catch(e){box.innerHTML=`<div class="empty"><div class="ei">⚠️</div>${esc(e.message)}</div>`;}
 }
@@ -1687,7 +1763,7 @@ function _renderUVidCategories(box,cats,bycat){
     <div class="vid-cat-grid">
       ${cats.map(cat=>{
         const cnt=(bycat[cat.id]||[]).length;
-        return`<div class="vid-cat-card" onclick="_openUVidCategory('${esc(cat.id)}','${esc(cat.name)}',${JSON.stringify((bycat[cat.id]||[]).map(v=>({id:v.id,title:v.title,videoUrl:v.videoUrl})))})">
+        return`<div class="vid-cat-card" onclick="_openUVidCategory('${esc(cat.id)}','${esc(cat.name)}')">`+`
           <div class="vid-cat-card-icon">📁</div>
           <div class="vid-cat-card-name">${esc(cat.name)}</div>
           <div class="vid-cat-card-cnt">${cnt} видео</div>
@@ -1696,9 +1772,10 @@ function _renderUVidCategories(box,cats,bycat){
     </div>`;
 }
 
-function _openUVidCategory(catId,catName,videos){
+function _openUVidCategory(catId,catName){
   const box=document.getElementById('uVidContent');
   if(!box)return;
+  const videos=(_uVidData.bycat&&_uVidData.bycat[catId])||[];
   if(!videos.length){
     box.innerHTML=`
       <button class="vid-back-btn" onclick="loadUserVideoLibrary()">← Назад</button>
@@ -1710,9 +1787,12 @@ function _openUVidCategory(catId,catName,videos){
     <button class="vid-back-btn" onclick="loadUserVideoLibrary()">← Назад</button>
     <div class="st" style="margin-bottom:14px">📁 ${esc(catName)}</div>
     ${videos.map(v=>`
-      <div class="uvid-item" onclick="openVideoModal('${esc(v.title)}','${esc(v.videoUrl)}')">
+      <div class="uvid-item" data-vid-title="${esc(v.title)}" data-vid-url="${esc(v.videoUrl)}" onclick="openVideoModal(this.dataset.vidTitle,this.dataset.vidUrl)">
         <div class="uvid-play">▶</div>
-        <div class="uvid-name">${esc(v.title)}</div>
+        <div>
+          <div class="uvid-name">${esc(v.title)}</div>
+          ${v.description?`<div style="font-size:11px;color:var(--mu2);margin-top:2px">${esc(v.description)}</div>`:''}
+        </div>
       </div>`).join('')}`;
 }
 
@@ -1745,7 +1825,14 @@ function fmtDt(iso){return new Date(iso).toLocaleString('ru-RU',{day:'2-digit',m
 function toast(msg,type='s'){const ic={s:'✅',e:'❌',w:'⚠️'};const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=`${ic[type]||'•'} ${msg}`;document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),4500);}
 function openMo(id){document.getElementById(id).classList.add('open');if(id==='mAddW')onOpenAddW();}
 function closeMo(id){document.getElementById(id).classList.remove('open');}
-document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{
+  if(e.target!==m)return;
+  if(m.id==='mPlanEditor'){
+    if(_pedDirty){if(!confirm('Есть несохранённые изменения. Закрыть без сохранения?'))return;}
+    _pedDirty=false;
+  }
+  m.classList.remove('open');
+}));
 function chartCfg(weights){return{type:'line',data:{labels:weights.map(w=>w.date),datasets:[{label:'Вес (кг)',data:weights.map(w=>w.weight),borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.07)',borderWidth:2.5,pointBackgroundColor:'#6ee7b7',pointRadius:5,tension:.35,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748b',font:{size:11}},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#64748b',font:{size:11}},grid:{color:'rgba(255,255,255,.04)'}}}}}}
 function openLightbox(url){document.getElementById('lightbox-img').src=url;document.getElementById('lightbox').classList.add('open');document.body.style.overflow='hidden';}
 function closeLightbox(e){if(e&&e.target===document.getElementById('lightbox-img'))return;document.getElementById('lightbox').classList.remove('open');document.getElementById('lightbox-img').src='';document.body.style.overflow='';}
