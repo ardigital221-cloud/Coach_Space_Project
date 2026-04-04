@@ -82,13 +82,34 @@ app.get('/api/img/:filePath(*)', async (req, res) => {
     const [exists] = await file.exists();
     if (!exists) return res.status(404).send('Not found');
     const [metadata] = await file.getMetadata();
-    const contentType = (metadata.contentType) || 'image/jpeg';
-    res.setHeader('Content-Type', contentType);
-    res.setHeader('Cache-Control', 'public, max-age=86400');
+    const contentType = metadata.contentType || 'application/octet-stream';
+    const fileSize = parseInt(metadata.size) || 0;
+
     res.setHeader('Access-Control-Allow-Origin', '*');
-    file.createReadStream()
-      .on('error', (e) => { console.error('Stream error:', e.message); res.status(500).end(); })
-      .pipe(res);
+    res.setHeader('Accept-Ranges', 'bytes');
+
+    const range = req.headers.range;
+    if (range && fileSize) {
+      const [startStr, endStr] = range.replace(/bytes=/, '').split('-');
+      const start = parseInt(startStr, 10);
+      const end   = endStr ? parseInt(endStr, 10) : fileSize - 1;
+      const chunkSize = end - start + 1;
+      res.writeHead(206, {
+        'Content-Range':  `bytes ${start}-${end}/${fileSize}`,
+        'Content-Length': chunkSize,
+        'Content-Type':   contentType,
+      });
+      file.createReadStream({ start, end })
+        .on('error', e => { console.error('Stream error:', e.message); res.end(); })
+        .pipe(res);
+    } else {
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      if (fileSize) res.setHeader('Content-Length', fileSize);
+      file.createReadStream()
+        .on('error', e => { console.error('Stream error:', e.message); res.status(500).end(); })
+        .pipe(res);
+    }
   } catch (e) {
     console.error('IMG PROXY:', e.message);
     res.status(500).send('Error');
