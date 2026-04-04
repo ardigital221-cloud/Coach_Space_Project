@@ -753,54 +753,92 @@ app.delete('/api/notes/:userId/:noteId', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════
-// ВИДЕОТЕКА УПРАЖНЕНИЙ
+// ВИДЕОТЕКА — КАТЕГОРИИ
 // ═══════════════════════════════════════════
 
-// GET /api/exercise-videos — возвращает объект { exerciseName: { id, url } }
-app.get('/api/exercise-videos', async (req, res) => {
+// GET /api/video-categories
+app.get('/api/video-categories', async (_req, res) => {
   try {
-    const snap = await db.collection('exerciseVideos').get();
-    const result = {};
-    snap.docs.forEach(d => {
-      result[d.data().exerciseName] = { id: d.id, url: d.data().videoUrl };
-    });
-    res.json(result);
+    const snap = await db.collection('videoCategories').orderBy('createdAt').get();
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// POST /api/exercise-videos — загрузить видео для упражнения
+// POST /api/video-categories  { name }
+app.post('/api/video-categories', async (req, res) => {
+  try {
+    const name = (req.body.name || '').trim();
+    if (!name) return res.status(400).json({ error: 'Название обязательно' });
+    const ref = await db.collection('videoCategories').add({
+      name, createdAt: new Date().toISOString()
+    });
+    res.json({ id: ref.id, name });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// DELETE /api/video-categories/:id — удаляет категорию + все её видео
+app.delete('/api/video-categories/:id', async (req, res) => {
+  try {
+    const catId = req.params.id;
+    const videos = await db.collection('exerciseVideos').where('categoryId', '==', catId).get();
+    const batch = db.batch();
+    for (const v of videos.docs) {
+      if (v.data().storagePath) {
+        await bucket.file(v.data().storagePath).delete().catch(() => {});
+      }
+      batch.delete(v.ref);
+    }
+    batch.delete(db.collection('videoCategories').doc(catId));
+    await batch.commit();
+    console.log(`[CAT-DEL] id=${catId}, videos=${videos.size}`);
+    res.json({ success: true, deletedVideos: videos.size });
+  } catch (e) {
+    console.error('[CAT-DEL-ERR]', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ═══════════════════════════════════════════
+// ВИДЕОТЕКА — ВИДЕО
+// ═══════════════════════════════════════════
+
+// GET /api/exercise-videos[?categoryId=xxx]
+app.get('/api/exercise-videos', async (req, res) => {
+  try {
+    let query = db.collection('exerciseVideos');
+    if (req.query.categoryId) {
+      query = query.where('categoryId', '==', req.query.categoryId);
+    }
+    const snap = await query.orderBy('createdAt').get();
+    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// POST /api/exercise-videos  multipart: categoryId, title, video
 app.post('/api/exercise-videos', uploadVideo.single('video'), async (req, res) => {
   try {
-    const exerciseName = (req.body.exerciseName || '').trim();
-    if (!exerciseName) return res.status(400).json({ error: 'exerciseName обязателен' });
-    if (!req.file)     return res.status(400).json({ error: 'Видео файл обязателен' });
+    const categoryId   = (req.body.categoryId   || '').trim();
+    const categoryName = (req.body.categoryName || '').trim();
+    const title        = (req.body.title        || '').trim();
+    if (!categoryId) return res.status(400).json({ error: 'categoryId обязателен' });
+    if (!title)      return res.status(400).json({ error: 'title обязателен' });
+    if (!req.file)   return res.status(400).json({ error: 'Видео файл обязателен' });
 
-    const safeName = require('path').basename(req.file.originalname).replace(/[^a-zA-Z0-9._-]/g, '_');
-    const fileName = `exercise-videos/${Date.now()}_${safeName}`;
+    const safeName = path.basename(req.file.originalname).replace(/[^a-zA-Z0-9._-]/g, '_');
+    const fileName = `exercise_videos/${Date.now()}_${safeName}`;
     const file = bucket.file(fileName);
     await file.save(req.file.buffer, {
       metadata: { contentType: req.file.mimetype, cacheControl: 'public, max-age=31536000' }
     });
     const videoUrl = `/api/img/${encodeURIComponent(fileName)}`;
 
-    // Если для этого упражнения уже есть видео — удаляем старое
-    const existing = await db.collection('exerciseVideos')
-      .where('exerciseName', '==', exerciseName).limit(1).get();
-    if (!existing.empty) {
-      const old = existing.docs[0];
-      if (old.data().storagePath) {
-        await bucket.file(old.data().storagePath).delete().catch(() => {});
-      }
-      await old.ref.delete();
-    }
-
     const ref = await db.collection('exerciseVideos').add({
-      exerciseName,
-      videoUrl,
+      categoryId, categoryName, title, videoUrl,
       storagePath: fileName,
+      fileSize: req.file.size,
       createdAt: new Date().toISOString()
     });
-    console.log(`[VIDEO-UPLOAD] "${exerciseName}" → ${fileName}`);
+    console.log(`[VIDEO-UPLOAD] "${title}" cat=${categoryId} → ${fileName}`);
     res.json({ id: ref.id, videoUrl });
   } catch (e) {
     console.error('[VIDEO-UPLOAD-ERR]', e.message);
@@ -808,7 +846,7 @@ app.post('/api/exercise-videos', uploadVideo.single('video'), async (req, res) =
   }
 });
 
-// DELETE /api/exercise-videos/:id — удалить видео по ID документа
+// DELETE /api/exercise-videos/:id
 app.delete('/api/exercise-videos/:id', async (req, res) => {
   try {
     const doc = await db.collection('exerciseVideos').doc(req.params.id).get();
@@ -819,7 +857,7 @@ app.delete('/api/exercise-videos/:id', async (req, res) => {
       });
     }
     await doc.ref.delete();
-    console.log(`[VIDEO-DEL] "${doc.data().exerciseName}" удалено`);
+    console.log(`[VIDEO-DEL] "${doc.data().title}" удалено`);
     res.json({ success: true });
   } catch (e) {
     console.error('[VIDEO-DEL-ERR]', e.message);
