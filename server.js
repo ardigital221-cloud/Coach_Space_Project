@@ -892,10 +892,12 @@ app.delete('/api/exercise-videos/:id', async (req, res) => {
 // ═══════════════════════════════════════════
 app.get('/api/nutrition/:userId', async (req, res) => {
   try {
-    let query = db.collection('nutrition').where('userId', '==', req.params.userId);
-    if (req.query.date) query = query.where('date', '==', req.query.date);
-    const snap = await query.orderBy('createdAt').get();
-    res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    // Используем только один where чтобы избежать требования составного индекса Firestore
+    const snap = await db.collection('nutrition').where('userId', '==', req.params.userId).get();
+    let items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (req.query.date) items = items.filter(i => i.date === req.query.date);
+    items.sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
+    res.json(items);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
