@@ -127,8 +127,8 @@
     .post-meta{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
     .post-dt{font-size:11px;color:var(--mu);}
     .sub-h{background:linear-gradient(135deg,rgba(139,92,246,.1),rgba(99,102,241,.06),rgba(139,92,246,.04));border:1px solid rgba(139,92,246,.25);border-radius:22px;padding:26px 22px;margin-bottom:14px;position:relative;overflow:hidden;}
-    .sub-h::before{content:'';position:absolute;top:-40px;right:-40px;width:130px;height:130px;background:radial-gradient(circle,rgba(139,92,246,.2),transparent 70%);}
-    .sub-h::after{content:'';position:absolute;bottom:-30px;left:-20px;width:90px;height:90px;background:radial-gradient(circle,rgba(99,102,241,.12),transparent 70%);}
+    .sub-h::before{content:'';position:absolute;top:-40px;right:-40px;width:130px;height:130px;background:radial-gradient(circle,rgba(139,92,246,.2),transparent 70%);pointer-events:none;}
+    .sub-h::after{content:'';position:absolute;bottom:-30px;left:-20px;width:90px;height:90px;background:radial-gradient(circle,rgba(99,102,241,.12),transparent 70%);pointer-events:none;}
     .sub-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--ac);opacity:.75;margin-bottom:6px;}
     .sub-n{font-family:'Unbounded',sans-serif;font-size:60px;font-weight:700;color:var(--ac);line-height:1;margin-bottom:4px;text-shadow:0 0 30px rgba(139,92,246,.4);}
     .sub-d{font-size:13px;color:var(--mu2);margin-bottom:14px;}
@@ -435,7 +435,7 @@
     .nut-date-nav{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
     .nut-date-nav input{flex:1;text-align:center;}
     .nut-kcal-card{background:linear-gradient(135deg,var(--acd),rgba(255,255,255,.015));border:1px solid var(--ba);border-radius:var(--r);padding:18px 20px;margin-bottom:14px;display:flex;align-items:center;gap:16px;position:relative;overflow:hidden;}
-    .nut-kcal-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(139,92,246,.18),transparent 70%);}
+    .nut-kcal-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(139,92,246,.18),transparent 70%);pointer-events:none;}
     .nut-kcal-num{font-family:'Unbounded',sans-serif;font-size:52px;font-weight:700;color:var(--ac);line-height:1;text-shadow:var(--glow);}
     .nut-kcal-lbl{font-size:12px;color:var(--mu2);margin-top:5px;}
     .nut-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
@@ -1886,8 +1886,9 @@ function closeVideoModal(){
 }
 
 // ═══ ПИТАНИЕ ═══
-let _nutDate=new Date().toISOString().split('T')[0];
-let _anutDate=new Date().toISOString().split('T')[0];
+function _todayLocal(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+let _nutDate=_todayLocal();
+let _anutDate=_todayLocal();
 let _anutStudentId=null,_anutStudentName='';
 let _nutStudents=[];
 const _NUT_EMOJI={breakfast:'🌅',lunch:'☀️',dinner:'🌙',snack:'🍎'};
@@ -1963,7 +1964,7 @@ async function saveNutEntry(){
     if(!r.ok){const d=await r.json();throw new Error(d.error||'Ошибка');}
     closeMo('mAddNut');
     ['nutName','nutKcal','nutProtein','nutFat','nutCarbs'].forEach(id=>document.getElementById(id).value='');
-    toast('✅ Записано!');
+    toast('Записано!','s');
     loadUserNutrition();
   }catch(e){toast('Ошибка: '+e.message,'e');}
   btn.disabled=false;btn.textContent='Добавить';
