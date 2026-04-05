@@ -431,6 +431,28 @@
     @keyframes slideUp {from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
     @keyframes spin    {to{transform:rotate(360deg)}}
     @keyframes pulse   {0%,100%{transform:scale(1)}50%{transform:scale(1.16)}}
+    /* ═══ FATSECRET ПОИСК ═══ */
+    .nut-dropdown{position:absolute;top:calc(100% + 2px);left:0;right:0;z-index:600;background:rgba(10,12,22,.98);border:1px solid var(--ba);border-radius:0 0 var(--r2) var(--r2);max-height:220px;overflow-y:auto;display:none;box-shadow:0 8px 32px rgba(0,0,0,.5);}
+    .nut-dd-item{padding:10px 14px;cursor:pointer;transition:background .15s;border-bottom:1px solid rgba(255,255,255,.04);}
+    .nut-dd-item:last-child{border-bottom:none;}
+    .nut-dd-item:hover,.nut-dd-item:active{background:rgba(139,92,246,.12);}
+    .nut-dd-name{font-size:13px;font-weight:600;color:var(--tx);}
+    .nut-dd-desc{font-size:11px;color:var(--mu2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .nut-fav-section{margin-bottom:14px;}
+    .nut-fav-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--mu2);margin-bottom:8px;}
+    .nut-fav-chips{display:flex;flex-wrap:wrap;gap:6px;}
+    .nut-fav-chip{display:flex;align-items:center;gap:5px;background:var(--acd);border:1px solid var(--ba);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--ac);cursor:pointer;transition:all .15s;max-width:180px;}
+    .nut-fav-chip:hover{background:rgba(139,92,246,.22);}
+    .nut-fav-chip-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
+    .nut-fav-chip-del{font-size:13px;opacity:.4;flex-shrink:0;background:none;border:none;color:inherit;padding:0 0 0 4px;cursor:pointer;line-height:1;transition:opacity .15s;}
+    .nut-fav-chip-del:hover{opacity:1;color:var(--red);}
+    .nut-star-row{display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:var(--r2);margin-top:10px;cursor:pointer;user-select:none;transition:all .18s;}
+    .nut-star-row:hover{background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.2);}
+    .nut-star-row.active{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.3);}
+    .nut-star-icon{font-size:20px;transition:transform .2s;flex-shrink:0;}
+    .nut-star-row.active .nut-star-icon{transform:scale(1.15);}
+    .nut-star-lbl{font-size:13px;color:var(--mu2);flex:1;}
+    .nut-star-row.active .nut-star-lbl{color:var(--yel);font-weight:600;}
     /* ═══ ПИТАНИЕ ═══ */
     .nut-date-nav{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
     .nut-date-nav input{flex:1;text-align:center;}
@@ -1013,7 +1035,15 @@
 <div class="mo" id="mAddNut">
   <div class="modal" style="max-width:420px">
     <div class="mh"></div><div class="mt">🥗 Добавить приём пищи</div>
-    <div class="fg"><label class="fl">Название блюда</label><input class="fi" id="nutName" placeholder="Куриная грудка, гречка с овощами..."/></div>
+    <div class="nut-fav-section" id="nutFavSection" style="display:none">
+      <div class="nut-fav-title">⭐ Избранное</div>
+      <div class="nut-fav-chips" id="nutFavChips"></div>
+    </div>
+    <div class="fg" style="position:relative">
+      <label class="fl">Название блюда</label>
+      <input class="fi" id="nutName" placeholder="Начните вводить для поиска..." autocomplete="off"/>
+      <div class="nut-dropdown" id="nutDropdown"></div>
+    </div>
     <div class="fg"><label class="fl">Тип приёма пищи</label>
       <select class="fsel" id="nutType">
         <option value="breakfast">🌅 Завтрак</option>
@@ -1028,8 +1058,12 @@
       <div class="fg"><label class="fl">Жиры (г)</label><input class="fi" id="nutFat" type="number" min="0" step="0.1" placeholder="8"/></div>
     </div>
     <div class="fg"><label class="fl">Углеводы (г)</label><input class="fi" id="nutCarbs" type="number" min="0" step="0.1" placeholder="35"/></div>
+    <div class="nut-star-row" id="nutStarToggle" onclick="toggleNutStar()">
+      <span class="nut-star-icon" id="nutStarIcon">☆</span>
+      <span class="nut-star-lbl">Сохранить в избранное</span>
+    </div>
     <div class="mf">
-      <button class="btn btn-g" onclick="closeMo('mAddNut')">Отмена</button>
+      <button class="btn btn-g" onclick="closeMo('mAddNut');resetNutModal()">Отмена</button>
       <button class="btn btn-p" id="nutSaveBtn" onclick="saveNutEntry()">Добавить</button>
     </div>
   </div>
@@ -1891,6 +1925,8 @@ let _nutDate=_todayLocal();
 let _anutDate=_todayLocal();
 let _anutStudentId=null,_anutStudentName='';
 let _nutStudents=[];
+let _nutSaveFav=false;
+let _nutFavsCache=[];
 const _NUT_EMOJI={breakfast:'🌅',lunch:'☀️',dinner:'🌙',snack:'🍎'};
 const _NUT_NAME={breakfast:'Завтрак',lunch:'Обед',dinner:'Ужин',snack:'Перекус'};
 
@@ -1962,8 +1998,14 @@ async function saveNutEntry(){
     const r=await fetch(`/api/nutrition/${ME.id}`,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({name,type,kcal,protein,fat,carbs,date:_nutDate})});
     if(!r.ok){const d=await r.json();throw new Error(d.error||'Ошибка');}
+    if(_nutSaveFav){
+      await fetch(`/api/favorites/${ME.id}`,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name,type,kcal,protein,fat,carbs})}).catch(()=>{});
+      toast('⭐ Добавлено в избранное','w');
+    }
     closeMo('mAddNut');
     ['nutName','nutKcal','nutProtein','nutFat','nutCarbs'].forEach(id=>document.getElementById(id).value='');
+    resetNutModal();
     toast('Записано!','s');
     loadUserNutrition();
   }catch(e){toast('Ошибка: '+e.message,'e');}
@@ -2048,13 +2090,122 @@ function anutSelectStudent(sid){
 
 function anutDateShift(d){const dt=new Date(_anutDate);dt.setDate(dt.getDate()+d);_anutDate=dt.toISOString().split('T')[0];loadAdminNutrition();}
 
+// ═══ FATSECRET AUTOCOMPLETE ═══
+function nutSetupAutocomplete(){
+  const input=document.getElementById('nutName');
+  if(!input||input._fsSetup)return;
+  input._fsSetup=true;
+  let timer=null;
+  input.addEventListener('input',()=>{
+    clearTimeout(timer);
+    const q=input.value.trim();
+    if(q.length<2){hideNutDropdown();return;}
+    timer=setTimeout(()=>searchFatSecretFoods(q),450);
+  });
+  input.addEventListener('blur',()=>setTimeout(hideNutDropdown,200));
+}
+async function searchFatSecretFoods(q){
+  try{
+    const r=await fetch(`/api/fatsecret/search?q=${encodeURIComponent(q)}`);
+    if(!r.ok)return;
+    const data=await r.json();
+    showNutDropdown(data.foods||[]);
+  }catch(e){hideNutDropdown();}
+}
+function showNutDropdown(foods){
+  const dd=document.getElementById('nutDropdown');
+  if(!dd)return;
+  if(!foods.length){dd.innerHTML='';dd.style.display='none';return;}
+  dd.innerHTML=foods.map(f=>{
+    const macros=parseFoodDescription(f.food_description||'');
+    const hint=macros?`${macros.kcal} ккал · Б:${macros.protein}г Ж:${macros.fat}г У:${macros.carbs}г`:(f.food_description||'').slice(0,55);
+    return `<div class="nut-dd-item" data-name="${esc(f.food_name)}" data-desc="${esc(f.food_description||'')}" onclick="selectNutFood(this)">
+      <div class="nut-dd-name">${esc(f.food_name)}</div>
+      <div class="nut-dd-desc">${esc(hint)}</div>
+    </div>`;
+  }).join('');
+  dd.style.display='block';
+}
+function hideNutDropdown(){const dd=document.getElementById('nutDropdown');if(dd)dd.style.display='none';}
+function selectNutFood(el){
+  const name=el.dataset.name;
+  const desc=el.dataset.desc;
+  document.getElementById('nutName').value=name;
+  hideNutDropdown();
+  const macros=parseFoodDescription(desc);
+  if(macros){
+    document.getElementById('nutKcal').value=macros.kcal;
+    document.getElementById('nutProtein').value=macros.protein;
+    document.getElementById('nutFat').value=macros.fat;
+    document.getElementById('nutCarbs').value=macros.carbs;
+  }
+}
+function parseFoodDescription(desc){
+  if(!desc)return null;
+  const cal=desc.match(/Calories:\s*([\d.]+)/i);
+  const fat=desc.match(/Fat:\s*([\d.]+)/i);
+  const carb=desc.match(/Carbs:\s*([\d.]+)/i);
+  const prot=desc.match(/Prot:\s*([\d.]+)/i);
+  if(!cal)return null;
+  return{kcal:Math.round(parseFloat(cal[1])||0),fat:parseFloat(fat?.[1])||0,carbs:parseFloat(carb?.[1])||0,protein:parseFloat(prot?.[1])||0};
+}
+function toggleNutStar(){
+  _nutSaveFav=!_nutSaveFav;
+  document.getElementById('nutStarToggle').classList.toggle('active',_nutSaveFav);
+  document.getElementById('nutStarIcon').textContent=_nutSaveFav?'⭐':'☆';
+}
+function resetNutModal(){
+  _nutSaveFav=false;
+  const row=document.getElementById('nutStarToggle');
+  const icon=document.getElementById('nutStarIcon');
+  if(row)row.classList.remove('active');
+  if(icon)icon.textContent='☆';
+  hideNutDropdown();
+}
+async function loadNutFavorites(){
+  if(!ME)return;
+  const section=document.getElementById('nutFavSection');
+  const chips=document.getElementById('nutFavChips');
+  if(!section||!chips)return;
+  try{
+    const r=await fetch(`/api/favorites/${ME.id}`);
+    if(!r.ok){section.style.display='none';return;}
+    _nutFavsCache=await r.json();
+    if(!_nutFavsCache.length){section.style.display='none';return;}
+    section.style.display='block';
+    chips.innerHTML=_nutFavsCache.map(f=>`
+      <div class="nut-fav-chip" data-fid="${f.id}" onclick="applyNutFavorite('${f.id}')">
+        <span class="nut-fav-chip-name">${esc(f.name)}</span>
+        <button class="nut-fav-chip-del" onclick="event.stopPropagation();deleteNutFavorite('${f.id}')">✕</button>
+      </div>`).join('');
+  }catch(e){section.style.display='none';}
+}
+function applyNutFavorite(id){
+  const fav=_nutFavsCache.find(f=>f.id===id);
+  if(!fav)return;
+  document.getElementById('nutName').value=fav.name||'';
+  document.getElementById('nutType').value=fav.type||'snack';
+  document.getElementById('nutKcal').value=fav.kcal||0;
+  document.getElementById('nutProtein').value=fav.protein||0;
+  document.getElementById('nutFat').value=fav.fat||0;
+  document.getElementById('nutCarbs').value=fav.carbs||0;
+  hideNutDropdown();
+}
+async function deleteNutFavorite(id){
+  try{
+    await fetch(`/api/favorites/${ME.id}/${id}`,{method:'DELETE'});
+    toast('Удалено из избранного','w');
+    loadNutFavorites();
+  }catch(e){toast('Ошибка','e');}
+}
+
 // ═══ УТИЛИТЫ ═══
 function v(id){return document.getElementById(id).value.trim();}
 function clr(a){a.forEach(id=>document.getElementById(id).value='');}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fmtDt(iso){return new Date(iso).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
 function toast(msg,type='s'){const ic={s:'✅',e:'❌',w:'⚠️'};const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=`${ic[type]||'•'} ${msg}`;document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),4500);}
-function openMo(id){document.getElementById(id).classList.add('open');if(id==='mAddW')onOpenAddW();}
+function openMo(id){document.getElementById(id).classList.add('open');if(id==='mAddW')onOpenAddW();if(id==='mAddNut'){nutSetupAutocomplete();loadNutFavorites();}}
 function closeMo(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{
   if(e.target!==m)return;
