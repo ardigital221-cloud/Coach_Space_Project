@@ -979,6 +979,55 @@ app.delete('/api/favorites/:userId/:favId', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════
+// КАСТОМНЫЕ БЛЮДА ПОЛЬЗОВАТЕЛЯ
+// ═══════════════════════════════════════════
+
+app.get('/api/custom-foods/:userId', async (req, res) => {
+  try {
+    const snap = await db.collection('customFoods').where('userId', '==', req.params.userId).get();
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    res.json(items);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/custom-foods/:userId', async (req, res) => {
+  try {
+    const { name, ingredients, kcal, protein, fat, carbs } = req.body;
+    if (!name) return res.status(400).json({ error: 'Название обязательно' });
+    // Проверяем дубликат по имени
+    const exists = await db.collection('customFoods')
+      .where('userId', '==', req.params.userId)
+      .where('name', '==', name).limit(1).get();
+    let id;
+    if (!exists.empty) {
+      // Обновляем существующее
+      await exists.docs[0].ref.update({ ingredients: ingredients || [], kcal: parseInt(kcal)||0, protein: parseFloat(protein)||0, fat: parseFloat(fat)||0, carbs: parseFloat(carbs)||0, updatedAt: new Date().toISOString() });
+      id = exists.docs[0].id;
+    } else {
+      const ref = await db.collection('customFoods').add({
+        userId: req.params.userId, name,
+        ingredients: ingredients || [],
+        kcal: parseInt(kcal) || 0,
+        protein: parseFloat(protein) || 0,
+        fat: parseFloat(fat) || 0,
+        carbs: parseFloat(carbs) || 0,
+        createdAt: new Date().toISOString()
+      });
+      id = ref.id;
+    }
+    res.json({ id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/custom-foods/:userId/:foodId', async (req, res) => {
+  try {
+    await db.collection('customFoods').doc(req.params.foodId).delete();
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ═══════════════════════════════════════════
 // ПИТАНИЕ
 // ═══════════════════════════════════════════
 app.get('/api/nutrition/:userId', async (req, res) => {
