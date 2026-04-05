@@ -888,6 +888,97 @@ app.delete('/api/exercise-videos/:id', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════
+// FATSECRET — поиск продуктов (Node.js 18+ built-in fetch)
+// ═══════════════════════════════════════════
+
+const FS_CLIENT_ID     = process.env.FATSECRET_CLIENT_ID     || '945cda6d57594c9abe8c3c17cc2970e8';
+const FS_CLIENT_SECRET = process.env.FATSECRET_CLIENT_SECRET || '419eb06f2f8746449f43929513877d59';
+let _fsToken = null, _fsTokenExpiry = 0;
+
+async function getFatSecretToken() {
+  if (_fsToken && Date.now() < _fsTokenExpiry) return _fsToken;
+  const creds = Buffer.from(`${FS_CLIENT_ID}:${FS_CLIENT_SECRET}`).toString('base64');
+  const r = await fetch('https://oauth.fatsecret.com/connect/token', {
+    method: 'POST',
+    headers: { 'Authorization': `Basic ${creds}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'grant_type=client_credentials&scope=basic'
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error_description || data.error || 'FatSecret auth failed');
+  _fsToken = data.access_token;
+  _fsTokenExpiry = Date.now() + ((data.expires_in || 86400) - 60) * 1000;
+  console.log(`[FS] Token получен, истекает через ${Math.round((data.expires_in || 86400) / 3600)}ч`);
+  return _fsToken;
+}
+
+app.get('/api/fatsecret/search', async (req, res) => {
+  try {
+    const q = (req.query.q || '').trim();
+    if (!q) return res.json({ foods: [] });
+    const token = await getFatSecretToken();
+    const url = `https://platform.fatsecret.com/rest/server.api?method=foods.search&search_expression=${encodeURIComponent(q)}&region=RU&format=json&max_results=8`;
+    const r = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+    const data = await r.json();
+    let foods = data.foods?.food || [];
+    if (!Array.isArray(foods)) foods = foods ? [foods] : [];
+    res.json({ foods });
+  } catch (e) {
+    console.error('[FS-SEARCH]', e.message);
+    res.json({ foods: [], error: e.message });
+  }
+});
+
+app.get('/api/fatsecret/food/:id', async (req, res) => {
+  try {
+    const token = await getFatSecretToken();
+    const url = `https://platform.fatsecret.com/rest/server.api?method=food.get.v2&food_id=${req.params.id}&format=json`;
+    const r = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+    const data = await r.json();
+    res.json(data.food || {});
+  } catch (e) {
+    console.error('[FS-FOOD]', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ═══════════════════════════════════════════
+// ИЗБРАННОЕ ПИТАНИЕ
+// ═══════════════════════════════════════════
+
+app.get('/api/favorites/:userId', async (req, res) => {
+  try {
+    const snap = await db.collection('favorites').where('userId', '==', req.params.userId).get();
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    res.json(items);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/favorites/:userId', async (req, res) => {
+  try {
+    const { name, type, kcal, protein, fat, carbs } = req.body;
+    if (!name) return res.status(400).json({ error: 'Название обязательно' });
+    const ref = await db.collection('favorites').add({
+      userId: req.params.userId, name,
+      type: type || 'snack',
+      kcal: parseInt(kcal) || 0,
+      protein: parseFloat(protein) || 0,
+      fat: parseFloat(fat) || 0,
+      carbs: parseFloat(carbs) || 0,
+      createdAt: new Date().toISOString()
+    });
+    res.json({ id: ref.id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/favorites/:userId/:favId', async (req, res) => {
+  try {
+    await db.collection('favorites').doc(req.params.favId).delete();
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ═══════════════════════════════════════════
 // ПИТАНИЕ
 // ═══════════════════════════════════════════
 app.get('/api/nutrition/:userId', async (req, res) => {
