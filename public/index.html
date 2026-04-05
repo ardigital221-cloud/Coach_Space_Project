@@ -1111,7 +1111,7 @@
           <input class="fi" id="nutName" placeholder="Начните вводить..." autocomplete="off"/>
           <div class="nut-dropdown" id="nutDropdown"></div>
         </div>
-        <div style="text-align:center;padding:10px 0;font-size:12px;color:var(--mu2)">Поиск по базе FatSecret и вашим блюдам</div>
+        <div style="text-align:center;padding:10px 0;font-size:12px;color:var(--mu2)">Поиск по базе продуктов и вашим блюдам</div>
       </div>
       <!-- карточка выбранного продукта -->
       <div id="nutSelectedCard" style="display:none">
@@ -1323,6 +1323,7 @@ function startApp(){
   document.getElementById('hName').textContent=ME.name;
   const r=document.getElementById('hRole');
   ME.role==='admin'?(r.textContent='Тренер',r.className='t-role ra'):(r.textContent='Ученик',r.className='t-role rs');
+  loadLocalFoods();
   buildNav();
 }
 
@@ -2261,6 +2262,11 @@ function switchNutTab(tab){
 // ═══ ПОИСК ПРОДУКТОВ ═══
 let _nutSelectedFood=null; // { name, per100:{kcal,protein,fat,carbs} }
 let _nutCustomFoodsCache=[];
+let _localFoods=[];
+async function loadLocalFoods(){
+  try{const r=await fetch('/foods.json');if(r.ok)_localFoods=await r.json();}
+  catch(e){_localFoods=[];}
+}
 
 async function loadCustomFoods(){
   if(!ME)return;
@@ -2279,7 +2285,7 @@ function nutSetupAutocomplete(){
     clearTimeout(timer);
     const q=input.value.trim();
     if(q.length<2){hideNutDropdown();return;}
-    timer=setTimeout(()=>doNutSearch(q,'nutDropdown','selectNutFood'),450);
+    timer=setTimeout(()=>doNutSearch(q,'nutDropdown','selectNutFood'),100);
   });
   input.addEventListener('blur',()=>setTimeout(()=>hideDropdown('nutDropdown'),200));
 }
@@ -2292,42 +2298,37 @@ function buildSetupAutocomplete(){
     clearTimeout(timer);
     const q=input.value.trim();
     if(q.length<2){hideDropdown('buildDropdown');return;}
-    timer=setTimeout(()=>doNutSearch(q,'buildDropdown','selectBuildIng'),450);
+    timer=setTimeout(()=>doNutSearch(q,'buildDropdown','selectBuildIng'),100);
   });
   input.addEventListener('blur',()=>setTimeout(()=>hideDropdown('buildDropdown'),200));
 }
-async function doNutSearch(q,ddId,selectFn){
+function doNutSearch(q,ddId,selectFn){
   const dd=document.getElementById(ddId);if(!dd)return;
-  dd.innerHTML='<div class="nut-dd-item" style="color:var(--mu2);text-align:center">Поиск...</div>';
+  const ql=q.toLowerCase();
+  // Кастомные блюда пользователя
+  const custom=_nutCustomFoodsCache.filter(f=>f.name.toLowerCase().includes(ql)).slice(0,3);
+  // Локальная база продуктов
+  const startsWith=_localFoods.filter(f=>f.name.toLowerCase().startsWith(ql));
+  const includes=_localFoods.filter(f=>!f.name.toLowerCase().startsWith(ql)&&f.name.toLowerCase().includes(ql));
+  const locals=[...startsWith,...includes].slice(0,12);
+  const customRows=custom.map(f=>`
+    <div class="nut-dd-item" style="border-left:2px solid var(--ac)"
+      data-name="${esc(f.name)}" data-kcal="${f.kcal}" data-p="${f.protein}" data-f="${f.fat}" data-c="${f.carbs}" data-custom="1"
+      onclick="${selectFn}(this)">
+      <div class="nut-dd-name">🏠 ${esc(f.name)}</div>
+      <div class="nut-dd-desc">${f.kcal} ккал · Б:${f.protein}г Ж:${f.fat}г У:${f.carbs}г · ваше блюдо</div>
+    </div>`).join('');
+  const localRows=locals.map(f=>`
+    <div class="nut-dd-item"
+      data-name="${esc(f.name)}" data-kcal="${f.kcal}" data-p="${f.protein}" data-f="${f.fat}" data-c="${f.carbs}" data-local="1"
+      onclick="${selectFn}(this)">
+      <div class="nut-dd-name">${esc(f.name)}</div>
+      <div class="nut-dd-desc">${f.kcal} ккал · Б:${f.protein}г Ж:${f.fat}г У:${f.carbs}г на 100г</div>
+    </div>`).join('');
+  const html=customRows+localRows;
+  if(!html){dd.style.display='none';return;}
+  dd.innerHTML=html;
   dd.style.display='block';
-  try{
-    // Кастомные блюда пользователя (клиентский фильтр)
-    const custom=_nutCustomFoodsCache.filter(f=>f.name.toLowerCase().includes(q.toLowerCase())).slice(0,3);
-    // FatSecret
-    const r=await fetch(`/api/fatsecret/search?q=${encodeURIComponent(q)}`);
-    const data=r.ok?await r.json():{foods:[]};
-    const fsItems=data.foods||[];
-    const customRows=custom.map(f=>`
-      <div class="nut-dd-item" style="border-left:2px solid var(--ac)"
-        data-name="${esc(f.name)}" data-kcal="${f.kcal}" data-p="${f.protein}" data-f="${f.fat}" data-c="${f.carbs}" data-custom="1"
-        onclick="${selectFn}(this)">
-        <div class="nut-dd-name">🏠 ${esc(f.name)}</div>
-        <div class="nut-dd-desc">${f.kcal} ккал · Б:${f.protein}г Ж:${f.fat}г У:${f.carbs}г · ваше блюдо</div>
-      </div>`).join('');
-    const fsRows=fsItems.map(f=>{
-      const m=parseFoodDescription(f.food_description||'');
-      const hint=m?`${m.kcal} ккал/100г · Б:${m.protein}г Ж:${m.fat}г У:${m.carbs}г`:(f.food_description||'').slice(0,55);
-      return `<div class="nut-dd-item"
-        data-name="${esc(f.food_name)}" data-desc="${esc(f.food_description||'')}"
-        onclick="${selectFn}(this)">
-        <div class="nut-dd-name">${esc(f.food_name)}</div>
-        <div class="nut-dd-desc">${esc(hint)}</div>
-      </div>`;
-    }).join('');
-    dd.innerHTML=customRows+fsRows;
-    if(!dd.innerHTML.trim()){dd.style.display='none';return;}
-    dd.style.display='block';
-  }catch(e){dd.innerHTML='';dd.style.display='none';}
 }
 function hideDropdown(id){const dd=document.getElementById(id);if(dd)dd.style.display='none';}
 function hideNutDropdown(){hideDropdown('nutDropdown');}
@@ -2337,8 +2338,8 @@ function selectNutFood(el){
   hideDropdown('nutDropdown');
   const name=el.dataset.name;
   let per100;
-  if(el.dataset.custom==='1'){
-    // Кастомное блюдо — значения уже итоговые за 100г условно
+  if(el.dataset.custom==='1'||el.dataset.local==='1'){
+    // Кастомное блюдо или локальная база — значения на 100г
     per100={kcal:parseFloat(el.dataset.kcal)||0,protein:parseFloat(el.dataset.p)||0,fat:parseFloat(el.dataset.f)||0,carbs:parseFloat(el.dataset.c)||0};
   }else{
     per100=parseFoodDescription(el.dataset.desc||'');
@@ -2349,9 +2350,7 @@ function selectNutFood(el){
   document.getElementById('nutSearchArea').style.display='none';
   document.getElementById('nutSelectedCard').style.display='block';
   document.getElementById('nutSelName').textContent=name;
-  document.getElementById('nutSelPer100').textContent=
-    el.dataset.custom==='1'?`${per100.kcal} ккал · Б:${per100.protein}г Ж:${per100.fat}г У:${per100.carbs}г`
-    :`на 100г: ${per100.kcal} ккал · Б:${per100.protein}г Ж:${per100.fat}г У:${per100.carbs}г`;
+  document.getElementById('nutSelPer100').textContent=`на 100г: ${per100.kcal} ккал · Б:${per100.protein}г Ж:${per100.fat}г У:${per100.carbs}г`;
   document.getElementById('nutWeight').value=100;
   document.getElementById('nutSaveBtn').style.display='';
   recalcNutByWeight();
@@ -2382,7 +2381,7 @@ function selectBuildIng(el){
   hideDropdown('buildDropdown');
   const name=el.dataset.name;
   let per100;
-  if(el.dataset.custom==='1'){
+  if(el.dataset.custom==='1'||el.dataset.local==='1'){
     per100={kcal:parseFloat(el.dataset.kcal)||0,protein:parseFloat(el.dataset.p)||0,fat:parseFloat(el.dataset.f)||0,carbs:parseFloat(el.dataset.c)||0};
   }else{
     per100=parseFoodDescription(el.dataset.desc||'');
