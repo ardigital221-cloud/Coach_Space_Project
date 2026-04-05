@@ -453,6 +453,28 @@
     .nut-meal-entry-kcal{font-size:13px;font-weight:700;color:var(--ac);flex-shrink:0;}
     .nut-meal-entry-del{background:none;border:none;color:var(--mu2);font-size:14px;cursor:pointer;padding:4px 6px;opacity:.5;transition:opacity .15s;flex-shrink:0;}
     .nut-meal-entry-del:hover{opacity:1;color:var(--red);}
+    /* ═══ ВЫБРАННЫЙ ПРОДУКТ ═══ */
+    .nut-sel-card{background:rgba(139,92,246,.08);border:1px solid var(--ba);border-radius:var(--r2);padding:12px 14px;margin-bottom:10px;position:relative;}
+    .nut-sel-name{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:4px;padding-right:80px;line-height:1.3;}
+    .nut-sel-per100{font-size:11px;color:var(--mu2);}
+    .nut-sel-clear{position:absolute;top:10px;right:10px;background:none;border:1px solid rgba(255,255,255,.1);color:var(--mu2);font-size:11px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .15s;}
+    .nut-sel-clear:hover{color:var(--red);border-color:rgba(239,68,68,.3);}
+    /* ═══ БАР РАСЧЁТА КБЖУ ═══ */
+    .nut-calc-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.06);border-radius:var(--r2);overflow:hidden;margin-bottom:12px;}
+    .nut-cb-item{background:rgba(255,255,255,.025);padding:10px 4px;text-align:center;}
+    .nut-cb-item.kcal .nut-cb-val,.nut-cb-kcal{color:var(--ac);}
+    .nut-cb-val{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;color:var(--tx);line-height:1;}
+    .nut-cb-lbl{font-size:9px;color:var(--mu2);text-transform:uppercase;letter-spacing:.4px;margin-top:3px;}
+    /* ═══ КОНСТРУКТОР ИНГРЕДИЕНТЫ ═══ */
+    .nut-ing-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:var(--r2);margin-bottom:6px;}
+    .nut-ing-info{flex:1;min-width:0;}
+    .nut-ing-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tx);}
+    .nut-ing-macros{font-size:11px;color:var(--mu2);margin-top:2px;}
+    .nut-ing-kcal{font-size:12px;font-weight:700;color:var(--ac);flex-shrink:0;}
+    .nut-ing-del{background:none;border:none;color:var(--mu2);font-size:13px;cursor:pointer;opacity:.5;transition:opacity .15s;padding:4px 6px;}
+    .nut-ing-del:hover{opacity:1;color:var(--red);}
+    .nut-total-bar{background:rgba(139,92,246,.06);border:1px solid var(--ba);border-radius:var(--r2);padding:10px;margin:10px 0;}
+    .nut-total-lbl{font-size:10px;color:var(--mu2);text-transform:uppercase;letter-spacing:.5px;font-weight:700;text-align:center;margin-bottom:8px;}
     /* ═══ MODAL ВКЛАДКИ ═══ */
     .nut-modal-tabs{display:flex;gap:0;margin-bottom:14px;background:rgba(255,255,255,.04);border-radius:var(--r2);padding:3px;}
     .nut-tab{flex:1;padding:8px 4px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;border-radius:calc(var(--r2) - 2px);color:var(--mu2);cursor:pointer;transition:all .18s;border:1px solid transparent;}
@@ -1070,47 +1092,125 @@
 </div>
 
 <div class="mo" id="mAddNut">
-  <div class="modal" style="max-width:420px">
+  <div class="modal" style="max-width:440px">
     <div class="mh"></div>
     <div class="mt" id="nutModalTitle">🥗 Добавить приём пищи</div>
     <div class="nut-modal-tabs">
       <div class="nut-tab active" id="ntab-search" onclick="switchNutTab('search')">🔍 Поиск</div>
+      <div class="nut-tab" id="ntab-build" onclick="switchNutTab('build')">🍳 Блюдо</div>
       <div class="nut-tab" id="ntab-fav" onclick="switchNutTab('fav')">⭐ Избранное</div>
       <div class="nut-tab" id="ntab-recent" onclick="switchNutTab('recent')">🕐 Недавние</div>
     </div>
 
-    <!-- Вкладка: Поиск и ввод -->
+    <!-- ── Вкладка: Поиск ── -->
     <div class="nut-tab-panel active" id="npanel-search">
-      <div class="fg" style="position:relative">
-        <label class="fl">Название блюда</label>
-        <input class="fi" id="nutName" placeholder="Начните вводить для поиска..." autocomplete="off"/>
-        <div class="nut-dropdown" id="nutDropdown"></div>
+      <!-- область поиска (скрывается после выбора) -->
+      <div id="nutSearchArea">
+        <div class="fg" style="position:relative">
+          <label class="fl">Поиск продукта</label>
+          <input class="fi" id="nutName" placeholder="Начните вводить..." autocomplete="off"/>
+          <div class="nut-dropdown" id="nutDropdown"></div>
+        </div>
+        <div style="text-align:center;padding:10px 0;font-size:12px;color:var(--mu2)">Поиск по базе FatSecret и вашим блюдам</div>
       </div>
-      <div class="fg"><label class="fl">Тип приёма пищи</label>
-        <select class="fsel" id="nutType">
-          <option value="breakfast">🌅 Завтрак</option>
-          <option value="lunch">☀️ Обед</option>
-          <option value="dinner">🌙 Ужин</option>
-          <option value="snack">🍎 Перекус</option>
-        </select>
-      </div>
-      <div class="fg"><label class="fl">Калории (ккал)</label><input class="fi" id="nutKcal" type="number" min="0" placeholder="300"/></div>
-      <div class="g2">
-        <div class="fg"><label class="fl">Белки (г)</label><input class="fi" id="nutProtein" type="number" min="0" step="0.1" placeholder="25"/></div>
-        <div class="fg"><label class="fl">Жиры (г)</label><input class="fi" id="nutFat" type="number" min="0" step="0.1" placeholder="8"/></div>
-      </div>
-      <div class="fg"><label class="fl">Углеводы (г)</label><input class="fi" id="nutCarbs" type="number" min="0" step="0.1" placeholder="35"/></div>
-      <div class="nut-star-row" id="nutStarToggle" onclick="toggleNutStar()">
-        <span class="nut-star-icon" id="nutStarIcon">☆</span>
-        <span class="nut-star-lbl">Сохранить в избранное</span>
+      <!-- карточка выбранного продукта -->
+      <div id="nutSelectedCard" style="display:none">
+        <div class="nut-sel-card">
+          <div class="nut-sel-name" id="nutSelName"></div>
+          <div class="nut-sel-per100" id="nutSelPer100">на 100 г</div>
+          <button class="nut-sel-clear" onclick="clearNutSelection()">✕ Изменить</button>
+        </div>
+        <div class="fg">
+          <label class="fl">Вес порции (г)</label>
+          <input class="fi" id="nutWeight" type="number" min="1" value="100" oninput="recalcNutByWeight()"/>
+        </div>
+        <div class="nut-calc-bar" id="nutCalcBar">
+          <div class="nut-cb-item kcal"><div class="nut-cb-val" id="ncb-k">0</div><div class="nut-cb-lbl">Калории</div></div>
+          <div class="nut-cb-item"><div class="nut-cb-val" id="ncb-p">0г</div><div class="nut-cb-lbl">Белки</div></div>
+          <div class="nut-cb-item"><div class="nut-cb-val" id="ncb-f">0г</div><div class="nut-cb-lbl">Жиры</div></div>
+          <div class="nut-cb-item"><div class="nut-cb-val" id="ncb-c">0г</div><div class="nut-cb-lbl">Углеводы</div></div>
+        </div>
+        <div class="fg">
+          <label class="fl">Тип приёма пищи</label>
+          <select class="fsel" id="nutType">
+            <option value="breakfast">🌅 Завтрак</option>
+            <option value="lunch">☀️ Обед</option>
+            <option value="dinner">🌆 Ужин</option>
+            <option value="snack">🍎 Перекус</option>
+          </select>
+        </div>
+        <div class="nut-star-row" id="nutStarToggle" onclick="toggleNutStar()">
+          <span class="nut-star-icon" id="nutStarIcon">☆</span>
+          <span class="nut-star-lbl">Сохранить в избранное</span>
+        </div>
       </div>
       <div class="mf" style="padding-top:12px">
         <button class="btn btn-g" onclick="closeMo('mAddNut');resetNutModal()">Отмена</button>
-        <button class="btn btn-p" id="nutSaveBtn" onclick="saveNutEntry()">Добавить</button>
+        <button class="btn btn-p" id="nutSaveBtn" onclick="saveNutEntry()" style="display:none">Добавить</button>
       </div>
     </div>
 
-    <!-- Вкладка: Избранное -->
+    <!-- ── Вкладка: Конструктор блюда ── -->
+    <div class="nut-tab-panel" id="npanel-build">
+      <div class="fg">
+        <label class="fl">Название блюда</label>
+        <input class="fi" id="buildDishName" placeholder="Например: Куриный суп..."/>
+      </div>
+      <div class="fg" style="position:relative">
+        <label class="fl">Добавить ингредиент</label>
+        <input class="fi" id="buildIngName" placeholder="Поиск ингредиента..." autocomplete="off"/>
+        <div class="nut-dropdown" id="buildDropdown"></div>
+      </div>
+      <!-- выбранный ингредиент (настройка веса) -->
+      <div id="buildIngCard" style="display:none">
+        <div class="nut-sel-card" style="margin-bottom:8px">
+          <div class="nut-sel-name" id="buildIngSelName"></div>
+          <div class="nut-sel-per100" id="buildIngPer100">на 100 г</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:8px">
+          <div class="fg" style="margin:0;flex:1">
+            <label class="fl">Вес (г)</label>
+            <input class="fi" id="buildIngWeight" type="number" min="1" value="100" oninput="recalcBuildIng()"/>
+          </div>
+          <button class="btn btn-p" style="flex-shrink:0" onclick="addBuildIngredient()">+ Добавить</button>
+        </div>
+        <div class="nut-calc-bar" id="buildIngCalcBar">
+          <div class="nut-cb-item kcal"><div class="nut-cb-val" id="bncb-k">0</div><div class="nut-cb-lbl">Ккал</div></div>
+          <div class="nut-cb-item"><div class="nut-cb-val" id="bncb-p">0г</div><div class="nut-cb-lbl">Белки</div></div>
+          <div class="nut-cb-item"><div class="nut-cb-val" id="bncb-f">0г</div><div class="nut-cb-lbl">Жиры</div></div>
+          <div class="nut-cb-item"><div class="nut-cb-val" id="bncb-c">0г</div><div class="nut-cb-lbl">Углеводы</div></div>
+        </div>
+      </div>
+      <!-- список добавленных ингредиентов -->
+      <div id="buildIngList"></div>
+      <!-- итого -->
+      <div id="buildTotalBox" style="display:none">
+        <div class="nut-total-bar">
+          <div class="nut-total-lbl">ИТОГО БЛЮДО</div>
+          <div class="nut-calc-bar" style="margin:0">
+            <div class="nut-cb-item kcal"><div class="nut-cb-val" id="btot-k">0</div><div class="nut-cb-lbl">Ккал</div></div>
+            <div class="nut-cb-item"><div class="nut-cb-val" id="btot-p">0г</div><div class="nut-cb-lbl">Белки</div></div>
+            <div class="nut-cb-item"><div class="nut-cb-val" id="btot-f">0г</div><div class="nut-cb-lbl">Жиры</div></div>
+            <div class="nut-cb-item"><div class="nut-cb-val" id="btot-c">0г</div><div class="nut-cb-lbl">Углеводы</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="fg" id="buildTypeRow">
+        <label class="fl">Тип приёма пищи</label>
+        <select class="fsel" id="buildType">
+          <option value="breakfast">🌅 Завтрак</option>
+          <option value="lunch">☀️ Обед</option>
+          <option value="dinner">🌆 Ужин</option>
+          <option value="snack">🍎 Перекус</option>
+        </select>
+      </div>
+      <div class="mf" style="padding-top:12px">
+        <button class="btn btn-g" onclick="closeMo('mAddNut');resetNutModal()">Отмена</button>
+        <button class="btn btn-p" id="buildSaveBtn" onclick="saveCustomDish()">Сохранить и добавить</button>
+      </div>
+    </div>
+
+    <!-- ── Вкладка: Избранное ── -->
     <div class="nut-tab-panel" id="npanel-fav">
       <div id="nutFavList" class="nut-recent-list"><div class="empty" style="padding:20px 0"><div class="ei">⭐</div>Нет избранного</div></div>
       <div class="mf" style="padding-top:12px">
@@ -1118,7 +1218,7 @@
       </div>
     </div>
 
-    <!-- Вкладка: Недавние -->
+    <!-- ── Вкладка: Недавние ── -->
     <div class="nut-tab-panel" id="npanel-recent">
       <div id="nutRecentList" class="nut-recent-list"><div class="empty" style="padding:20px 0"><div class="ei">🕐</div>Нет недавних записей</div></div>
       <div class="mf" style="padding-top:12px">
@@ -2050,14 +2150,18 @@ function renderUserNutrition(box,entries){
 
 function nutDateShift(d){const dt=new Date(_nutDate);dt.setDate(dt.getDate()+d);_nutDate=dt.toISOString().split('T')[0];loadUserNutrition();}
 
+// ═══ СОХРАНЕНИЕ ЗАПИСИ ПИТАНИЯ ═══
 async function saveNutEntry(){
-  const name=document.getElementById('nutName').value.trim();
+  if(!_nutSelectedFood)return toast('Выберите продукт из поиска','e');
+  const weight=parseFloat(document.getElementById('nutWeight').value)||100;
   const type=document.getElementById('nutType').value;
-  const kcal=parseInt(document.getElementById('nutKcal').value)||0;
-  const protein=parseFloat(document.getElementById('nutProtein').value)||0;
-  const fat=parseFloat(document.getElementById('nutFat').value)||0;
-  const carbs=parseFloat(document.getElementById('nutCarbs').value)||0;
-  if(!name)return toast('Введите название блюда','e');
+  const k=_nutSelectedFood.per100;
+  const mul=weight/100;
+  const kcal=Math.round(k.kcal*mul);
+  const protein=Math.round(k.protein*mul*10)/10;
+  const fat=Math.round(k.fat*mul*10)/10;
+  const carbs=Math.round(k.carbs*mul*10)/10;
+  const name=_nutSelectedFood.name;
   const btn=document.getElementById('nutSaveBtn');
   btn.disabled=true;btn.textContent='...';
   try{
@@ -2066,13 +2170,11 @@ async function saveNutEntry(){
     if(!r.ok){const d=await r.json();throw new Error(d.error||'Ошибка');}
     if(_nutSaveFav){
       await fetch(`/api/favorites/${ME.id}`,{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({name,type,kcal,protein,fat,carbs})}).catch(()=>{});
+        body:JSON.stringify({name,type,kcal,protein,fat,carbs,per100:k})}).catch(()=>{});
       toast('⭐ Добавлено в избранное','w');
     }
-    closeMo('mAddNut');
-    resetNutModal();
-    toast('Записано!','s');
-    loadUserNutrition();
+    closeMo('mAddNut');resetNutModal();
+    toast('Записано!','s');loadUserNutrition();
   }catch(e){toast('Ошибка: '+e.message,'e');}
   btn.disabled=false;btn.textContent='Добавить';
 }
@@ -2113,7 +2215,7 @@ async function loadAdminNutrition(){
         <div class="nut-entry-icon">${_NUT_EMOJI[e.type]||'🍽'}</div>
         <div class="nut-entry-info">
           <div class="nut-entry-name">${esc(e.name)}</div>
-          <div class="nut-entry-macros">Б: ${+(e.protein||0).toFixed(1)}г &middot; Ж: ${+(e.fat||0).toFixed(1)}г &middot; У: ${+(e.carbs||0).toFixed(1)}г</div>
+          <div class="nut-entry-macros">Б: ${+(e.protein||0).toFixed(1)}г · Ж: ${+(e.fat||0).toFixed(1)}г · У: ${+(e.carbs||0).toFixed(1)}г</div>
         </div>
         <div class="nut-entry-right">
           <div class="nut-entry-kcal">${e.kcal||0} ккал</div>
@@ -2128,17 +2230,11 @@ async function loadAdminNutrition(){
         <input type="date" class="fi" value="${_anutDate}" onchange="_anutDate=this.value;loadAdminNutrition()"/>
         <button class="btn btn-g sm" onclick="anutDateShift(1)">›</button>
       </div>
-      <div class="nut-kcal-card">
-        <div>
-          <div class="nut-kcal-num">${tot.k}</div>
-          <div class="nut-kcal-lbl">ккал за ${_anutDate}</div>
-        </div>
-      </div>
-      <div class="nut-summary">
-        <div class="nut-macro"><div class="nut-macro-val">${Math.round(tot.p)}г</div><div class="nut-macro-lbl">Белки</div></div>
-        <div class="nut-macro"><div class="nut-macro-val">${Math.round(tot.f)}г</div><div class="nut-macro-lbl">Жиры</div></div>
-        <div class="nut-macro"><div class="nut-macro-val">${Math.round(tot.c)}г</div><div class="nut-macro-lbl">Углеводы</div></div>
-        <div class="nut-macro" style="background:var(--acd);border-color:var(--ba)"><div class="nut-macro-val">${entries.length}</div><div class="nut-macro-lbl">Приёмов</div></div>
+      <div class="nut-macro-bar" style="margin-bottom:14px">
+        <div class="nut-mb-item"><div class="nut-mb-val">${Math.round(tot.f)}г</div><div class="nut-mb-lbl">Жиры</div></div>
+        <div class="nut-mb-item"><div class="nut-mb-val">${Math.round(tot.c)}г</div><div class="nut-mb-lbl">Углеводы</div></div>
+        <div class="nut-mb-item"><div class="nut-mb-val">${Math.round(tot.p)}г</div><div class="nut-mb-lbl">Белки</div></div>
+        <div class="nut-mb-item kcal"><div class="nut-mb-val">${tot.k}</div><div class="nut-mb-lbl">Калории</div></div>
       </div>
       <div class="sh"><div class="st" style="font-size:13px">📋 Дневник питания</div></div>
       ${rows}`;
@@ -2146,61 +2242,34 @@ async function loadAdminNutrition(){
 }
 
 function anutSelectStudent(sid){
-  const s=_nutStudents.find(x=>x.id===sid);
-  if(!s)return;
-  _anutStudentId=sid;
-  _anutStudentName=s.name;
-  loadAdminNutrition();
+  const s=_nutStudents.find(x=>x.id===sid);if(!s)return;
+  _anutStudentId=sid;_anutStudentName=s.name;loadAdminNutrition();
 }
-
 function anutDateShift(d){const dt=new Date(_anutDate);dt.setDate(dt.getDate()+d);_anutDate=dt.toISOString().split('T')[0];loadAdminNutrition();}
 
 // ═══ ВКЛАДКИ МОДАЛА ПИТАНИЯ ═══
 function switchNutTab(tab){
   _nutActiveTab=tab;
-  ['search','fav','recent'].forEach(t=>{
-    document.getElementById('ntab-'+t).classList.toggle('active',t===tab);
-    document.getElementById('npanel-'+t).classList.toggle('active',t===tab);
+  ['search','build','fav','recent'].forEach(t=>{
+    document.getElementById('ntab-'+t)?.classList.toggle('active',t===tab);
+    document.getElementById('npanel-'+t)?.classList.toggle('active',t===tab);
   });
   if(tab==='search')setTimeout(()=>document.getElementById('nutName')?.focus(),100);
-}
-async function loadNutRecent(){
-  const list=document.getElementById('nutRecentList');
-  if(!list||!ME)return;
-  try{
-    const r=await fetch(`/api/nutrition/${ME.id}`);
-    if(!r.ok){list.innerHTML='<div class="empty" style="padding:20px 0"><div class="ei">🕐</div>Нет недавних</div>';return;}
-    const all=await r.json();
-    // уникальные блюда по имени, берём последнее употребление
-    const seen=new Map();
-    all.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
-    for(const e of all){if(!seen.has(e.name))seen.set(e.name,e);}
-    _nutRecentCache=[...seen.values()].slice(0,20);
-    if(!_nutRecentCache.length){list.innerHTML='<div class="empty" style="padding:20px 0"><div class="ei">🕐</div>Нет недавних записей</div>';return;}
-    list.innerHTML=_nutRecentCache.map(e=>`
-      <div class="nut-recent-item" onclick="applyNutRecent('${e.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
-        <div class="nut-recent-icon">${_NUT_EMOJI[e.type]||'🍽'}</div>
-        <div class="nut-recent-info">
-          <div class="nut-recent-name">${esc(e.name)}</div>
-          <div class="nut-recent-macros">Б:${+(e.protein||0).toFixed(1)}г · Ж:${+(e.fat||0).toFixed(1)}г · У:${+(e.carbs||0).toFixed(1)}г</div>
-        </div>
-        <div class="nut-recent-kcal">${e.kcal||0} ккал</div>
-      </div>`).join('');
-  }catch(ex){list.innerHTML='<div class="empty" style="padding:20px 0"><div class="ei">🕐</div>Нет данных</div>';}
-}
-function applyNutRecent(name){
-  const e=_nutRecentCache.find(x=>x.name===name);
-  if(!e)return;
-  document.getElementById('nutName').value=e.name||'';
-  document.getElementById('nutType').value=e.type||'snack';
-  document.getElementById('nutKcal').value=e.kcal||0;
-  document.getElementById('nutProtein').value=e.protein||0;
-  document.getElementById('nutFat').value=e.fat||0;
-  document.getElementById('nutCarbs').value=e.carbs||0;
-  switchNutTab('search');
+  if(tab==='build')setTimeout(()=>document.getElementById('buildIngName')?.focus(),100);
 }
 
-// ═══ FATSECRET AUTOCOMPLETE ═══
+// ═══ ПОИСК ПРОДУКТОВ ═══
+let _nutSelectedFood=null; // { name, per100:{kcal,protein,fat,carbs} }
+let _nutCustomFoodsCache=[];
+
+async function loadCustomFoods(){
+  if(!ME)return;
+  try{
+    const r=await fetch(`/api/custom-foods/${ME.id}`);
+    if(r.ok)_nutCustomFoodsCache=await r.json();
+  }catch(e){_nutCustomFoodsCache=[];}
+}
+
 function nutSetupAutocomplete(){
   const input=document.getElementById('nutName');
   if(!input||input._fsSetup)return;
@@ -2210,46 +2279,193 @@ function nutSetupAutocomplete(){
     clearTimeout(timer);
     const q=input.value.trim();
     if(q.length<2){hideNutDropdown();return;}
-    timer=setTimeout(()=>searchFatSecretFoods(q),450);
+    timer=setTimeout(()=>doNutSearch(q,'nutDropdown','selectNutFood'),450);
   });
-  input.addEventListener('blur',()=>setTimeout(hideNutDropdown,200));
+  input.addEventListener('blur',()=>setTimeout(()=>hideDropdown('nutDropdown'),200));
 }
-async function searchFatSecretFoods(q){
-  try{
-    const r=await fetch(`/api/fatsecret/search?q=${encodeURIComponent(q)}`);
-    if(!r.ok)return;
-    const data=await r.json();
-    showNutDropdown(data.foods||[]);
-  }catch(e){hideNutDropdown();}
+function buildSetupAutocomplete(){
+  const input=document.getElementById('buildIngName');
+  if(!input||input._fsSetup)return;
+  input._fsSetup=true;
+  let timer=null;
+  input.addEventListener('input',()=>{
+    clearTimeout(timer);
+    const q=input.value.trim();
+    if(q.length<2){hideDropdown('buildDropdown');return;}
+    timer=setTimeout(()=>doNutSearch(q,'buildDropdown','selectBuildIng'),450);
+  });
+  input.addEventListener('blur',()=>setTimeout(()=>hideDropdown('buildDropdown'),200));
 }
-function showNutDropdown(foods){
-  const dd=document.getElementById('nutDropdown');
-  if(!dd)return;
-  if(!foods.length){dd.innerHTML='';dd.style.display='none';return;}
-  dd.innerHTML=foods.map(f=>{
-    const macros=parseFoodDescription(f.food_description||'');
-    const hint=macros?`${macros.kcal} ккал · Б:${macros.protein}г Ж:${macros.fat}г У:${macros.carbs}г`:(f.food_description||'').slice(0,55);
-    return `<div class="nut-dd-item" data-name="${esc(f.food_name)}" data-desc="${esc(f.food_description||'')}" onclick="selectNutFood(this)">
-      <div class="nut-dd-name">${esc(f.food_name)}</div>
-      <div class="nut-dd-desc">${esc(hint)}</div>
-    </div>`;
-  }).join('');
+async function doNutSearch(q,ddId,selectFn){
+  const dd=document.getElementById(ddId);if(!dd)return;
+  dd.innerHTML='<div class="nut-dd-item" style="color:var(--mu2);text-align:center">Поиск...</div>';
   dd.style.display='block';
+  try{
+    // Кастомные блюда пользователя (клиентский фильтр)
+    const custom=_nutCustomFoodsCache.filter(f=>f.name.toLowerCase().includes(q.toLowerCase())).slice(0,3);
+    // FatSecret
+    const r=await fetch(`/api/fatsecret/search?q=${encodeURIComponent(q)}`);
+    const data=r.ok?await r.json():{foods:[]};
+    const fsItems=data.foods||[];
+    const customRows=custom.map(f=>`
+      <div class="nut-dd-item" style="border-left:2px solid var(--ac)"
+        data-name="${esc(f.name)}" data-kcal="${f.kcal}" data-p="${f.protein}" data-f="${f.fat}" data-c="${f.carbs}" data-custom="1"
+        onclick="${selectFn}(this)">
+        <div class="nut-dd-name">🏠 ${esc(f.name)}</div>
+        <div class="nut-dd-desc">${f.kcal} ккал · Б:${f.protein}г Ж:${f.fat}г У:${f.carbs}г · ваше блюдо</div>
+      </div>`).join('');
+    const fsRows=fsItems.map(f=>{
+      const m=parseFoodDescription(f.food_description||'');
+      const hint=m?`${m.kcal} ккал/100г · Б:${m.protein}г Ж:${m.fat}г У:${m.carbs}г`:(f.food_description||'').slice(0,55);
+      return `<div class="nut-dd-item"
+        data-name="${esc(f.food_name)}" data-desc="${esc(f.food_description||'')}"
+        onclick="${selectFn}(this)">
+        <div class="nut-dd-name">${esc(f.food_name)}</div>
+        <div class="nut-dd-desc">${esc(hint)}</div>
+      </div>`;
+    }).join('');
+    dd.innerHTML=customRows+fsRows;
+    if(!dd.innerHTML.trim()){dd.style.display='none';return;}
+    dd.style.display='block';
+  }catch(e){dd.innerHTML='';dd.style.display='none';}
 }
-function hideNutDropdown(){const dd=document.getElementById('nutDropdown');if(dd)dd.style.display='none';}
+function hideDropdown(id){const dd=document.getElementById(id);if(dd)dd.style.display='none';}
+function hideNutDropdown(){hideDropdown('nutDropdown');}
+
+// Выбор продукта в поиске (вкладка Поиск)
 function selectNutFood(el){
+  hideDropdown('nutDropdown');
   const name=el.dataset.name;
-  const desc=el.dataset.desc;
-  document.getElementById('nutName').value=name;
-  hideNutDropdown();
-  const macros=parseFoodDescription(desc);
-  if(macros){
-    document.getElementById('nutKcal').value=macros.kcal;
-    document.getElementById('nutProtein').value=macros.protein;
-    document.getElementById('nutFat').value=macros.fat;
-    document.getElementById('nutCarbs').value=macros.carbs;
+  let per100;
+  if(el.dataset.custom==='1'){
+    // Кастомное блюдо — значения уже итоговые за 100г условно
+    per100={kcal:parseFloat(el.dataset.kcal)||0,protein:parseFloat(el.dataset.p)||0,fat:parseFloat(el.dataset.f)||0,carbs:parseFloat(el.dataset.c)||0};
+  }else{
+    per100=parseFoodDescription(el.dataset.desc||'');
+    if(!per100)per100={kcal:0,protein:0,fat:0,carbs:0};
   }
+  _nutSelectedFood={name,per100};
+  // Скрываем поиск, показываем карточку
+  document.getElementById('nutSearchArea').style.display='none';
+  document.getElementById('nutSelectedCard').style.display='block';
+  document.getElementById('nutSelName').textContent=name;
+  document.getElementById('nutSelPer100').textContent=
+    el.dataset.custom==='1'?`${per100.kcal} ккал · Б:${per100.protein}г Ж:${per100.fat}г У:${per100.carbs}г`
+    :`на 100г: ${per100.kcal} ккал · Б:${per100.protein}г Ж:${per100.fat}г У:${per100.carbs}г`;
+  document.getElementById('nutWeight').value=100;
+  document.getElementById('nutSaveBtn').style.display='';
+  recalcNutByWeight();
 }
+function clearNutSelection(){
+  _nutSelectedFood=null;
+  document.getElementById('nutSearchArea').style.display='';
+  document.getElementById('nutSelectedCard').style.display='none';
+  document.getElementById('nutSaveBtn').style.display='none';
+  document.getElementById('nutName').value='';
+  document.getElementById('nutName').focus();
+}
+function recalcNutByWeight(){
+  if(!_nutSelectedFood)return;
+  const w=parseFloat(document.getElementById('nutWeight').value)||100;
+  const k=_nutSelectedFood.per100;const m=w/100;
+  document.getElementById('ncb-k').textContent=Math.round(k.kcal*m);
+  document.getElementById('ncb-p').textContent=Math.round(k.protein*m*10)/10+'г';
+  document.getElementById('ncb-f').textContent=Math.round(k.fat*m*10)/10+'г';
+  document.getElementById('ncb-c').textContent=Math.round(k.carbs*m*10)/10+'г';
+}
+
+// ═══ КОНСТРУКТОР БЛЮДА ═══
+let _buildSelectedIng=null; // { name, per100:{kcal,protein,fat,carbs} }
+let _buildIngredients=[];
+
+function selectBuildIng(el){
+  hideDropdown('buildDropdown');
+  const name=el.dataset.name;
+  let per100;
+  if(el.dataset.custom==='1'){
+    per100={kcal:parseFloat(el.dataset.kcal)||0,protein:parseFloat(el.dataset.p)||0,fat:parseFloat(el.dataset.f)||0,carbs:parseFloat(el.dataset.c)||0};
+  }else{
+    per100=parseFoodDescription(el.dataset.desc||'');
+    if(!per100)per100={kcal:0,protein:0,fat:0,carbs:0};
+  }
+  _buildSelectedIng={name,per100};
+  document.getElementById('buildIngSelName').textContent=name;
+  document.getElementById('buildIngPer100').textContent=`на 100г: ${per100.kcal} ккал · Б:${per100.protein}г Ж:${per100.fat}г У:${per100.carbs}г`;
+  document.getElementById('buildIngCard').style.display='block';
+  document.getElementById('buildIngWeight').value=100;
+  recalcBuildIng();
+}
+function recalcBuildIng(){
+  if(!_buildSelectedIng)return;
+  const w=parseFloat(document.getElementById('buildIngWeight').value)||100;
+  const k=_buildSelectedIng.per100;const m=w/100;
+  document.getElementById('bncb-k').textContent=Math.round(k.kcal*m);
+  document.getElementById('bncb-p').textContent=Math.round(k.protein*m*10)/10+'г';
+  document.getElementById('bncb-f').textContent=Math.round(k.fat*m*10)/10+'г';
+  document.getElementById('bncb-c').textContent=Math.round(k.carbs*m*10)/10+'г';
+}
+function addBuildIngredient(){
+  if(!_buildSelectedIng)return;
+  const w=parseFloat(document.getElementById('buildIngWeight').value)||100;
+  const k=_buildSelectedIng.per100;const m=w/100;
+  _buildIngredients.push({
+    name:_buildSelectedIng.name,weight:w,
+    kcal:Math.round(k.kcal*m),protein:Math.round(k.protein*m*10)/10,
+    fat:Math.round(k.fat*m*10)/10,carbs:Math.round(k.carbs*m*10)/10
+  });
+  _buildSelectedIng=null;
+  document.getElementById('buildIngCard').style.display='none';
+  document.getElementById('buildIngName').value='';
+  renderBuildIngredients();
+}
+function removeBuildIngredient(idx){
+  _buildIngredients.splice(idx,1);renderBuildIngredients();
+}
+function renderBuildIngredients(){
+  const list=document.getElementById('buildIngList');
+  const totBox=document.getElementById('buildTotalBox');
+  if(!_buildIngredients.length){list.innerHTML='';totBox.style.display='none';return;}
+  list.innerHTML=_buildIngredients.map((ing,i)=>`
+    <div class="nut-ing-item">
+      <div class="nut-ing-info">
+        <div class="nut-ing-name">${esc(ing.name)}</div>
+        <div class="nut-ing-macros">${ing.weight}г · Б:${ing.protein}г Ж:${ing.fat}г У:${ing.carbs}г</div>
+      </div>
+      <div class="nut-ing-kcal">${ing.kcal} ккал</div>
+      <button class="nut-ing-del" onclick="removeBuildIngredient(${i})">✕</button>
+    </div>`).join('');
+  const tot=_buildIngredients.reduce((a,i)=>({k:a.k+i.kcal,p:a.p+i.protein,f:a.f+i.fat,c:a.c+i.carbs}),{k:0,p:0,f:0,c:0});
+  document.getElementById('btot-k').textContent=tot.k;
+  document.getElementById('btot-p').textContent=Math.round(tot.p*10)/10+'г';
+  document.getElementById('btot-f').textContent=Math.round(tot.f*10)/10+'г';
+  document.getElementById('btot-c').textContent=Math.round(tot.c*10)/10+'г';
+  totBox.style.display='block';
+}
+async function saveCustomDish(){
+  const name=(document.getElementById('buildDishName').value||'').trim();
+  if(!name)return toast('Введите название блюда','e');
+  if(!_buildIngredients.length)return toast('Добавьте хотя бы один ингредиент','e');
+  const tot=_buildIngredients.reduce((a,i)=>({k:a.k+i.kcal,p:a.p+i.protein,f:a.f+i.fat,c:a.c+i.carbs}),{k:0,p:0,f:0,c:0});
+  const type=document.getElementById('buildType').value;
+  const btn=document.getElementById('buildSaveBtn');
+  btn.disabled=true;btn.textContent='...';
+  try{
+    // Сохраняем как кастомное блюдо в базу
+    await fetch(`/api/custom-foods/${ME.id}`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name,ingredients:_buildIngredients,kcal:tot.k,protein:tot.p,fat:tot.f,carbs:tot.c})});
+    // Добавляем в дневник питания
+    const r=await fetch(`/api/nutrition/${ME.id}`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name,type,kcal:tot.k,protein:tot.p,fat:tot.f,carbs:tot.c,date:_nutDate})});
+    if(!r.ok){const d=await r.json();throw new Error(d.error||'Ошибка');}
+    // Обновляем кэш кастомных блюд
+    await loadCustomFoods();
+    closeMo('mAddNut');resetNutModal();
+    toast('Блюдо сохранено и добавлено!','s');loadUserNutrition();
+  }catch(e){toast('Ошибка: '+e.message,'e');}
+  btn.disabled=false;btn.textContent='Сохранить и добавить';
+}
+
+// ═══ ПАРСИНГ FATSECRET ═══
 function parseFoodDescription(desc){
   if(!desc)return null;
   const cal=desc.match(/Calories:\s*([\d.]+)/i);
@@ -2259,27 +2475,37 @@ function parseFoodDescription(desc){
   if(!cal)return null;
   return{kcal:Math.round(parseFloat(cal[1])||0),fat:parseFloat(fat?.[1])||0,carbs:parseFloat(carb?.[1])||0,protein:parseFloat(prot?.[1])||0};
 }
+
+// ═══ ЗВЁЗДОЧКА / ИЗБРАННОЕ ═══
 function toggleNutStar(){
   _nutSaveFav=!_nutSaveFav;
   document.getElementById('nutStarToggle').classList.toggle('active',_nutSaveFav);
   document.getElementById('nutStarIcon').textContent=_nutSaveFav?'⭐':'☆';
 }
 function resetNutModal(){
-  _nutSaveFav=false;
-  const row=document.getElementById('nutStarToggle');
-  const icon=document.getElementById('nutStarIcon');
-  if(row)row.classList.remove('active');
-  if(icon)icon.textContent='☆';
-  hideNutDropdown();
-  switchNutTab('search');
+  _nutSaveFav=false;_nutSelectedFood=null;
+  _buildSelectedIng=null;_buildIngredients=[];
+  document.getElementById('nutStarToggle')?.classList.remove('active');
+  const icon=document.getElementById('nutStarIcon');if(icon)icon.textContent='☆';
+  document.getElementById('nutSearchArea').style.display='';
+  document.getElementById('nutSelectedCard').style.display='none';
+  const saveBtn=document.getElementById('nutSaveBtn');if(saveBtn)saveBtn.style.display='none';
+  document.getElementById('nutName').value='';
+  document.getElementById('buildDishName').value='';
+  document.getElementById('buildIngName').value='';
+  document.getElementById('buildIngCard').style.display='none';
+  document.getElementById('buildIngList').innerHTML='';
+  document.getElementById('buildTotalBox').style.display='none';
+  hideDropdown('nutDropdown');hideDropdown('buildDropdown');
   const title=document.getElementById('nutModalTitle');
   if(title)title.textContent='🥗 Добавить приём пищи';
-  ['nutName','nutKcal','nutProtein','nutFat','nutCarbs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  switchNutTab('search');
 }
+
+// ═══ ИЗБРАННОЕ ═══
 async function loadNutFavorites(){
   if(!ME)return;
-  const list=document.getElementById('nutFavList');
-  if(!list)return;
+  const list=document.getElementById('nutFavList');if(!list)return;
   try{
     const r=await fetch(`/api/favorites/${ME.id}`);
     if(!r.ok){list.innerHTML='<div class="empty" style="padding:20px 0"><div class="ei">⭐</div>Нет избранного</div>';return;}
@@ -2300,22 +2526,64 @@ async function loadNutFavorites(){
   }catch(e){list.innerHTML='<div class="empty" style="padding:20px 0"><div class="ei">⭐</div>Ошибка загрузки</div>';}
 }
 function applyNutFavorite(id){
-  const fav=_nutFavsCache.find(f=>f.id===id);
-  if(!fav)return;
-  document.getElementById('nutName').value=fav.name||'';
+  const fav=_nutFavsCache.find(f=>f.id===id);if(!fav)return;
+  // Используем per100 если сохранено, иначе используем значения напрямую (100г порция)
+  const per100=fav.per100||{kcal:fav.kcal||0,protein:fav.protein||0,fat:fav.fat||0,carbs:fav.carbs||0};
+  _nutSelectedFood={name:fav.name,per100};
+  document.getElementById('nutSearchArea').style.display='none';
+  document.getElementById('nutSelectedCard').style.display='block';
+  document.getElementById('nutSelName').textContent=fav.name;
+  document.getElementById('nutSelPer100').textContent=`на 100г: ${per100.kcal} ккал · Б:${per100.protein}г Ж:${per100.fat}г У:${per100.carbs}г`;
+  document.getElementById('nutWeight').value=100;
   document.getElementById('nutType').value=fav.type||'snack';
-  document.getElementById('nutKcal').value=fav.kcal||0;
-  document.getElementById('nutProtein').value=fav.protein||0;
-  document.getElementById('nutFat').value=fav.fat||0;
-  document.getElementById('nutCarbs').value=fav.carbs||0;
-  hideNutDropdown();
+  document.getElementById('nutSaveBtn').style.display='';
+  recalcNutByWeight();
+  switchNutTab('search');
 }
 async function deleteNutFavorite(id){
   try{
     await fetch(`/api/favorites/${ME.id}/${id}`,{method:'DELETE'});
-    toast('Удалено из избранного','w');
-    loadNutFavorites();
+    toast('Удалено из избранного','w');loadNutFavorites();
   }catch(e){toast('Ошибка','e');}
+}
+
+// ═══ НЕДАВНИЕ ═══
+async function loadNutRecent(){
+  const list=document.getElementById('nutRecentList');if(!list||!ME)return;
+  try{
+    const r=await fetch(`/api/nutrition/${ME.id}`);
+    if(!r.ok){list.innerHTML='<div class="empty" style="padding:20px 0"><div class="ei">🕐</div>Нет недавних</div>';return;}
+    const all=await r.json();
+    const seen=new Map();
+    all.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+    for(const e of all){if(!seen.has(e.name))seen.set(e.name,e);}
+    _nutRecentCache=[...seen.values()].slice(0,20);
+    if(!_nutRecentCache.length){list.innerHTML='<div class="empty" style="padding:20px 0"><div class="ei">🕐</div>Нет недавних записей</div>';return;}
+    list.innerHTML=_nutRecentCache.map(e=>`
+      <div class="nut-recent-item" onclick="applyNutRecent(${JSON.stringify(e.name)})">
+        <div class="nut-recent-icon">${_NUT_EMOJI[e.type]||'🍽'}</div>
+        <div class="nut-recent-info">
+          <div class="nut-recent-name">${esc(e.name)}</div>
+          <div class="nut-recent-macros">Б:${+(e.protein||0).toFixed(1)}г · Ж:${+(e.fat||0).toFixed(1)}г · У:${+(e.carbs||0).toFixed(1)}г</div>
+        </div>
+        <div class="nut-recent-kcal">${e.kcal||0} ккал</div>
+      </div>`).join('');
+  }catch(ex){list.innerHTML='<div class="empty" style="padding:20px 0"><div class="ei">🕐</div>Нет данных</div>';}
+}
+function applyNutRecent(name){
+  const e=_nutRecentCache.find(x=>x.name===name);if(!e)return;
+  // Показываем как выбранный продукт — значения за 100г (те же, что и сохранённые)
+  const per100={kcal:e.kcal||0,protein:e.protein||0,fat:e.fat||0,carbs:e.carbs||0};
+  _nutSelectedFood={name:e.name,per100};
+  document.getElementById('nutSearchArea').style.display='none';
+  document.getElementById('nutSelectedCard').style.display='block';
+  document.getElementById('nutSelName').textContent=e.name;
+  document.getElementById('nutSelPer100').textContent=`${per100.kcal} ккал · Б:${per100.protein}г Ж:${per100.fat}г У:${per100.carbs}г`;
+  document.getElementById('nutWeight').value=100;
+  document.getElementById('nutType').value=e.type||'snack';
+  document.getElementById('nutSaveBtn').style.display='';
+  recalcNutByWeight();
+  switchNutTab('search');
 }
 
 // ═══ УТИЛИТЫ ═══
@@ -2329,10 +2597,11 @@ function openMo(id,nutType){
   if(id==='mAddW')onOpenAddW();
   if(id==='mAddNut'){
     nutSetupAutocomplete();
+    buildSetupAutocomplete();
     switchNutTab('search');
     if(nutType){
-      const sel=document.getElementById('nutType');
-      if(sel)sel.value=nutType;
+      const sel=document.getElementById('nutType');if(sel)sel.value=nutType;
+      const sel2=document.getElementById('buildType');if(sel2)sel2.value=nutType;
       const names={breakfast:'🌅 Завтрак',lunch:'☀️ Обед',dinner:'🌆 Ужин',snack:'🍎 Перекус'};
       const title=document.getElementById('nutModalTitle');
       if(title)title.textContent='🥗 '+names[nutType];
@@ -2340,6 +2609,7 @@ function openMo(id,nutType){
       const title=document.getElementById('nutModalTitle');
       if(title)title.textContent='🥗 Добавить приём пищи';
     }
+    loadCustomFoods();
     loadNutFavorites();
     loadNutRecent();
   }
