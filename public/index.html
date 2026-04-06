@@ -572,10 +572,177 @@
     .video-play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35);transition:background .2s;}
     .video-thumb:hover .video-play-overlay{background:rgba(0,0,0,.15);}
     .video-play-icon{width:44px;height:44px;border-radius:50%;background:rgba(139,92,246,.9);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;box-shadow:0 4px 16px rgba(139,92,246,.4);}
+
+    /* ═══ КРОСС ═══ */
+    .cross-hero{background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(99,102,241,.08));border:1px solid rgba(56,189,248,.25);border-radius:22px;padding:28px 22px;margin-bottom:16px;text-align:center;position:relative;overflow:hidden;}
+    .cross-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:160px;height:160px;background:radial-gradient(circle,rgba(56,189,248,.18),transparent 70%);pointer-events:none;}
+    .cross-state-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--blu);opacity:.8;margin-bottom:8px;}
+    .cross-timer{font-family:'Unbounded',sans-serif;font-size:52px;font-weight:700;color:var(--tx);line-height:1;letter-spacing:2px;margin-bottom:20px;text-shadow:0 0 30px rgba(56,189,248,.3);}
+    .cross-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px;}
+    .cross-metric{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--r2);padding:14px 8px;}
+    .cross-metric-val{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:700;color:var(--blu);line-height:1;}
+    .cross-metric-lbl{font-size:10px;color:var(--mu2);margin-top:4px;}
+    .cross-start-btn{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#38bdf8,#6366f1);color:#fff;font-size:32px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;border:none;cursor:pointer;box-shadow:0 6px 28px rgba(56,189,248,.4);transition:all .22s;}
+    .cross-start-btn:hover{transform:scale(1.07);box-shadow:0 10px 36px rgba(56,189,248,.55);}
+    .cross-start-btn.running{background:linear-gradient(135deg,#fbbf24,#f59e0b);box-shadow:0 6px 28px rgba(251,191,36,.4);}
+    .cross-start-btn.running:hover{box-shadow:0 10px 36px rgba(251,191,36,.55);}
+    .cross-ctrl{display:flex;gap:10px;justify-content:center;margin-top:14px;}
+    .cross-pause-btn{flex:1;max-width:140px;padding:12px;border-radius:var(--r2);background:rgba(251,191,36,.1);color:var(--yel);border:1px solid rgba(251,191,36,.25);font-weight:700;font-size:13px;transition:all .2s;}
+    .cross-pause-btn:hover{background:rgba(251,191,36,.18);}
+    .cross-stop-btn{flex:1;max-width:140px;padding:12px;border-radius:var(--r2);background:rgba(251,113,133,.1);color:var(--red);border:1px solid rgba(251,113,133,.25);font-weight:700;font-size:13px;transition:all .2s;}
+    .cross-stop-btn:hover{background:rgba(251,113,133,.18);}
+    .cross-result-card{background:linear-gradient(135deg,rgba(56,189,248,.1),rgba(99,102,241,.08));border:1px solid rgba(56,189,248,.3);border-radius:22px;padding:24px 20px;margin-bottom:14px;text-align:center;}
+    .cross-result-title{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:700;color:var(--blu);margin-bottom:18px;}
+    .cross-result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+    .cross-result-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--r2);padding:14px 8px;}
+    .cross-result-val{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:700;color:var(--tx);}
+    .cross-result-lbl{font-size:10px;color:var(--mu2);margin-top:3px;}
+    .lb-filter{display:flex;gap:8px;margin-bottom:14px;}
+    .lb-btn{flex:1;padding:9px 6px;border-radius:var(--r2);border:1px solid rgba(255,255,255,.07);font-size:11px;font-weight:700;text-align:center;cursor:pointer;background:rgba(255,255,255,.03);color:var(--mu2);transition:all .22s;font-family:'Unbounded',sans-serif;}
+    .lb-btn.active{border-color:var(--blu);color:var(--blu);background:rgba(56,189,248,.1);}
+    .lb-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:var(--r2);margin-bottom:8px;transition:all .2s;}
+    .lb-row:hover{border-color:rgba(56,189,248,.2);}
+    .lb-row.me{border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.06);}
+    .lb-pos{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;color:var(--mu);width:22px;flex-shrink:0;}
+    .lb-pos.gold{color:#fbbf24;}.lb-pos.silver{color:#94a3b8;}.lb-pos.bronze{color:#cd7f32;}
+    .lb-name{flex:1;font-weight:600;font-size:14px;}
+    .lb-dist{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;color:var(--blu);}
+    .lb-meta{font-size:11px;color:var(--mu2);}
+    .run-hist-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:var(--r2);margin-bottom:8px;}
+    .run-hist-icon{width:38px;height:38px;border-radius:12px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+    .run-hist-info{flex:1;}
+    .run-hist-date{font-size:12px;color:var(--mu2);}
+    .run-hist-dist{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;color:var(--blu);}
+    .run-hist-meta{font-size:11px;color:var(--mu2);}
+    .cross-gps-warn{background:rgba(251,113,133,.08);border:1px solid rgba(251,113,133,.2);border-radius:var(--r2);padding:12px 14px;font-size:13px;color:var(--red);margin-bottom:12px;display:none;}
+
+    /* ═══ ЛЕНДИНГ ═══ */
+    #landingPage{position:fixed;inset:0;z-index:200;background:var(--bg);display:none;flex-direction:column;overflow-y:auto;}
+    #landingPage.show{display:flex;}
+    .land-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+    .land-bg::before{content:'';position:absolute;top:-120px;left:-80px;width:500px;height:500px;background:radial-gradient(circle,rgba(56,189,248,.13),transparent 65%);}
+    .land-bg::after{content:'';position:absolute;bottom:-100px;right:-60px;width:420px;height:420px;background:radial-gradient(circle,rgba(139,92,246,.12),transparent 65%);}
+    .land-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:0 20px 40px;}
+    .land-top{width:100%;max-width:480px;display:flex;align-items:center;justify-content:space-between;padding:18px 0;}
+    .land-logo{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;background:linear-gradient(135deg,#c4b5fd,#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+    .land-login-link{font-size:13px;color:var(--mu2);cursor:pointer;transition:color .2s;background:none;border:none;font-family:inherit;}
+    .land-login-link:hover{color:var(--ac);}
+    .land-hero{width:100%;max-width:480px;text-align:center;padding:32px 0 28px;}
+    .land-emoji{font-size:72px;line-height:1;margin-bottom:18px;display:block;animation:pulse 2s ease infinite;}
+    .land-tag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--blu);background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);border-radius:20px;padding:4px 14px;margin-bottom:14px;}
+    .land-title{font-family:'Unbounded',sans-serif;font-size:28px;font-weight:700;line-height:1.2;margin-bottom:12px;background:linear-gradient(135deg,#f1f5f9,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+    @media(max-width:380px){.land-title{font-size:22px;}}
+    .land-sub{font-size:15px;color:var(--mu2);line-height:1.7;margin-bottom:28px;}
+    .land-cta{width:100%;max-width:340px;padding:16px 24px;border-radius:16px;background:linear-gradient(135deg,#38bdf8,#6366f1);color:#fff;font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;border:none;cursor:pointer;box-shadow:0 8px 30px rgba(56,189,248,.35);transition:all .22s;margin-bottom:12px;}
+    .land-cta:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(56,189,248,.5);}
+    .land-secondary{font-size:13px;color:var(--mu2);cursor:pointer;background:none;border:none;font-family:inherit;transition:color .2s;text-decoration:underline;text-underline-offset:3px;}
+    .land-secondary:hover{color:var(--tx);}
+    .land-cards{width:100%;max-width:480px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px;}
+    .land-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:16px 10px;text-align:center;}
+    .land-card-icon{font-size:26px;margin-bottom:6px;}
+    .land-card-val{font-family:'Unbounded',sans-serif;font-size:16px;font-weight:700;color:var(--blu);margin-bottom:2px;}
+    .land-card-lbl{font-size:10px;color:var(--mu2);}
+    .land-desc{width:100%;max-width:480px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:20px;margin-bottom:24px;}
+    .land-desc-title{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:12px;}
+    .land-desc-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:13px;color:var(--mu2);line-height:1.5;}
+    .land-desc-item:last-child{margin-bottom:0;}
+    .land-desc-dot{width:20px;height:20px;border-radius:8px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.2);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px;}
+
+    /* ═══ МОДАЛКА РЕГИСТРАЦИИ НА ЗАБЕГ ═══ */
+    .reg-success{text-align:center;padding:20px 0;}
+    .reg-success-icon{font-size:56px;margin-bottom:12px;}
+    .reg-success-title{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:700;color:var(--blu);margin-bottom:8px;}
+    .reg-success-sub{font-size:13px;color:var(--mu2);line-height:1.6;}
+
+    /* ═══ ПАНЕЛЬ КРОСС У ТРЕНЕРА — ПЕРЕКЛЮЧАТЕЛЬ ═══ */
+    .across-tabs{display:flex;gap:8px;margin-bottom:16px;}
+    .across-tab{flex:1;padding:11px;border-radius:var(--r2);border:1px solid rgba(255,255,255,.07);font-size:12px;font-weight:700;text-align:center;cursor:pointer;background:rgba(255,255,255,.03);color:var(--mu2);transition:all .22s;font-family:'Unbounded',sans-serif;}
+    .across-tab.active{border-color:var(--blu);color:var(--blu);background:rgba(56,189,248,.1);}
+    .across-section{display:none;}.across-section.active{display:block;}
+    .creg-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:var(--r2);margin-bottom:8px;}
+    .creg-ava{width:38px;height:38px;border-radius:12px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+    .creg-info{flex:1;}
+    .creg-name{font-weight:600;font-size:14px;margin-bottom:2px;}
+    .creg-meta{font-size:11px;color:var(--mu2);}
+    .creg-del{background:rgba(251,113,133,.1);color:var(--red);border:1px solid rgba(251,113,133,.2);border-radius:var(--r3);padding:6px 10px;font-size:12px;cursor:pointer;transition:all .2s;font-weight:600;}
+    .creg-del:hover{background:rgba(251,113,133,.2);}
+    .creg-count{font-size:11px;color:var(--mu2);margin-bottom:10px;}
   </style>
 </head>
 <body>
 <div id="splash"><div class="sp-logo">⚡ Coach Space</div><div class="sp-ring"></div></div>
+
+<!-- ЛЕНДИНГ-ВИЗИТКА -->
+<div id="landingPage">
+  <div class="land-bg"></div>
+  <div class="land-inner">
+    <div class="land-top">
+      <div class="land-logo">⚡ Coach Space</div>
+      <button class="land-login-link" onclick="showLogin()">Войти →</button>
+    </div>
+
+    <div class="land-hero">
+      <span class="land-emoji">🏃</span>
+      <div class="land-tag">Открытый старт</div>
+      <div class="land-title">Городской кросс<br>Coach Space</div>
+      <div class="land-sub">Пробеги вместе с нами — независимо от уровня подготовки. Отслеживай дистанцию, скорость и соревнуйся в общем рейтинге.</div>
+      <button class="land-cta" onclick="openMo('mCrossReg')">Записаться на забег</button>
+      <br>
+      <button class="land-secondary" onclick="showLogin()">Войти в Coach Space</button>
+    </div>
+
+    <div class="land-cards">
+      <div class="land-card">
+        <div class="land-card-icon">📍</div>
+        <div class="land-card-val">GPS</div>
+        <div class="land-card-lbl">Трекинг маршрута</div>
+      </div>
+      <div class="land-card">
+        <div class="land-card-icon">🏆</div>
+        <div class="land-card-val">Топ</div>
+        <div class="land-card-lbl">Общий рейтинг</div>
+      </div>
+      <div class="land-card">
+        <div class="land-card-icon">⚡</div>
+        <div class="land-card-val">Live</div>
+        <div class="land-card-lbl">Скорость онлайн</div>
+      </div>
+    </div>
+
+    <div class="land-desc">
+      <div class="land-desc-title">Как это работает</div>
+      <div class="land-desc-item"><div class="land-desc-dot">1</div>Записывайся на забег — заполни форму ниже</div>
+      <div class="land-desc-item"><div class="land-desc-dot">2</div>В день старта открой приложение, нажми «Кросс» → «Старт»</div>
+      <div class="land-desc-item"><div class="land-desc-dot">3</div>GPS отслеживает дистанцию и скорость в реальном времени</div>
+      <div class="land-desc-item"><div class="land-desc-dot">4</div>После финиша результат попадает в общий рейтинг</div>
+    </div>
+
+    <button class="land-cta" onclick="openMo('mCrossReg')" style="max-width:480px">Хочу участвовать</button>
+  </div>
+</div>
+
+<!-- МОДАЛКА РЕГИСТРАЦИИ НА ЗАБЕГ -->
+<div class="mo" id="mCrossReg"><div class="modal">
+  <div class="mh"></div>
+  <div id="crossRegForm">
+    <div class="mt">🏃 Записаться на кросс</div>
+    <div class="fg"><label class="fl">Имя и фамилия *</label><input class="fi" id="cregName" placeholder="Иван Иванов"/></div>
+    <div class="fg"><label class="fl">Телефон</label><input class="fi" id="cregPhone" type="tel" placeholder="+7 700 000 00 00"/></div>
+    <div class="fg"><label class="fl">Telegram (username или @)</label><input class="fi" id="cregTg" placeholder="@username"/></div>
+    <div class="fg"><label class="fl">Город</label><input class="fi" id="cregCity" placeholder="Алматы"/></div>
+    <div class="ferr" id="cregErr"></div>
+    <div class="mf">
+      <button class="btn btn-g" onclick="closeMo('mCrossReg')">Отмена</button>
+      <button class="btn btn-p" onclick="submitCrossReg()" id="cregBtn">Записаться</button>
+    </div>
+  </div>
+  <div class="reg-success" id="crossRegSuccess" style="display:none">
+    <div class="reg-success-icon">✅</div>
+    <div class="reg-success-title">Ты в списке!</div>
+    <div class="reg-success-sub">Мы получили твою заявку.<br>Следи за новостями Coach Space.</div>
+    <div style="margin-top:16px"><button class="btn btn-g btn-full" onclick="closeMo('mCrossReg')">Закрыть</button></div>
+  </div>
+</div></div>
 
 <div id="loginPage">
   <div class="lcard">
@@ -777,6 +944,123 @@
     <div class="panel" id="p-anut">
       <div class="sh"><div class="st">🥗 Питание учеников</div></div>
       <div id="aNutContent"><div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div></div>
+    </div>
+
+    <!-- КРОСС — ПОЛЬЗОВАТЕЛЬ -->
+    <div class="panel" id="p-ucross">
+      <div class="cross-gps-warn" id="crossGpsWarn">GPS недоступен. Проверьте разрешения геолокации в браузере.</div>
+
+      <!-- Экран тренировки -->
+      <div id="crossTrainScreen">
+        <div class="cross-hero">
+          <div class="cross-state-lbl" id="crossStateLbl">Готов к старту</div>
+          <div class="cross-timer" id="crossTimer">00:00</div>
+          <div class="cross-metrics">
+            <div class="cross-metric">
+              <div class="cross-metric-val" id="crossDist">0.00</div>
+              <div class="cross-metric-lbl">км</div>
+            </div>
+            <div class="cross-metric">
+              <div class="cross-metric-val" id="crossSpeed">0.0</div>
+              <div class="cross-metric-lbl">км/ч</div>
+            </div>
+            <div class="cross-metric">
+              <div class="cross-metric-val" id="crossPace">—</div>
+              <div class="cross-metric-lbl">мин/км</div>
+            </div>
+          </div>
+          <button class="cross-start-btn" id="crossStartBtn" onclick="crossToggleRun()">▶</button>
+          <div id="crossCtrl" style="display:none" class="cross-ctrl">
+            <button class="cross-pause-btn" id="crossPauseBtn" onclick="crossPause()">⏸ Пауза</button>
+            <button class="cross-stop-btn" onclick="crossFinish()">⏹ Завершить</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Экран результата -->
+      <div id="crossResultScreen" style="display:none">
+        <div class="cross-result-card">
+          <div class="cross-result-title">🏁 Пробежка завершена!</div>
+          <div class="cross-result-grid">
+            <div class="cross-result-item">
+              <div class="cross-result-val" id="resTime">—</div>
+              <div class="cross-result-lbl">Время</div>
+            </div>
+            <div class="cross-result-item">
+              <div class="cross-result-val" id="resDist">—</div>
+              <div class="cross-result-lbl">Дистанция</div>
+            </div>
+            <div class="cross-result-item">
+              <div class="cross-result-val" id="resSpeed">—</div>
+              <div class="cross-result-lbl">Ср. скорость</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:center">
+            <button class="btn btn-p" onclick="crossSaveRun()">💾 Сохранить</button>
+            <button class="btn btn-g" onclick="crossReset()">🔄 Новая</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Лидерборд -->
+      <div class="card">
+        <div class="sh"><div class="st">🏆 Рейтинг</div></div>
+        <div class="lb-filter">
+          <button class="lb-btn" onclick="loadLeaderboard('today',this)">Сегодня</button>
+          <button class="lb-btn active" onclick="loadLeaderboard('week',this)">Неделя</button>
+          <button class="lb-btn" onclick="loadLeaderboard('all',this)">Всё время</button>
+        </div>
+        <div id="crossLeaderboard"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
+      </div>
+
+      <!-- История пробежек -->
+      <div class="card">
+        <div class="sh"><div class="st">📋 Мои пробежки</div></div>
+        <div id="crossHistory"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
+      </div>
+    </div>
+
+    <!-- КРОСС — ТРЕНЕР -->
+    <div class="panel" id="p-across">
+      <!-- Переключатель вкладок -->
+      <div class="across-tabs">
+        <button class="across-tab active" onclick="switchAcrossTab('leaderboard',this)">🏆 Рейтинг забега</button>
+        <button class="across-tab" onclick="switchAcrossTab('registrants',this)">📋 Заявки на забег</button>
+        <button class="across-tab" onclick="switchAcrossTab('students',this)">👥 Участники CS</button>
+      </div>
+
+      <!-- Вкладка: Рейтинг -->
+      <div class="across-section active" id="acrossLeaderboardSection">
+        <div class="card">
+          <div class="sh"><div class="st">🏆 Рейтинг участников</div></div>
+          <div class="lb-filter">
+            <button class="lb-btn" onclick="loadAdminLeaderboard('today',this)">Сегодня</button>
+            <button class="lb-btn active" onclick="loadAdminLeaderboard('week',this)">Неделя</button>
+            <button class="lb-btn" onclick="loadAdminLeaderboard('all',this)">Всё время</button>
+          </div>
+          <div id="adminLeaderboard"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
+        </div>
+      </div>
+
+      <!-- Вкладка: Заявки на забег -->
+      <div class="across-section" id="acrossRegistrantsSection">
+        <div class="card">
+          <div class="sh">
+            <div class="st">📋 Записавшиеся на забег</div>
+            <button class="btn btn-g sm" onclick="loadCrossRegistrants()">↻</button>
+          </div>
+          <div id="crossRegCount" class="creg-count"></div>
+          <div id="crossRegList"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
+        </div>
+      </div>
+
+      <!-- Вкладка: Участники Coach Space -->
+      <div class="across-section" id="acrossStudentsSection">
+        <div class="card">
+          <div class="sh"><div class="st">👥 Участники Coach Space</div></div>
+          <div id="acrossStudentsList"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1317,6 +1601,7 @@ function doLogout(){ME=null;localStorage.removeItem('auth_id');document.getEleme
 ['inL','inP'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();}));
 
 function startApp(){
+  document.getElementById('landingPage').classList.remove('show');
   document.getElementById('loginPage').classList.remove('show');
   document.getElementById('app').classList.add('show');
   document.getElementById('bnav').style.display='flex';
@@ -1328,8 +1613,8 @@ function startApp(){
 }
 
 const TABS={
-  admin:[{id:'ah',icon:'🏠',lbl:'Главная'},{id:'acal',icon:'📅',lbl:'Календарь'},{id:'aw',icon:'🏋️',lbl:'Тренировки'},{id:'aprog',icon:'📈',lbl:'Прогресс'},{id:'arev',icon:'⭐',lbl:'Отзывы'},{id:'avid',icon:'🎬',lbl:'Видео'},{id:'ashop',icon:'🛒',lbl:'Магазин'},{id:'anut',icon:'🥗',lbl:'Питание'}],
-  user: [{id:'uh',icon:'🏠',lbl:'Главная'},{id:'uplan',icon:'📋',lbl:'План'},{id:'udiary',icon:'📊',lbl:'Дневник'},{id:'uprog',icon:'📈',lbl:'Прогресс'},{id:'uvid',icon:'🎬',lbl:'Видео'},{id:'ushop',icon:'🛒',lbl:'Магазин'},{id:'unut',icon:'🥗',lbl:'Питание'}]
+  admin:[{id:'ah',icon:'🏠',lbl:'Главная'},{id:'acal',icon:'📅',lbl:'Календарь'},{id:'aw',icon:'🏋️',lbl:'Тренировки'},{id:'aprog',icon:'📈',lbl:'Прогресс'},{id:'arev',icon:'⭐',lbl:'Отзывы'},{id:'avid',icon:'🎬',lbl:'Видео'},{id:'ashop',icon:'🛒',lbl:'Магазин'},{id:'anut',icon:'🥗',lbl:'Питание'},{id:'across',icon:'🏃',lbl:'Кросс'}],
+  user: [{id:'uh',icon:'🏠',lbl:'Главная'},{id:'uplan',icon:'📋',lbl:'План'},{id:'udiary',icon:'📊',lbl:'Дневник'},{id:'uprog',icon:'📈',lbl:'Прогресс'},{id:'uvid',icon:'🎬',lbl:'Видео'},{id:'ushop',icon:'🛒',lbl:'Магазин'},{id:'unut',icon:'🥗',lbl:'Питание'},{id:'ucross',icon:'🏃',lbl:'Кросс'}]
 };
 function buildNav(){
   const nav=document.getElementById('bnav'),tabs=ME.role==='admin'?TABS.admin:TABS.user;
@@ -1357,6 +1642,8 @@ function showTab(id,btn){
   if(id==='uvid')  loadUserVideoLibrary();
   if(id==='anut')  loadAdminNutrition();
   if(id==='unut')  loadUserNutrition();
+  if(id==='ucross') loadUserCross();
+  if(id==='across') loadAdminCross();
 }
 
 // ═══ МАГАЗИН ═══
@@ -2632,10 +2919,362 @@ function exportExcel(){toast('⏳ Подготовка файла...','w');const
 (async function init(){
   const splash=document.getElementById('splash');
   const ok=await tryAutoLogin();
-  setTimeout(()=>{splash.classList.add('hide');setTimeout(()=>splash.style.display='none',400);ok?startApp():document.getElementById('loginPage').classList.add('show');},800);
+  setTimeout(()=>{
+    splash.classList.add('hide');
+    setTimeout(()=>splash.style.display='none',400);
+    if(ok){ startApp(); }
+    else {
+      // Показываем лендинг (если не авторизован)
+      document.getElementById('landingPage').classList.add('show');
+    }
+  },800);
 })();
 
+function showLogin(){
+  document.getElementById('landingPage').classList.remove('show');
+  document.getElementById('loginPage').classList.add('show');
+}
+
+// Регистрация на забег
+async function submitCrossReg(){
+  const name=(document.getElementById('cregName').value||'').trim();
+  const phone=(document.getElementById('cregPhone').value||'').trim();
+  const tg=(document.getElementById('cregTg').value||'').trim();
+  const city=(document.getElementById('cregCity').value||'').trim();
+  const err=document.getElementById('cregErr');
+  err.style.display='none';
+  if(!name){err.style.display='block';err.textContent='Введите имя';return;}
+  const btn=document.getElementById('cregBtn');
+  btn.disabled=true;btn.textContent='...';
+  try{
+    await fetch('/api/cross-register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,telegram:tg,city})});
+    document.getElementById('crossRegForm').style.display='none';
+    document.getElementById('crossRegSuccess').style.display='block';
+    // сброс
+    ['cregName','cregPhone','cregTg','cregCity'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  }catch(e){err.style.display='block';err.textContent='Ошибка: '+e.message;}
+  btn.disabled=false;btn.textContent='Записаться';
+}
+
+// При закрытии модалки регистрации — сброс формы к начальному состоянию
+function _resetCrossRegModal(){
+  document.getElementById('crossRegForm').style.display='block';
+  document.getElementById('crossRegSuccess').style.display='none';
+  ['cregName','cregPhone','cregTg','cregCity'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const err=document.getElementById('cregErr');if(err)err.style.display='none';
+}
+// Переопределяем closeMo чтобы сбрасывать форму при закрытии
+const _origCloseMo = closeMo;
+function closeMo(id){
+  _origCloseMo(id);
+  if(id==='mCrossReg') setTimeout(_resetCrossRegModal, 300);
+}
+
+// Переключение вкладок в панели тренера "Кросс"
+function switchAcrossTab(tab, btn){
+  document.querySelectorAll('.across-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.across-section').forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');
+  if(tab==='leaderboard'){
+    document.getElementById('acrossLeaderboardSection').classList.add('active');
+    loadAdminLeaderboard('week', document.querySelector('#acrossLeaderboardSection .lb-btn.active'));
+  } else if(tab==='registrants'){
+    document.getElementById('acrossRegistrantsSection').classList.add('active');
+    loadCrossRegistrants();
+  } else if(tab==='students'){
+    document.getElementById('acrossStudentsSection').classList.add('active');
+    loadAcrossStudents();
+  }
+}
+
+// Загрузить список заявок на забег
+async function loadCrossRegistrants(){
+  const list=document.getElementById('crossRegList');
+  const cnt=document.getElementById('crossRegCount');
+  try{
+    const data=await api('/api/cross-register');
+    if(cnt) cnt.textContent=`Всего заявок: ${data.length}`;
+    if(!data.length){list.innerHTML='<div class="empty" style="padding:16px 0"><div class="ei">🏃</div>Пока нет заявок</div>';return;}
+    list.innerHTML=data.map(r=>{
+      const d=new Date(r.registeredAt);
+      const dateStr=d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+      const meta=[r.phone,r.telegram,r.city].filter(Boolean).join(' · ');
+      return`<div class="creg-row">
+        <div class="creg-ava">🏃</div>
+        <div class="creg-info">
+          <div class="creg-name">${esc(r.name)}</div>
+          <div class="creg-meta">${meta?esc(meta)+'<br>':''}<span style="opacity:.6">${dateStr}</span></div>
+        </div>
+        <button class="creg-del" onclick="deleteCrossReg('${r.id}',this)">✕</button>
+      </div>`;
+    }).join('');
+  }catch(e){list.innerHTML='<div class="empty" style="padding:16px 0">Ошибка загрузки</div>';}
+}
+
+async function deleteCrossReg(id, btn){
+  if(!confirm('Удалить заявку?'))return;
+  btn.disabled=true;
+  try{await api('/api/cross-register/'+id,'DELETE');loadCrossRegistrants();}
+  catch(e){toast('Ошибка: '+e.message,'e');btn.disabled=false;}
+}
+
+// Загрузить участников Coach Space в панели тренера
+async function loadAcrossStudents(){
+  const list=document.getElementById('acrossStudentsList');
+  try{
+    const data=await api('/api/users');
+    if(!data.length){list.innerHTML='<div class="empty" style="padding:16px 0"><div class="ei">👥</div>Нет участников</div>';return;}
+    list.innerHTML=data.map(u=>`
+      <div class="creg-row">
+        <div class="creg-ava" style="background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.2)">${(u.name||'?')[0].toUpperCase()}</div>
+        <div class="creg-info">
+          <div class="creg-name">${esc(u.name)}</div>
+          <div class="creg-meta">@${esc(u.login)} · ${u.sessions||0} занятий</div>
+        </div>
+      </div>`).join('');
+  }catch(e){list.innerHTML='<div class="empty" style="padding:16px 0">Ошибка загрузки</div>';}
+}
+
 document.getElementById('uPd').value=new Date(Date.now()+30*86400000).toISOString().split('T')[0];
+
+// ═══════════════════════════════════════════
+// КРОСС — GPS ТРЕНИРОВКА
+// ═══════════════════════════════════════════
+let _crossState = 'idle'; // idle | running | paused | finished
+let _crossTimer = null;
+let _crossElapsed = 0;    // секунды (накопленное время)
+let _crossPauseStart = 0;
+let _crossDistM = 0;      // метры
+let _crossLastPos = null;
+let _crossWatchId = null;
+let _crossResult = null;
+
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const φ1 = lat1 * Math.PI / 180, φ2 = lat2 * Math.PI / 180;
+  const Δφ = (lat2 - lat1) * Math.PI / 180;
+  const Δλ = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function fmtTime(s) {
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  if (h > 0) return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function fmtDist(m) {
+  return m >= 1000 ? (m/1000).toFixed(2) : (m/1000).toFixed(3);
+}
+
+function fmtPace(distM, seconds) {
+  if (distM < 10) return '—';
+  const minPerKm = seconds / 60 / (distM / 1000);
+  const m = Math.floor(minPerKm), s = Math.round((minPerKm - m) * 60);
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function crossUpdateUI() {
+  document.getElementById('crossTimer').textContent = fmtTime(_crossElapsed);
+  const km = _crossDistM / 1000;
+  document.getElementById('crossDist').textContent = km.toFixed(2);
+  const spd = _crossElapsed > 0 ? (_crossDistM / _crossElapsed * 3.6) : 0;
+  document.getElementById('crossSpeed').textContent = spd.toFixed(1);
+  document.getElementById('crossPace').textContent = fmtPace(_crossDistM, _crossElapsed);
+}
+
+function crossToggleRun() {
+  if (_crossState === 'idle') {
+    crossStart();
+  } else if (_crossState === 'paused') {
+    crossResume();
+  }
+}
+
+function crossStart() {
+  if (!navigator.geolocation) {
+    document.getElementById('crossGpsWarn').style.display = 'block';
+    return;
+  }
+  _crossState = 'running';
+  _crossElapsed = 0; _crossDistM = 0; _crossLastPos = null;
+  document.getElementById('crossStateLbl').textContent = 'Тренировка идёт...';
+  document.getElementById('crossStartBtn').innerHTML = '⏸';
+  document.getElementById('crossStartBtn').classList.add('running');
+  document.getElementById('crossStartBtn').onclick = crossPause;
+  document.getElementById('crossCtrl').style.display = 'flex';
+  document.getElementById('crossPauseBtn').textContent = '⏸ Пауза';
+  document.getElementById('crossPauseBtn').onclick = crossPause;
+  _crossTimer = setInterval(() => { _crossElapsed++; crossUpdateUI(); }, 1000);
+  _crossWatchId = navigator.geolocation.watchPosition(pos => {
+    if (_crossState !== 'running') return;
+    const {latitude: lat, longitude: lon} = pos.coords;
+    if (_crossLastPos) {
+      const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
+      if (d < 200) _crossDistM += d; // фильтр скачков GPS
+    }
+    _crossLastPos = {lat, lon};
+  }, err => {
+    console.warn('GPS:', err.message);
+    document.getElementById('crossGpsWarn').style.display = 'block';
+  }, {enableHighAccuracy: true, maximumAge: 2000, timeout: 10000});
+}
+
+function crossPause() {
+  if (_crossState !== 'running') return;
+  _crossState = 'paused';
+  clearInterval(_crossTimer);
+  if (_crossWatchId !== null) { navigator.geolocation.clearWatch(_crossWatchId); _crossWatchId = null; }
+  document.getElementById('crossStateLbl').textContent = 'Пауза';
+  document.getElementById('crossStartBtn').innerHTML = '▶';
+  document.getElementById('crossStartBtn').classList.remove('running');
+  document.getElementById('crossStartBtn').onclick = crossToggleRun;
+  document.getElementById('crossPauseBtn').textContent = '▶ Продолжить';
+  document.getElementById('crossPauseBtn').onclick = crossResume;
+}
+
+function crossResume() {
+  if (_crossState !== 'paused') return;
+  _crossState = 'running';
+  document.getElementById('crossStateLbl').textContent = 'Тренировка идёт...';
+  document.getElementById('crossStartBtn').innerHTML = '⏸';
+  document.getElementById('crossStartBtn').classList.add('running');
+  document.getElementById('crossStartBtn').onclick = crossPause;
+  document.getElementById('crossPauseBtn').textContent = '⏸ Пауза';
+  document.getElementById('crossPauseBtn').onclick = crossPause;
+  _crossTimer = setInterval(() => { _crossElapsed++; crossUpdateUI(); }, 1000);
+  _crossWatchId = navigator.geolocation.watchPosition(pos => {
+    if (_crossState !== 'running') return;
+    const {latitude: lat, longitude: lon} = pos.coords;
+    if (_crossLastPos) {
+      const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
+      if (d < 200) _crossDistM += d;
+    }
+    _crossLastPos = {lat, lon};
+  }, err => console.warn('GPS:', err.message), {enableHighAccuracy: true, maximumAge: 2000, timeout: 10000});
+}
+
+function crossFinish() {
+  clearInterval(_crossTimer);
+  if (_crossWatchId !== null) { navigator.geolocation.clearWatch(_crossWatchId); _crossWatchId = null; }
+  _crossState = 'finished';
+  const avgSpd = _crossElapsed > 0 ? (_crossDistM / _crossElapsed * 3.6) : 0;
+  _crossResult = { distance: _crossDistM, duration: _crossElapsed, avgSpeed: avgSpd, date: new Date().toISOString() };
+  document.getElementById('crossTrainScreen').style.display = 'none';
+  document.getElementById('crossResultScreen').style.display = 'block';
+  document.getElementById('resTime').textContent = fmtTime(_crossElapsed);
+  document.getElementById('resDist').textContent = fmtDist(_crossDistM) + ' км';
+  document.getElementById('resSpeed').textContent = avgSpd.toFixed(1) + ' км/ч';
+}
+
+async function crossSaveRun() {
+  if (!ME || !_crossResult) return;
+  try {
+    await api('/api/runs', 'POST', {
+      userId: ME.id,
+      userName: ME.name,
+      distance: _crossResult.distance,
+      duration: _crossResult.duration,
+      avgSpeed: _crossResult.avgSpeed,
+      date: _crossResult.date
+    });
+    toast('✅ Пробежка сохранена!', 's');
+    crossReset();
+    loadLeaderboard('week', document.querySelector('#p-ucross .lb-btn.active'));
+    loadCrossHistory();
+  } catch(e) { toast('Ошибка: ' + e.message, 'e'); }
+}
+
+function crossReset() {
+  _crossState = 'idle'; _crossElapsed = 0; _crossDistM = 0; _crossLastPos = null; _crossResult = null;
+  document.getElementById('crossTrainScreen').style.display = 'block';
+  document.getElementById('crossResultScreen').style.display = 'none';
+  document.getElementById('crossStateLbl').textContent = 'Готов к старту';
+  document.getElementById('crossTimer').textContent = '00:00';
+  document.getElementById('crossDist').textContent = '0.00';
+  document.getElementById('crossSpeed').textContent = '0.0';
+  document.getElementById('crossPace').textContent = '—';
+  document.getElementById('crossStartBtn').innerHTML = '▶';
+  document.getElementById('crossStartBtn').classList.remove('running');
+  document.getElementById('crossStartBtn').onclick = crossToggleRun;
+  document.getElementById('crossCtrl').style.display = 'none';
+  document.getElementById('crossGpsWarn').style.display = 'none';
+}
+
+function renderLeaderboard(list, containerId) {
+  const el = document.getElementById(containerId);
+  if (!list || !list.length) { el.innerHTML = '<div class="empty" style="padding:20px 0"><div class="ei">🏃</div>Пока нет пробежек</div>'; return; }
+  const medals = ['gold','silver','bronze'];
+  el.innerHTML = list.map((row, i) => {
+    const isMe = ME && row.userId === ME.id;
+    const pos = i + 1;
+    const distKm = (row.totalDistance / 1000).toFixed(2);
+    return `<div class="lb-row${isMe?' me':''}">
+      <div class="lb-pos${pos<=3?' '+medals[pos-1]:''}">${pos <= 3 ? ['🥇','🥈','🥉'][pos-1] : pos}</div>
+      <div>
+        <div class="lb-name">${esc(row.userName)}${isMe?' <span style="color:var(--ac);font-size:11px">(вы)</span>':''}</div>
+        <div class="lb-meta">${row.totalRuns} пробеж${row.totalRuns===1?'ка':row.totalRuns<5?'ки':'ек'} · лучшая скорость ${row.bestSpeed.toFixed(1)} км/ч</div>
+      </div>
+      <div class="lb-dist">${distKm} км</div>
+    </div>`;
+  }).join('');
+}
+
+async function loadLeaderboard(period, btn) {
+  if (btn) { document.querySelectorAll('#p-ucross .lb-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+  try {
+    const list = await api('/api/runs/leaderboard?period=' + period);
+    renderLeaderboard(list, 'crossLeaderboard');
+  } catch(e) { document.getElementById('crossLeaderboard').innerHTML = '<div class="empty" style="padding:16px 0">Ошибка загрузки</div>'; }
+}
+
+async function loadCrossHistory() {
+  if (!ME) return;
+  const el = document.getElementById('crossHistory');
+  try {
+    const list = await api('/api/runs/user/' + ME.id);
+    if (!list.length) { el.innerHTML = '<div class="empty" style="padding:16px 0"><div class="ei">🏃</div>Нет пробежек</div>'; return; }
+    el.innerHTML = list.map(r => {
+      const d = new Date(r.date);
+      const dateStr = d.toLocaleDateString('ru-RU', {day:'numeric',month:'short'}) + ' ' + d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+      return `<div class="run-hist-item">
+        <div class="run-hist-icon">🏃</div>
+        <div class="run-hist-info">
+          <div class="run-hist-date">${dateStr}</div>
+          <div class="run-hist-dist">${fmtDist(r.distance)} км</div>
+          <div class="run-hist-meta">${fmtTime(r.duration)} · ${r.avgSpeed.toFixed(1)} км/ч</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<div class="empty" style="padding:16px 0">Ошибка загрузки</div>'; }
+}
+
+async function loadAdminLeaderboard(period, btn) {
+  if (btn) { document.querySelectorAll('#acrossLeaderboardSection .lb-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+  try {
+    const list = await api('/api/runs/leaderboard?period=' + period);
+    renderLeaderboard(list, 'adminLeaderboard');
+  } catch(e) { document.getElementById('adminLeaderboard').innerHTML = '<div class="empty" style="padding:16px 0">Ошибка загрузки</div>'; }
+}
+
+function loadUserCross() {
+  if (_crossState === 'idle') crossReset();
+  loadLeaderboard('week', document.querySelector('#p-ucross .lb-btn.active'));
+  loadCrossHistory();
+}
+
+function loadAdminCross() {
+  // Загружаем активную вкладку
+  const activeSec = document.querySelector('#p-across .across-section.active');
+  if (!activeSec || activeSec.id === 'acrossLeaderboardSection') {
+    loadAdminLeaderboard('week', document.querySelector('#acrossLeaderboardSection .lb-btn.active'));
+  } else if (activeSec.id === 'acrossRegistrantsSection') {
+    loadCrossRegistrants();
+  } else if (activeSec.id === 'acrossStudentsSection') {
+    loadAcrossStudents();
+  }
+}
 </script>
 </body>
 </html>

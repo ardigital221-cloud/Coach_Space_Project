@@ -1110,6 +1110,118 @@ app.post('/api/notifications/test', async (req, res) => {
 });
 
 // ═══════════════════════════════════════════
+// КРОСС — РЕГИСТРАЦИЯ НА ЗАБЕГ (публичная)
+// ═══════════════════════════════════════════
+
+// Записаться на забег (без авторизации)
+app.post('/api/cross-register', async (req, res) => {
+  try {
+    const { name, phone, telegram, city } = req.body;
+    if (!name || !name.trim()) return res.status(400).json({ error: 'Имя обязательно' });
+    const ref = await db.collection('crossRegistrants').add({
+      name: name.trim(),
+      phone: (phone || '').trim(),
+      telegram: (telegram || '').trim(),
+      city: (city || '').trim(),
+      registeredAt: new Date().toISOString()
+    });
+    await tgSend(COACH_TG, `🏃 <b>Новая заявка на кросс!</b>\n👤 ${name.trim()}${phone ? '\n📞 ' + phone : ''}${telegram ? '\n✈️ ' + telegram : ''}${city ? '\n📍 ' + city : ''}`);
+    res.json({ id: ref.id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Получить всех записавшихся (только для авторизованных — тренер)
+app.get('/api/cross-register', async (_req, res) => {
+  try {
+    const snap = await db.collection('crossRegistrants').get();
+    const list = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (b.registeredAt || '').localeCompare(a.registeredAt || ''));
+    res.json(list);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Удалить заявку
+app.delete('/api/cross-register/:id', async (req, res) => {
+  try {
+    await db.collection('crossRegistrants').doc(req.params.id).delete();
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ═══════════════════════════════════════════
+// КРОСС — ПРОБЕЖКИ
+// ═══════════════════════════════════════════
+
+// Сохранить пробежку
+app.post('/api/runs', async (req, res) => {
+  try {
+    const { userId, userName, distance, duration, avgSpeed, date } = req.body;
+    if (!userId || distance == null || duration == null) return res.status(400).json({ error: 'Недостаточно данных' });
+    const ref = await db.collection('runs').add({
+      userId,
+      userName: userName || 'Аноним',
+      distance: parseFloat(distance) || 0,      // метры
+      duration: parseInt(duration) || 0,         // секунды
+      avgSpeed: parseFloat(avgSpeed) || 0,       // км/ч
+      date: date || new Date().toISOString(),
+      createdAt: new Date().toISOString()
+    });
+    res.json({ id: ref.id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// История пробежек пользователя
+app.get('/api/runs/user/:userId', async (req, res) => {
+  try {
+    const snap = await db.collection('runs')
+      .where('userId', '==', req.params.userId)
+      .get();
+    const runs = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))
+      .slice(0, 50);
+    res.json(runs);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Лидерборд — агрегация по дистанции за период
+app.get('/api/runs/leaderboard', async (req, res) => {
+  try {
+    const period = req.query.period || 'week'; // today | week | all
+    let snap;
+    if (period === 'all') {
+      snap = await db.collection('runs').get();
+    } else {
+      const now = new Date();
+      let from;
+      if (period === 'today') {
+        from = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+      } else {
+        // week
+        const d = new Date(now);
+        d.setDate(d.getDate() - 7);
+        from = d.toISOString();
+      }
+      snap = await db.collection('runs').where('createdAt', '>=', from).get();
+    }
+    // Агрегируем по userId
+    const map = {};
+    snap.docs.forEach(doc => {
+      const r = doc.data();
+      if (!map[r.userId]) {
+        map[r.userId] = { userId: r.userId, userName: r.userName || 'Аноним', totalDistance: 0, totalRuns: 0, bestSpeed: 0 };
+      }
+      map[r.userId].totalDistance += r.distance || 0;
+      map[r.userId].totalRuns += 1;
+      if ((r.avgSpeed || 0) > map[r.userId].bestSpeed) map[r.userId].bestSpeed = r.avgSpeed;
+    });
+    const list = Object.values(map).sort((a, b) => b.totalDistance - a.totalDistance);
+    res.json(list);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ═══════════════════════════════════════════
 // CRON — напоминания об оплате (каждый день в 9:00)
 // ═══════════════════════════════════════════
 cron.schedule('0 9 * * *', async () => {
