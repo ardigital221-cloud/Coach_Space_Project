@@ -1062,11 +1062,29 @@
         </div>
 
         <!-- Форма добавления участника кросса -->
-        <div id="addCrossPartForm" style="display:none" class="card" style="margin-top:12px">
-          <div class="st" style="margin-bottom:12px">➕ Новый участник кросса</div>
-          <div class="fg"><label class="fl">Имя участника</label><input class="fi" id="crossPartName" placeholder="Иван Иванов"/></div>
-          <div class="fg"><label class="fl">Заметка (необязательно)</label><input class="fi" id="crossPartNote" placeholder="Команда, клуб..."/></div>
-          <div class="mf" style="margin-top:12px">
+        <div id="addCrossPartForm" style="display:none;margin-top:12px" class="card">
+          <div class="st" style="margin-bottom:12px">➕ Добавить участника кросса</div>
+
+          <!-- Переключатель: вручную / из зала -->
+          <div style="display:flex;gap:8px;margin-bottom:14px">
+            <button id="crossPartModeManual" class="btn btn-p sm" style="flex:1" onclick="switchCrossPartMode('manual')">✏️ Вручную</button>
+            <button id="crossPartModeFromCS" class="btn btn-g sm" style="flex:1" onclick="switchCrossPartMode('fromcs')">👥 Из зала</button>
+          </div>
+
+          <!-- Ручной ввод -->
+          <div id="crossPartManualBlock">
+            <div class="fg"><label class="fl">Имя участника</label><input class="fi" id="crossPartName" placeholder="Иван Иванов"/></div>
+            <div class="fg"><label class="fl">Заметка (необязательно)</label><input class="fi" id="crossPartNote" placeholder="Команда, клуб..."/></div>
+          </div>
+
+          <!-- Выбор из участников зала -->
+          <div id="crossPartFromCSBlock" style="display:none">
+            <div class="fg"><label class="fl">Поиск по имени</label><input class="fi" id="crossPartSearch" placeholder="Начните вводить имя..." oninput="filterCSMembers()"/></div>
+            <div id="crossPartCSList" style="max-height:220px;overflow-y:auto;margin-top:4px"></div>
+            <div id="crossPartSelected" style="margin-top:10px;font-size:13px;color:var(--mu2)">Выбрано: <span id="crossPartSelectedNames" style="color:#a78bfa">никого</span></div>
+          </div>
+
+          <div class="mf" style="margin-top:14px">
             <button class="btn btn-g" onclick="closeAddCrossParticipant()">Отмена</button>
             <button class="btn btn-p" id="crossPartSaveBtn" onclick="saveCrossParticipant()">Сохранить</button>
           </div>
@@ -3104,25 +3122,95 @@ async function loadAcrossStudents(){
   }catch(e){list.innerHTML='<div class="empty" style="padding:16px 0">Ошибка загрузки</div>';}
 }
 
+let _crossPartMode = 'manual'; // 'manual' | 'fromcs'
+let _csMembers = [];           // кэш участников зала
+let _crossPartSelectedIds = new Set(); // выбранные участники
+
 function openAddCrossParticipant(){
   document.getElementById('addCrossPartForm').style.display='block';
-  document.getElementById('crossPartName').focus();
+  switchCrossPartMode('manual');
 }
 
 function closeAddCrossParticipant(){
   document.getElementById('addCrossPartForm').style.display='none';
   document.getElementById('crossPartName').value='';
   document.getElementById('crossPartNote').value='';
+  document.getElementById('crossPartSearch').value='';
+  _crossPartSelectedIds.clear();
+  updateSelectedNames();
+}
+
+function switchCrossPartMode(mode){
+  _crossPartMode = mode;
+  document.getElementById('crossPartManualBlock').style.display = mode==='manual' ? 'block' : 'none';
+  document.getElementById('crossPartFromCSBlock').style.display = mode==='fromcs' ? 'block' : 'none';
+  document.getElementById('crossPartModeManual').className = 'btn sm ' + (mode==='manual' ? 'btn-p' : 'btn-g');
+  document.getElementById('crossPartModeFromCS').className  = 'btn sm ' + (mode==='fromcs' ? 'btn-p' : 'btn-g');
+  if(mode==='fromcs') loadCSMembersForSelect();
+}
+
+async function loadCSMembersForSelect(){
+  const box = document.getElementById('crossPartCSList');
+  if(_csMembers.length){ renderCSMembers(_csMembers); return; }
+  box.innerHTML='<div class="empty"><div class="sp-ring" style="margin:8px auto"></div></div>';
+  try{
+    _csMembers = await api('/api/users');
+    renderCSMembers(_csMembers);
+  }catch(e){ box.innerHTML='<div class="empty" style="padding:8px">Ошибка загрузки</div>'; }
+}
+
+function renderCSMembers(list){
+  const q = (document.getElementById('crossPartSearch').value||'').toLowerCase();
+  const filtered = q ? list.filter(u=>(u.name||'').toLowerCase().includes(q)) : list;
+  const box = document.getElementById('crossPartCSList');
+  if(!filtered.length){ box.innerHTML='<div class="empty" style="padding:8px;font-size:13px">Не найдено</div>'; return; }
+  box.innerHTML = filtered.map(u=>{
+    const sel = _crossPartSelectedIds.has(u.id);
+    return `<div onclick="toggleCSMember('${u.id}','${esc(u.name)}')" style="display:flex;align-items:center;gap:10px;padding:10px 8px;border-radius:10px;cursor:pointer;background:${sel?'rgba(139,92,246,.15)':'transparent'};transition:.15s">
+      <div style="width:34px;height:34px;border-radius:50%;background:rgba(139,92,246,.2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">${(u.name||'?')[0].toUpperCase()}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;color:#fff">${esc(u.name)}</div>
+        <div style="font-size:12px;color:var(--mu2)">@${esc(u.login)} · ${u.sessions||0} занятий</div>
+      </div>
+      <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${sel?'#7c3aed':'#3a4255'};background:${sel?'#7c3aed':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px">${sel?'✓':''}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCSMember(id, name){
+  if(_crossPartSelectedIds.has(id)) _crossPartSelectedIds.delete(id);
+  else _crossPartSelectedIds.add(id);
+  updateSelectedNames();
+  renderCSMembers(_csMembers);
+}
+
+function updateSelectedNames(){
+  const span = document.getElementById('crossPartSelectedNames');
+  if(!span) return;
+  if(!_crossPartSelectedIds.size){ span.textContent='никого'; return; }
+  const names = _csMembers.filter(u=>_crossPartSelectedIds.has(u.id)).map(u=>u.name);
+  span.textContent = names.join(', ');
+}
+
+function filterCSMembers(){
+  renderCSMembers(_csMembers);
 }
 
 async function saveCrossParticipant(){
-  const name=document.getElementById('crossPartName').value.trim();
-  if(!name){toast('Введите имя','e');return;}
   const btn=document.getElementById('crossPartSaveBtn');
   btn.disabled=true; btn.textContent='Сохраняем...';
   try{
-    await api('/api/cross-participants','POST',{name,note:document.getElementById('crossPartNote').value.trim()});
-    toast('Участник добавлен ✓');
+    if(_crossPartMode==='manual'){
+      const name=document.getElementById('crossPartName').value.trim();
+      if(!name){toast('Введите имя','e');return;}
+      await api('/api/cross-participants','POST',{name,note:document.getElementById('crossPartNote').value.trim()});
+      toast('Участник добавлен ✓');
+    } else {
+      if(!_crossPartSelectedIds.size){toast('Выберите хотя бы одного участника','e');return;}
+      const selected = _csMembers.filter(u=>_crossPartSelectedIds.has(u.id));
+      await Promise.all(selected.map(u=>api('/api/cross-participants','POST',{name:u.name,note:'Участник CS'})));
+      toast(`Добавлено ${selected.length} чел. ✓`);
+    }
     closeAddCrossParticipant();
     loadAcrossStudents();
   }catch(e){toast('Ошибка: '+e.message,'e');}
