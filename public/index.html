@@ -2960,11 +2960,11 @@ function _resetCrossRegModal(){
   const err=document.getElementById('cregErr');if(err)err.style.display='none';
 }
 // Переопределяем closeMo чтобы сбрасывать форму при закрытии
-const _origCloseMo = closeMo;
-function closeMo(id){
+var _origCloseMo = closeMo;
+closeMo = function(id){
   _origCloseMo(id);
   if(id==='mCrossReg') setTimeout(_resetCrossRegModal, 300);
-}
+};
 
 // Переключение вкладок в панели тренера "Кросс"
 function switchAcrossTab(tab, btn){
