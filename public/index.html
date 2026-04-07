@@ -1525,10 +1525,6 @@
       </div>
       <div class="fg"><label class="fl">Порция (грамм)</label><input class="fi" id="ownNutGrams" type="number" placeholder="100" value="100" oninput="ownNutCalc()"/></div>
       <div id="ownNutPreview" style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;color:var(--mu2)"></div>
-      <label style="display:flex;align-items:center;gap:10px;padding:8px 0;cursor:pointer;font-size:14px;color:var(--mu2)">
-        <input type="checkbox" id="ownNutShare" style="width:18px;height:18px;accent-color:var(--ac)"/>
-        Поделиться с другими пользователями
-      </label>
       <div class="mf" style="padding-top:12px">
         <button class="btn btn-g" onclick="closeMo('mAddNut');resetNutModal()">Отмена</button>
         <button class="btn btn-p" onclick="saveOwnNutEntry()">Добавить</button>
@@ -2591,8 +2587,15 @@ async function loadLocalFoods(){
 async function loadCustomFoods(){
   if(!ME)return;
   try{
-    const r=await authFetch(`/api/custom-foods/${ME.id}`);
-    if(r.ok)_nutCustomFoodsCache=await r.json();
+    // Грузим свои продукты и общие (от всех пользователей) в единый кеш
+    const [myFoods, sharedFoods] = await Promise.all([
+      authFetch(`/api/custom-foods/${ME.id}`).then(r=>r.ok?r.json():[]).catch(()=>[]),
+      api('/api/shared-foods').catch(()=>[])
+    ]);
+    // Объединяем: свои первыми, затем чужие общие (без дублей по имени)
+    const myNames=new Set(myFoods.map(f=>f.name.toLowerCase()));
+    const uniqueShared=sharedFoods.filter(f=>!myNames.has(f.name.toLowerCase()));
+    _nutCustomFoodsCache=[...myFoods,...uniqueShared];
   }catch(e){_nutCustomFoodsCache=[];}
 }
 
@@ -2625,19 +2628,21 @@ function buildSetupAutocomplete(){
 function doNutSearch(q,ddId,selectFn){
   const dd=document.getElementById(ddId);if(!dd)return;
   const ql=q.toLowerCase();
-  // Кастомные блюда пользователя
-  const custom=_nutCustomFoodsCache.filter(f=>f.name.toLowerCase().includes(ql)).slice(0,3);
+  // Кастомные блюда (свои + общие от других)
+  const custom=_nutCustomFoodsCache.filter(f=>f.name.toLowerCase().includes(ql)).slice(0,5);
   // Локальная база продуктов
   const startsWith=_localFoods.filter(f=>f.name.toLowerCase().startsWith(ql));
   const includes=_localFoods.filter(f=>!f.name.toLowerCase().startsWith(ql)&&f.name.toLowerCase().includes(ql));
-  const locals=[...startsWith,...includes].slice(0,12);
-  const customRows=custom.map(f=>`
-    <div class="nut-dd-item" style="border-left:2px solid var(--ac)"
+  const locals=[...startsWith,...includes].slice(0,10);
+  const customRows=custom.map(f=>{
+    const isMine=ME&&f.userId===ME.id;
+    const label=isMine?'🏠 моё':(f.userName?`👤 ${esc(f.userName)}`:'👥 общее');
+    return`<div class="nut-dd-item" style="border-left:2px solid var(--ac)"
       data-name="${esc(f.name)}" data-kcal="${f.kcal}" data-p="${f.protein}" data-f="${f.fat}" data-c="${f.carbs}" data-custom="1"
       onclick="${selectFn}(this)">
-      <div class="nut-dd-name">🏠 ${esc(f.name)}</div>
-      <div class="nut-dd-desc">${f.kcal} ккал · Б:${f.protein}г Ж:${f.fat}г У:${f.carbs}г · ваше блюдо</div>
-    </div>`).join('');
+      <div class="nut-dd-name">${esc(f.name)} <span style="font-size:11px;color:var(--mu2)">${label}</span></div>
+      <div class="nut-dd-desc">${f.kcal} ккал · Б:${f.protein}г Ж:${f.fat}г У:${f.carbs}г на 100г</div>
+    </div>`;}).join('');
   const localRows=locals.map(f=>`
     <div class="nut-dd-item"
       data-name="${esc(f.name)}" data-kcal="${f.kcal}" data-p="${f.protein}" data-f="${f.fat}" data-c="${f.carbs}" data-local="1"
@@ -2823,7 +2828,6 @@ function resetNutModal(){
   ownFields.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const ownGrams=document.getElementById('ownNutGrams');if(ownGrams)ownGrams.value='100';
   const ownPrev=document.getElementById('ownNutPreview');if(ownPrev)ownPrev.innerHTML='';
-  const ownShare=document.getElementById('ownNutShare');if(ownShare)ownShare.checked=false;
   switchNutTab('search');
 }
 
@@ -3488,14 +3492,15 @@ async function saveOwnNutEntry() {
   const c100 = parseFloat(document.getElementById('ownNutCarb').value) || 0;
   const mul = grams / 100;
   const mealType = document.getElementById('nutType')?.value || 'snack';
-  const isShared = document.getElementById('ownNutShare')?.checked || false;
   try {
-    // Сохраняем в базу продуктов (для поиска другими)
+    // Сохраняем в общую базу продуктов (доступна всем при поиске)
     await api(`/api/custom-foods/${ME.id}`, 'POST', {
       name, kcal: Math.round(k100), protein: parseFloat(p100.toFixed(1)),
       fat: parseFloat(f100.toFixed(1)), carbs: parseFloat(c100.toFixed(1)),
-      isShared, userName: ME.name
+      isShared: true, userName: ME.name
     });
+    // Обновляем кеш продуктов сразу
+    loadCustomFoods();
     // Добавляем в дневник питания за сегодня
     await api(`/api/nutrition/${ME.id}`, 'POST', {
       name: `${name} (${grams}г)`, type: mealType,
@@ -3505,7 +3510,7 @@ async function saveOwnNutEntry() {
       carbs: parseFloat((c100 * mul).toFixed(1)),
       date: _nutDate
     });
-    toast(isShared ? '✅ Добавлено и опубликовано для всех' : '✅ Добавлено', 's');
+    toast('✅ Добавлено', 's');
     closeMo('mAddNut');
     resetNutModal();
     loadUserNutrition();
