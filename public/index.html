@@ -1566,10 +1566,18 @@ let _uVidData = {};
 let _pedDirty = false;
 const EMOJIS = ['👍','❤️','🔥','😂','😮','👏','💪','✅'];
 
+function _getToken(){return localStorage.getItem('auth_token');}
+function _setToken(t){localStorage.setItem('auth_token',t);}
+function _clearAuth(){localStorage.removeItem('auth_token');localStorage.removeItem('auth_id');}
+function authFetch(url,opts={}){const t=_getToken();if(t){opts.headers=opts.headers||{};opts.headers['Authorization']='Bearer '+t;}return fetch(url,opts);}
+
 async function api(url, method='GET', body=null) {
   const opts = { method, headers:{'Content-Type':'application/json'} };
+  const token = _getToken();
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(url, opts);
+  if (r.status === 401) { _clearAuth(); ME=null; document.getElementById('app').classList.remove('show'); document.getElementById('bnav').style.display='none'; document.getElementById('loginPage').classList.add('show'); throw new Error('Сессия истекла'); }
   const ct = r.headers.get('content-type') || '';
   if (!ct.includes('application/json')) {
     throw new Error(`Сервер вернул не JSON (статус ${r.status}). Проверьте консоль.`);
@@ -1585,11 +1593,11 @@ async function doLogin(){
   const login=document.getElementById('inL').value.trim(), pwd=document.getElementById('inP').value;
   const err=document.getElementById('loginErr'); err.style.display='none';
   if(!login||!pwd){err.style.display='block';err.textContent='Введите логин и пароль';return;}
-  try{const r=await api('/api/login','POST',{login,password:pwd});ME=r.user;localStorage.setItem('auth_id',ME.id);startApp();}
+  try{const r=await api('/api/login','POST',{login,password:pwd});ME=r.user;_setToken(r.token);localStorage.setItem('auth_id',ME.id);startApp();}
   catch(e){err.style.display='block';err.textContent=e.message;}
 }
-async function tryAutoLogin(){const id=localStorage.getItem('auth_id');if(!id)return false;try{ME=await api('/api/me/'+id);return true;}catch{localStorage.removeItem('auth_id');return false;}}
-function doLogout(){ME=null;localStorage.removeItem('auth_id');document.getElementById('app').classList.remove('show');document.getElementById('bnav').style.display='none';document.getElementById('loginPage').classList.add('show');}
+async function tryAutoLogin(){const id=localStorage.getItem('auth_id');if(!id||!_getToken())return false;try{ME=await api('/api/me/'+id);return true;}catch{_clearAuth();return false;}}
+async function doLogout(){try{await api('/api/logout','POST');}catch(e){}ME=null;_clearAuth();document.getElementById('app').classList.remove('show');document.getElementById('bnav').style.display='none';document.getElementById('loginPage').classList.add('show');}
 ['inL','inP'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();}));
 
 function startApp(){
@@ -1652,8 +1660,8 @@ function renderShopGallery(item,isAdmin){
 function gallerySwitchTo(id,idx){galleryState[id]=idx;updateGalleryDOM(id);}
 function galleryPrev(id,total){galleryState[id]=((galleryState[id]||0)-1+total)%total;updateGalleryDOM(id);}
 function galleryNext(id,total){galleryState[id]=((galleryState[id]||0)+1)%total;updateGalleryDOM(id);}
-function updateGalleryDOM(id){const isAdmin=ME&&ME.role==='admin';fetch('/api/shop').then(r=>r.json()).then(items=>{const item=items.find(x=>x.id===id);if(!item)return;const photos=getItemPhotos(item);const idx=Math.min(galleryState[id]||0,photos.length-1);const gEl=document.getElementById('gallery-'+id);if(!gEl)return;const imgEl=document.getElementById('gimg-'+id);if(imgEl)imgEl.src=photos[idx];gEl.querySelectorAll('.sg-dot').forEach((d,i)=>d.classList.toggle('a',i===idx));const cnt=gEl.querySelector('.sg-count');if(cnt)cnt.textContent=`${idx+1} / ${photos.length}`;const del=gEl.querySelector('.sg-del-btn');if(del)del.setAttribute('onclick',`event.stopPropagation();delShopPhoto('${id}',${idx})`);}).catch(()=>{});}
-async function addShopPhoto(itemId,input){const file=input.files[0];if(!file)return;toast('⏳ Загрузка...','w');const fd=new FormData();fd.append('photo',file);try{const r=await fetch(`/api/shop/${itemId}/photos`,{method:'POST',body:fd});const d=await r.json();if(!r.ok)throw new Error(d.error);toast('✅ Фото добавлено','s');input.value='';loadAdminShop();}catch(e){toast('Ошибка: '+e.message,'e');}}
+function updateGalleryDOM(id){const isAdmin=ME&&ME.role==='admin';authFetch('/api/shop').then(r=>r.json()).then(items=>{const item=items.find(x=>x.id===id);if(!item)return;const photos=getItemPhotos(item);const idx=Math.min(galleryState[id]||0,photos.length-1);const gEl=document.getElementById('gallery-'+id);if(!gEl)return;const imgEl=document.getElementById('gimg-'+id);if(imgEl)imgEl.src=photos[idx];gEl.querySelectorAll('.sg-dot').forEach((d,i)=>d.classList.toggle('a',i===idx));const cnt=gEl.querySelector('.sg-count');if(cnt)cnt.textContent=`${idx+1} / ${photos.length}`;const del=gEl.querySelector('.sg-del-btn');if(del)del.setAttribute('onclick',`event.stopPropagation();delShopPhoto('${id}',${idx})`);}).catch(()=>{});}
+async function addShopPhoto(itemId,input){const file=input.files[0];if(!file)return;toast('⏳ Загрузка...','w');const fd=new FormData();fd.append('photo',file);try{const r=await authFetch(`/api/shop/${itemId}/photos`,{method:'POST',body:fd});const d=await r.json();if(!r.ok)throw new Error(d.error);toast('✅ Фото добавлено','s');input.value='';loadAdminShop();}catch(e){toast('Ошибка: '+e.message,'e');}}
 async function delShopPhoto(itemId,idx){if(!confirm('Удалить это фото?'))return;try{await api(`/api/shop/${itemId}/photos/${idx}`,'DELETE');toast('🗑 Фото удалено','w');galleryState[itemId]=0;loadAdminShop();}catch(e){toast('Ошибка: '+e.message,'e');}}
 let _shFilesArr=[];
 function prevShopMulti(e){_shFilesArr=Array.from(e.target.files);const prev=document.getElementById('shMultiPrev');prev.innerHTML=_shFilesArr.map((f,i)=>{const url=URL.createObjectURL(f);return`<div class="multi-prev-item" id="shprev-${i}"><img src="${url}" alt=""/><button class="multi-prev-del" onclick="removeShFile(${i})">✕</button></div>`;}).join('');}
@@ -1809,7 +1817,7 @@ async function createWorkout(){const title=v('wTitle'),type=document.getElementB
 
 // ═══ ПРОГРЕСС ТРЕНЕРА ═══
 async function loadProgPanel(){try{const s=allStudents.length?allStudents:await api('/api/users');allStudents=s;const sel=document.getElementById('progSel');sel.innerHTML='<option value="">— выберите ученика —</option>'+s.map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join('');document.getElementById('progContent').innerHTML='';}catch(e){toast(e.message,'e');}}
-async function loadAdminProg(){const uid=document.getElementById('progSel').value;const box=document.getElementById('progContent');if(!uid){box.innerHTML='';return;}box.innerHTML=`<div class="empty"><div class="sp-ring" style="margin:30px auto"></div></div>`;try{const[progressData,diaryData]=await Promise.all([fetch('/api/progress/'+uid,{headers:{'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[]),fetch('/api/diary/'+uid,{headers:{'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[])]);const weights=(Array.isArray(progressData)?progressData:[]).filter(d=>d.type==='weight');const photos=(Array.isArray(progressData)?progressData:[]).filter(d=>d.type==='photo');const entries=Array.isArray(diaryData)?diaryData:[];let html='';html+=`<div class="card card-a"><div class="ct">⚖️ График веса</div>`;html+=weights.length?`<div class="chart-w"><canvas id="adm-wc"></canvas></div>`:`<div class="empty" style="padding:20px 0"><div class="ei">⚖️</div>Нет данных о весе</div>`;html+=`</div>`;if(photos.length){html+=`<div class="st" style="margin-bottom:10px">📸 Фото прогресса</div><div class="ph-g">`;html+=photos.map(p=>`<img class="ph-img" src="${p.photoUrl}" onclick="openLightbox('${p.photoUrl}')"/>`).join('');html+=`</div><div style="margin-bottom:16px"></div>`;}html+=`<div class="sh" style="margin-bottom:12px"><div class="st">📊 Дневник тренировок</div><span style="font-size:12px;color:var(--mu2)">${entries.length} записей</span></div>`;if(!entries.length){html+=`<div class="empty" style="padding:20px 0"><div class="ei">📊</div>Ученик ещё не вёл дневник</div>`;}else{html+=entries.map(e=>{const stars=e.rating?'⭐'.repeat(e.rating):'';const d=new Date(e.date).toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short',year:'numeric'});const exCount=(e.exercises||[]).length;return`<div class="diary-day" style="cursor:default"><div class="diary-day-head"><span style="font-size:18px">🏋️</span><div><div class="diary-day-date">${d}</div><div class="diary-day-excount">${exCount} упражнений${e.note?' · '+esc(e.note.slice(0,50)):''}</div></div><div class="diary-day-rating">${stars}</div></div>${(e.exercises||[]).length?`<div style="margin-top:10px">`+e.exercises.map(ex=>{const chips=(ex.sets||[]).map(s=>`<span class="diary-set-chip">${s.weight?s.weight+'кг×':''}${s.reps}</span>`).join('');return`<div class="diary-ex-row"><span class="diary-ex-name">${esc(ex.name)}</span><div class="diary-ex-sets">${chips}</div></div>`;}).join('')+`</div>`:''}</div>`;}).join('');}box.innerHTML=html;if(weights.length)new Chart(document.getElementById('adm-wc'),chartCfg(weights));}catch(e){box.innerHTML=`<div class="empty">${esc(e.message)}</div>`;}}
+async function loadAdminProg(){const uid=document.getElementById('progSel').value;const box=document.getElementById('progContent');if(!uid){box.innerHTML='';return;}box.innerHTML=`<div class="empty"><div class="sp-ring" style="margin:30px auto"></div></div>`;try{const[progressData,diaryData]=await Promise.all([authFetch('/api/progress/'+uid,{headers:{'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[]),authFetch('/api/diary/'+uid,{headers:{'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[])]);const weights=(Array.isArray(progressData)?progressData:[]).filter(d=>d.type==='weight');const photos=(Array.isArray(progressData)?progressData:[]).filter(d=>d.type==='photo');const entries=Array.isArray(diaryData)?diaryData:[];let html='';html+=`<div class="card card-a"><div class="ct">⚖️ График веса</div>`;html+=weights.length?`<div class="chart-w"><canvas id="adm-wc"></canvas></div>`:`<div class="empty" style="padding:20px 0"><div class="ei">⚖️</div>Нет данных о весе</div>`;html+=`</div>`;if(photos.length){html+=`<div class="st" style="margin-bottom:10px">📸 Фото прогресса</div><div class="ph-g">`;html+=photos.map(p=>`<img class="ph-img" src="${p.photoUrl}" onclick="openLightbox('${p.photoUrl}')"/>`).join('');html+=`</div><div style="margin-bottom:16px"></div>`;}html+=`<div class="sh" style="margin-bottom:12px"><div class="st">📊 Дневник тренировок</div><span style="font-size:12px;color:var(--mu2)">${entries.length} записей</span></div>`;if(!entries.length){html+=`<div class="empty" style="padding:20px 0"><div class="ei">📊</div>Ученик ещё не вёл дневник</div>`;}else{html+=entries.map(e=>{const stars=e.rating?'⭐'.repeat(e.rating):'';const d=new Date(e.date).toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short',year:'numeric'});const exCount=(e.exercises||[]).length;return`<div class="diary-day" style="cursor:default"><div class="diary-day-head"><span style="font-size:18px">🏋️</span><div><div class="diary-day-date">${d}</div><div class="diary-day-excount">${exCount} упражнений${e.note?' · '+esc(e.note.slice(0,50)):''}</div></div><div class="diary-day-rating">${stars}</div></div>${(e.exercises||[]).length?`<div style="margin-top:10px">`+e.exercises.map(ex=>{const chips=(ex.sets||[]).map(s=>`<span class="diary-set-chip">${s.weight?s.weight+'кг×':''}${s.reps}</span>`).join('');return`<div class="diary-ex-row"><span class="diary-ex-name">${esc(ex.name)}</span><div class="diary-ex-sets">${chips}</div></div>`;}).join('')+`</div>`:''}</div>`;}).join('');}box.innerHTML=html;if(weights.length)new Chart(document.getElementById('adm-wc'),chartCfg(weights));}catch(e){box.innerHTML=`<div class="empty">${esc(e.message)}</div>`;}}
 
 // ═══ ГЛАВНАЯ УЧЕНИКА ═══
 async function loadUserHome(){try{ME=await api('/api/me/'+ME.id);}catch{}const n=document.getElementById('subN');n.textContent=ME.sessions;n.style.color=ME.sessions<=0?'var(--red)':ME.sessions<=2?'var(--yel)':'var(--ac)';document.getElementById('subPay').textContent=ME.paymentDate?new Date(ME.paymentDate).toLocaleDateString('ru-RU'):'—';document.getElementById('streak').style.display=ME.sessions>0?'flex':'none';document.getElementById('planBtn').innerHTML='';loadUserPosts();if(!document.getElementById('reviewHomeBtn')){const tgBtn=document.querySelector('.tg-a');if(tgBtn){const btn=document.createElement('button');btn.id='reviewHomeBtn';btn.className='tg-a';btn.style.cssText='cursor:pointer;border:none;text-align:left;width:100%;background:rgba(255,255,255,.03)';btn.innerHTML='<span style="font-size:26px">⭐</span><div><b style="font-size:14px">Оставить отзыв</b><br><span style="font-size:12px;color:var(--mu2)">Оцените тренировку</span></div>';btn.onclick=()=>openMo('mReview');tgBtn.parentNode.insertBefore(btn,tgBtn.nextSibling);}}}
@@ -1820,7 +1828,7 @@ async function loadUserWorkouts(){const box=document.getElementById('uWorkouts')
 async function loadUserProgress(){document.getElementById('wtD').value=new Date().toISOString().split('T')[0];try{const data=await api('/api/progress/'+ME.id);const weights=data.filter(d=>d.type==='weight');const photos=data.filter(d=>d.type==='photo');if(wChartInst){wChartInst.destroy();wChartInst=null;}const chartBox=document.querySelector('#p-uprog .chart-w');if(chartBox){if(weights.length){chartBox.innerHTML='<canvas id="wChart"></canvas>';wChartInst=new Chart(document.getElementById('wChart'),chartCfg(weights));}else{chartBox.innerHTML=`<div class="empty"><div class="ei">⚖️</div>Добавьте первую запись веса</div>`;}}const pg=document.getElementById('phGrid');pg.innerHTML=photos.length?photos.map(p=>`<div class="ph-wrap"><img class="ph-img" src="${p.photoUrl}" onclick="openLightbox('${esc(p.photoUrl)}')"/><button class="ph-del" onclick="deletePhoto('${p.id}',event)" title="Удалить фото">✕</button></div>`).join(''):`<div class="empty" style="grid-column:1/-1"><div class="ei">📸</div>Нет фото</div>`;}catch(e){toast('Ошибка загрузки прогресса: '+e.message,'e');}}
 async function addWeight(){const w=v('wtV'),d=v('wtD');if(!w){toast('Введите вес','e');return;}try{await api('/api/progress','POST',{userId:ME.id,weight:w,date:d});toast('✅ Вес сохранён','s');closeMo('mAddWt');document.getElementById('wtV').value='';loadUserProgress();}catch(e){toast(e.message,'e');}}
 function prevPhoto(e){const f=e.target.files[0];if(!f)return;const p=document.getElementById('phPrev');p.src=URL.createObjectURL(f);p.style.display='block';document.getElementById('phUpLbl').style.display='none';}
-async function uploadPhoto(){const file=document.getElementById('phFile').files[0];if(!file){toast('Выберите фото','e');return;}toast('⏳ Загрузка фото...','w');const fd=new FormData();fd.append('userId',ME.id);fd.append('photo',file);try{const r=await fetch('/api/progress/photo',{method:'POST',body:fd});const d=await r.json();if(!r.ok)throw new Error(d.error);toast('✅ Фото загружено','s');closeMo('mAddPh');document.getElementById('phFile').value='';document.getElementById('phPrev').style.display='none';document.getElementById('phUpLbl').style.display='flex';loadUserProgress();}catch(e){toast('Ошибка: '+e.message,'e');}}
+async function uploadPhoto(){const file=document.getElementById('phFile').files[0];if(!file){toast('Выберите фото','e');return;}toast('⏳ Загрузка фото...','w');const fd=new FormData();fd.append('userId',ME.id);fd.append('photo',file);try{const r=await authFetch('/api/progress/photo',{method:'POST',body:fd});const d=await r.json();if(!r.ok)throw new Error(d.error);toast('✅ Фото загружено','s');closeMo('mAddPh');document.getElementById('phFile').value='';document.getElementById('phPrev').style.display='none';document.getElementById('phUpLbl').style.display='flex';loadUserProgress();}catch(e){toast('Ошибка: '+e.message,'e');}}
 async function deletePhoto(photoId,e){if(e)e.stopPropagation();if(!confirm('Удалить это фото?'))return;try{await api('/api/progress/photo/'+photoId,'DELETE');toast('🗑 Фото удалено','w');loadUserProgress();}catch(err){toast('Ошибка: '+err.message,'e');}}
 
 // ═══ ДНЕВНИК ═══
@@ -1850,12 +1858,12 @@ function loadBlockExercises(){if(!_diaryPlan)return;flushCurrentBlockToStore();c
 function flushCurrentBlockToStore(){if(!_diaryExercises.length)return;const curBlock=_diaryExercises[0]?.block;if(curBlock!==undefined){_diaryAllExercises=_diaryAllExercises.filter(e=>e.block!==curBlock);_diaryAllExercises.push(..._diaryExercises);}}
 async function openDiaryModal(){_diaryEntryId=null;_diaryRating=0;_diaryExercises=[];_diaryAllExercises=[];_diaryActiveBlock=null;document.getElementById('diaryDate').value=new Date().toISOString().split('T')[0];document.getElementById('diaryNote').value='';document.getElementById('diaryModalTitle').textContent='📊 Запись тренировки';document.getElementById('diarySaveBtn').setAttribute('onclick','saveDiary()');document.querySelectorAll('#starRow .star-btn').forEach(b=>b.classList.remove('active'));try{const data=await api('/api/users/'+ME.id+'/plan');_diaryPlan=data.trainingPlan||null;}catch{_diaryPlan=null;}const weekBar=document.getElementById('diaryWeekBar');const weekBtns=document.getElementById('diaryWeekBtns');if(_diaryPlan){weekBar.style.display='block';weekBtns.innerHTML=[1,2,3,4].map(w=>{const cnt=(_diaryPlan[w]||[]).filter(e=>e.exercise).length;return`<button class="week-btn diary-week-btn${w===1?' active':''}" data-week="${w}" onclick="diarySelectWeek(${w})">Нед. ${w}<span class="block-cnt">${cnt}</span></button>`;}).join('');_diaryWeek=1;renderBlockBtns();}else{weekBar.style.display='none';document.getElementById('diaryBlockBar').style.display='none';renderDiaryExList();}openMo('mDiary');}
 function setStar(n){_diaryRating=n;document.querySelectorAll('#starRow .star-btn').forEach((b,i)=>b.classList.toggle('active',i<n));}
-async function saveDiary(){const date=document.getElementById('diaryDate').value;if(!date){toast('Укажите дату','e');return;}flushCurrentBlockToStore();const allEx=[..._diaryAllExercises,..._diaryExercises.filter(e=>e.custom&&!_diaryAllExercises.find(x=>x===e))];const exercises=allEx.map(ex=>({name:ex.name,sets:ex.sets.filter(s=>s.reps).map(s=>({weight:s.weight!==''?s.weight:'',reps:parseInt(s.reps)||0}))})).filter(ex=>ex.sets.length);if(!exercises.length){toast('Добавьте хотя бы одно упражнение с подходами','e');return;}const note=document.getElementById('diaryNote').value;try{const r=await fetch('/api/diary/'+ME.id,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({date,exercises,note,rating:_diaryRating||null})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Ошибка сохранения');toast('✅ Тренировка сохранена!','s');closeMo('mDiary');loadDiary();}catch(e){toast(e.message,'e');}}
+async function saveDiary(){const date=document.getElementById('diaryDate').value;if(!date){toast('Укажите дату','e');return;}flushCurrentBlockToStore();const allEx=[..._diaryAllExercises,..._diaryExercises.filter(e=>e.custom&&!_diaryAllExercises.find(x=>x===e))];const exercises=allEx.map(ex=>({name:ex.name,sets:ex.sets.filter(s=>s.reps).map(s=>({weight:s.weight!==''?s.weight:'',reps:parseInt(s.reps)||0}))})).filter(ex=>ex.sets.length);if(!exercises.length){toast('Добавьте хотя бы одно упражнение с подходами','e');return;}const note=document.getElementById('diaryNote').value;try{const r=await authFetch('/api/diary/'+ME.id,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({date,exercises,note,rating:_diaryRating||null})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Ошибка сохранения');toast('✅ Тренировка сохранена!','s');closeMo('mDiary');loadDiary();}catch(e){toast(e.message,'e');}}
 async function saveDiaryEdit(entryId){const date=document.getElementById('diaryDate').value;if(!date){toast('Укажите дату','e');return;}const exercises=_diaryExercises.map(ex=>({name:ex.name,sets:ex.sets.filter(s=>s.reps).map(s=>({weight:s.weight!==''?s.weight:'',reps:parseInt(s.reps)||0}))})).filter(ex=>ex.sets.length);if(!exercises.length){toast('Добавьте хотя бы одно упражнение с подходами','e');return;}const note=document.getElementById('diaryNote').value;try{await api('/api/diary/'+ME.id+'/'+entryId,'PUT',{date,exercises,note,rating:_diaryRating||null});toast('✅ Запись обновлена!','s');closeMo('mDiary');loadDiary();}catch(e){toast(e.message,'e');}}
-async function loadDiary(){const box=document.getElementById('diaryList');box.innerHTML='<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';try{const r=await fetch('/api/diary/'+ME.id,{headers:{'Accept':'application/json'}});if(!r.ok)throw new Error('Статус '+r.status);const ct=r.headers.get('content-type')||'';if(!ct.includes('application/json'))throw new Error('Сервер вернул не JSON. Проверьте server.js');const entries=await r.json();if(!entries.length){box.innerHTML='<div class="empty"><div class="ei">📊</div>Начни записывать тренировки!<br><small style="color:var(--mu)">Нажми «+ Запись» чтобы добавить</small></div>';return;}box.innerHTML=entries.map(e=>{const stars=e.rating?'⭐'.repeat(e.rating):'';const exCount=(e.exercises||[]).length;const d=new Date(e.date).toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short'});return`<div class="diary-day" id="diary-${e.id}"><div class="diary-day-head"><span style="font-size:18px">🏋️</span><div><div class="diary-day-date">${d}</div><div class="diary-day-excount">${exCount} упражнений${e.note?' · '+esc(e.note.slice(0,40)):''}</div></div><div class="diary-day-rating">${stars}</div></div>${(e.exercises||[]).length?'<div style="margin-top:10px">'+e.exercises.map(ex=>{const chips=(ex.sets||[]).map(s=>`<span class="diary-set-chip">${s.weight?s.weight+'кг×':''}${s.reps}</span>`).join('');return`<div class="diary-ex-row"><span class="diary-ex-name">${esc(ex.name)}</span><div class="diary-ex-sets">${chips}</div></div>`;}).join('')+'</div>':''}<div class="diary-day-actions"><button class="btn btn-g sm" onclick="editDiary('${e.id}')">✏️ Редактировать</button><button class="btn btn-d sm" onclick="deleteDiary('${e.id}')">🗑 Удалить</button></div></div>`;}).join('');}catch(e){box.innerHTML=`<div class="empty"><div class="ei">📊</div>${esc(e.message)}</div>`;console.error('loadDiary:',e);}}
+async function loadDiary(){const box=document.getElementById('diaryList');box.innerHTML='<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';try{const r=await authFetch('/api/diary/'+ME.id,{headers:{'Accept':'application/json'}});if(!r.ok)throw new Error('Статус '+r.status);const ct=r.headers.get('content-type')||'';if(!ct.includes('application/json'))throw new Error('Сервер вернул не JSON. Проверьте server.js');const entries=await r.json();if(!entries.length){box.innerHTML='<div class="empty"><div class="ei">📊</div>Начни записывать тренировки!<br><small style="color:var(--mu)">Нажми «+ Запись» чтобы добавить</small></div>';return;}box.innerHTML=entries.map(e=>{const stars=e.rating?'⭐'.repeat(e.rating):'';const exCount=(e.exercises||[]).length;const d=new Date(e.date).toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short'});return`<div class="diary-day" id="diary-${e.id}"><div class="diary-day-head"><span style="font-size:18px">🏋️</span><div><div class="diary-day-date">${d}</div><div class="diary-day-excount">${exCount} упражнений${e.note?' · '+esc(e.note.slice(0,40)):''}</div></div><div class="diary-day-rating">${stars}</div></div>${(e.exercises||[]).length?'<div style="margin-top:10px">'+e.exercises.map(ex=>{const chips=(ex.sets||[]).map(s=>`<span class="diary-set-chip">${s.weight?s.weight+'кг×':''}${s.reps}</span>`).join('');return`<div class="diary-ex-row"><span class="diary-ex-name">${esc(ex.name)}</span><div class="diary-ex-sets">${chips}</div></div>`;}).join('')+'</div>':''}<div class="diary-day-actions"><button class="btn btn-g sm" onclick="editDiary('${e.id}')">✏️ Редактировать</button><button class="btn btn-d sm" onclick="deleteDiary('${e.id}')">🗑 Удалить</button></div></div>`;}).join('');}catch(e){box.innerHTML=`<div class="empty"><div class="ei">📊</div>${esc(e.message)}</div>`;console.error('loadDiary:',e);}}
 function resetDiaryModal(){document.getElementById('diarySaveBtn').setAttribute('onclick','saveDiary()');document.getElementById('diaryModalTitle').textContent='📊 Запись тренировки';}
 async function deleteDiary(entryId){if(!confirm('Удалить запись тренировки?'))return;try{await api('/api/diary/'+ME.id+'/'+entryId,'DELETE');toast('🗑 Запись удалена','w');loadDiary();}catch(e){toast('Ошибка: '+e.message,'e');}}
-async function editDiary(entryId){try{const r=await fetch('/api/diary/'+ME.id,{headers:{'Accept':'application/json'}});const entries=await r.json();const e=entries.find(x=>x.id===entryId);if(!e){toast('Запись не найдена','e');return;}_diaryEntryId=entryId;_diaryRating=e.rating||0;document.getElementById('diaryDate').value=e.date;document.getElementById('diaryNote').value=e.note||'';document.getElementById('diaryModalTitle').textContent='✏️ Редактировать запись';document.getElementById('diarySaveBtn').setAttribute('onclick',`saveDiaryEdit('${entryId}')`);document.querySelectorAll('#starRow .star-btn').forEach((b,i)=>b.classList.toggle('active',i<_diaryRating));document.getElementById('diaryWeekBar').style.display='none';_diaryExercises=(e.exercises||[]).map(ex=>({name:ex.name,block:'',custom:true,planSets:'',planReps:'',expanded:true,sets:(ex.sets||[]).map(s=>({weight:s.weight!==undefined?s.weight:'',reps:s.reps||'',done:false}))}));renderDiaryExList();openMo('mDiary');}catch(err){toast('Ошибка: '+err.message,'e');}}
+async function editDiary(entryId){try{const r=await authFetch('/api/diary/'+ME.id,{headers:{'Accept':'application/json'}});const entries=await r.json();const e=entries.find(x=>x.id===entryId);if(!e){toast('Запись не найдена','e');return;}_diaryEntryId=entryId;_diaryRating=e.rating||0;document.getElementById('diaryDate').value=e.date;document.getElementById('diaryNote').value=e.note||'';document.getElementById('diaryModalTitle').textContent='✏️ Редактировать запись';document.getElementById('diarySaveBtn').setAttribute('onclick',`saveDiaryEdit('${entryId}')`);document.querySelectorAll('#starRow .star-btn').forEach((b,i)=>b.classList.toggle('active',i<_diaryRating));document.getElementById('diaryWeekBar').style.display='none';_diaryExercises=(e.exercises||[]).map(ex=>({name:ex.name,block:'',custom:true,planSets:'',planReps:'',expanded:true,sets:(ex.sets||[]).map(s=>({weight:s.weight!==undefined?s.weight:'',reps:s.reps||'',done:false}))}));renderDiaryExList();openMo('mDiary');}catch(err){toast('Ошибка: '+err.message,'e');}}
 
 // ═══ КАЛЕНДАРЬ ═══
 let _calYear=new Date().getFullYear(),_calMonth=new Date().getMonth(),_calWorkouts=[];
@@ -1871,7 +1879,7 @@ function showCalDay(dateStr){const ws=_calWorkouts.filter(w=>w.datetime&&w.datet
 let _reviewRating=0;
 function setReviewStar(n){_reviewRating=n;document.querySelectorAll('#reviewStarRow .star-btn').forEach((b,i)=>b.classList.toggle('active',i<n));}
 async function submitReview(){if(!_reviewRating){toast('Выберите оценку','e');return;}const text=document.getElementById('reviewText').value.trim();try{await api('/api/reviews','POST',{userId:ME.id,userName:ME.name,rating:_reviewRating,text});toast('⭐ Спасибо за отзыв!','s');closeMo('mReview');_reviewRating=0;setReviewStar(0);document.getElementById('reviewText').value='';}catch(e){toast(e.message,'e');}}
-async function loadReviews(){const box=document.getElementById('reviewsList'),avgBox=document.getElementById('avgRating');box.innerHTML='<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';avgBox.innerHTML='';try{const r=await fetch('/api/reviews',{headers:{'Accept':'application/json'}});if(!r.ok)throw new Error('Сервер вернул статус '+r.status);const ct=r.headers.get('content-type')||'';if(!ct.includes('application/json')){box.innerHTML='<div class="empty"><div class="ei">⭐</div>Отзывов пока нет</div>';return;}const reviews=await r.json();if(!reviews.length){box.innerHTML='<div class="empty"><div class="ei">⭐</div>Отзывов пока нет</div>';return;}reviews.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));const avg=(reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1);const stars=Math.round(avg);avgBox.innerHTML=`<div class="avg-rating"><div class="avg-num">${avg}</div><div class="avg-stars">${'⭐'.repeat(stars)}${'☆'.repeat(5-stars)}</div><div class="avg-count">${reviews.length} отзывов</div></div>`;box.innerHTML=reviews.map(rv=>{const d=new Date(rv.createdAt).toLocaleDateString('ru-RU');const ratingStars='⭐'.repeat(Math.min(5,Math.max(1,rv.rating)));const delBtn=ME?.role==='admin'?`<button class="btn btn-d sm" style="margin-top:8px" onclick="delReview('${rv.id}')">🗑 Удалить</button>`:'';return`<div class="review-card"><div class="review-head"><div class="review-ava">${(rv.userName||'?').charAt(0).toUpperCase()}</div><div><div class="review-name">${esc(rv.userName||'Ученик')}</div><div class="review-stars">${ratingStars}</div></div><div class="review-date">${d}</div></div>${rv.text?`<div class="review-text">${esc(rv.text)}</div>`:''}${delBtn}</div>`;}).join('');}catch(e){box.innerHTML=`<div class="empty"><div class="ei">⭐</div>${esc(e.message)}</div>`;}}
+async function loadReviews(){const box=document.getElementById('reviewsList'),avgBox=document.getElementById('avgRating');box.innerHTML='<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';avgBox.innerHTML='';try{const r=await authFetch('/api/reviews',{headers:{'Accept':'application/json'}});if(!r.ok)throw new Error('Сервер вернул статус '+r.status);const ct=r.headers.get('content-type')||'';if(!ct.includes('application/json')){box.innerHTML='<div class="empty"><div class="ei">⭐</div>Отзывов пока нет</div>';return;}const reviews=await r.json();if(!reviews.length){box.innerHTML='<div class="empty"><div class="ei">⭐</div>Отзывов пока нет</div>';return;}reviews.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));const avg=(reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1);const stars=Math.round(avg);avgBox.innerHTML=`<div class="avg-rating"><div class="avg-num">${avg}</div><div class="avg-stars">${'⭐'.repeat(stars)}${'☆'.repeat(5-stars)}</div><div class="avg-count">${reviews.length} отзывов</div></div>`;box.innerHTML=reviews.map(rv=>{const d=new Date(rv.createdAt).toLocaleDateString('ru-RU');const ratingStars='⭐'.repeat(Math.min(5,Math.max(1,rv.rating)));const delBtn=ME?.role==='admin'?`<button class="btn btn-d sm" style="margin-top:8px" onclick="delReview('${rv.id}')">🗑 Удалить</button>`:'';return`<div class="review-card"><div class="review-head"><div class="review-ava">${(rv.userName||'?').charAt(0).toUpperCase()}</div><div><div class="review-name">${esc(rv.userName||'Ученик')}</div><div class="review-stars">${ratingStars}</div></div><div class="review-date">${d}</div></div>${rv.text?`<div class="review-text">${esc(rv.text)}</div>`:''}${delBtn}</div>`;}).join('');}catch(e){box.innerHTML=`<div class="empty"><div class="ei">⭐</div>${esc(e.message)}</div>`;}}
 async function delReview(id){if(!confirm('Удалить этот отзыв?'))return;try{await api('/api/reviews/'+id,'DELETE');toast('🗑 Отзыв удалён','w');loadReviews();}catch(e){toast(e.message,'e');}}
 async function testNotifications(){const chatId=prompt('Telegram ID для теста (оставьте пустым = отправить тренеру):');if(chatId===null)return;try{const r=await api('/api/notifications/test','POST',{chatId:chatId||null});if(r.success)toast('✅ Тест отправлен → '+r.sentTo,'s');else toast('❌ Уведомления не работают: '+r.reason,'e');}catch(e){toast(e.message,'e');}}
 
@@ -2262,6 +2270,7 @@ async function submitUploadVideo(){
   xhr.onerror=()=>{toast('Ошибка сети','e');if(progress)progress.style.display='none';};
   toast('⏳ Загружаю...','w');
   xhr.open('POST','/api/exercise-videos');
+  const _xhrTok=_getToken();if(_xhrTok)xhr.setRequestHeader('Authorization','Bearer '+_xhrTok);
   xhr.send(fd);
 }
 
@@ -2375,7 +2384,7 @@ async function loadUserNutrition(){
   const box=document.getElementById('uNutContent');
   box.innerHTML='<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';
   try{
-    const r=await fetch(`/api/nutrition/${ME.id}?date=${_nutDate}`);
+    const r=await authFetch(`/api/nutrition/${ME.id}?date=${_nutDate}`);
     if(!r.ok)throw new Error('Статус '+r.status);
     const entries=await r.json();
     renderUserNutrition(box,entries);
@@ -2445,11 +2454,11 @@ async function saveNutEntry(){
   const btn=document.getElementById('nutSaveBtn');
   btn.disabled=true;btn.textContent='...';
   try{
-    const r=await fetch(`/api/nutrition/${ME.id}`,{method:'POST',headers:{'Content-Type':'application/json'},
+    const r=await authFetch(`/api/nutrition/${ME.id}`,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({name,type,kcal,protein,fat,carbs,date:_nutDate})});
     if(!r.ok){const d=await r.json();throw new Error(d.error||'Ошибка');}
     if(_nutSaveFav){
-      await fetch(`/api/favorites/${ME.id}`,{method:'POST',headers:{'Content-Type':'application/json'},
+      await authFetch(`/api/favorites/${ME.id}`,{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({name,type,kcal,protein,fat,carbs,per100:k})}).catch(()=>{});
       toast('⭐ Добавлено в избранное','w');
     }
@@ -2461,7 +2470,7 @@ async function saveNutEntry(){
 
 async function deleteNutEntry(id){
   try{
-    const r=await fetch(`/api/nutrition/${ME.id}/${id}`,{method:'DELETE'});
+    const r=await authFetch(`/api/nutrition/${ME.id}/${id}`,{method:'DELETE'});
     if(!r.ok)throw new Error('Ошибка удаления');
     loadUserNutrition();
   }catch(e){toast(e.message,'e');}
@@ -2471,7 +2480,7 @@ async function loadAdminNutrition(){
   const box=document.getElementById('aNutContent');
   if(!_anutStudentId){
     try{
-      const students=await fetch('/api/users').then(r=>r.json());
+      const students=await authFetch('/api/users').then(r=>r.json());
       _nutStudents=students;
       if(!students.length){box.innerHTML='<div class="empty"><div class="ei">👥</div>Нет учеников</div>';return;}
       box.innerHTML=`<div class="card"><div class="ct">Выберите ученика для просмотра питания</div><div class="nut-student-list">
@@ -2486,7 +2495,7 @@ async function loadAdminNutrition(){
   }
   box.innerHTML='<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>';
   try{
-    const r=await fetch(`/api/nutrition/${_anutStudentId}?date=${_anutDate}`);
+    const r=await authFetch(`/api/nutrition/${_anutStudentId}?date=${_anutDate}`);
     if(!r.ok)throw new Error('Статус '+r.status);
     const entries=await r.json();
     const tot=entries.reduce((a,e)=>({k:a.k+(e.kcal||0),p:a.p+(e.protein||0),f:a.f+(e.fat||0),c:a.c+(e.carbs||0)}),{k:0,p:0,f:0,c:0});
@@ -2550,7 +2559,7 @@ async function loadLocalFoods(){
 async function loadCustomFoods(){
   if(!ME)return;
   try{
-    const r=await fetch(`/api/custom-foods/${ME.id}`);
+    const r=await authFetch(`/api/custom-foods/${ME.id}`);
     if(r.ok)_nutCustomFoodsCache=await r.json();
   }catch(e){_nutCustomFoodsCache=[];}
 }
@@ -2729,10 +2738,10 @@ async function saveCustomDish(){
   btn.disabled=true;btn.textContent='...';
   try{
     // Сохраняем как кастомное блюдо в базу
-    await fetch(`/api/custom-foods/${ME.id}`,{method:'POST',headers:{'Content-Type':'application/json'},
+    await authFetch(`/api/custom-foods/${ME.id}`,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({name,ingredients:_buildIngredients,kcal:tot.k,protein:tot.p,fat:tot.f,carbs:tot.c})});
     // Добавляем в дневник питания
-    const r=await fetch(`/api/nutrition/${ME.id}`,{method:'POST',headers:{'Content-Type':'application/json'},
+    const r=await authFetch(`/api/nutrition/${ME.id}`,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({name,type,kcal:tot.k,protein:tot.p,fat:tot.f,carbs:tot.c,date:_nutDate})});
     if(!r.ok){const d=await r.json();throw new Error(d.error||'Ошибка');}
     // Обновляем кэш кастомных блюд
@@ -2785,7 +2794,7 @@ async function loadNutFavorites(){
   if(!ME)return;
   const list=document.getElementById('nutFavList');if(!list)return;
   try{
-    const r=await fetch(`/api/favorites/${ME.id}`);
+    const r=await authFetch(`/api/favorites/${ME.id}`);
     if(!r.ok){list.innerHTML='<div class="empty" style="padding:20px 0"><div class="ei">⭐</div>Нет избранного</div>';return;}
     _nutFavsCache=await r.json();
     if(!_nutFavsCache.length){list.innerHTML='<div class="empty" style="padding:20px 0"><div class="ei">⭐</div>Нет избранного</div>';return;}
@@ -2820,7 +2829,7 @@ function applyNutFavorite(id){
 }
 async function deleteNutFavorite(id){
   try{
-    await fetch(`/api/favorites/${ME.id}/${id}`,{method:'DELETE'});
+    await authFetch(`/api/favorites/${ME.id}/${id}`,{method:'DELETE'});
     toast('Удалено из избранного','w');loadNutFavorites();
   }catch(e){toast('Ошибка','e');}
 }
@@ -2829,7 +2838,7 @@ async function deleteNutFavorite(id){
 async function loadNutRecent(){
   const list=document.getElementById('nutRecentList');if(!list||!ME)return;
   try{
-    const r=await fetch(`/api/nutrition/${ME.id}`);
+    const r=await authFetch(`/api/nutrition/${ME.id}`);
     if(!r.ok){list.innerHTML='<div class="empty" style="padding:20px 0"><div class="ei">🕐</div>Нет недавних</div>';return;}
     const all=await r.json();
     const seen=new Map();

@@ -8,6 +8,73 @@ const cron       = require('node-cron');
 const XLSX       = require('xlsx');
 const admin      = require('firebase-admin');
 const { Telegraf } = require('telegraf');
+const bcrypt     = require('bcrypt');
+const crypto     = require('crypto');
+const rateLimit  = require('express-rate-limit');
+
+// ═══════════════════════════════════════════
+// БЕЗОПАСНОСТЬ
+// ═══════════════════════════════════════════
+const SALT_ROUNDS = 10;
+
+// Rate-limit: не более 10 попыток входа за 15 минут
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: 'Слишком много попыток входа. Попробуйте через 15 минут.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Кеш токенов в памяти (снижает количество запросов к Firestore)
+const _tokenCache = new Map();
+const TOKEN_CACHE_TTL = 5 * 60 * 1000; // 5 минут
+
+function generateToken() {
+  return crypto.randomBytes(48).toString('hex');
+}
+
+async function createSession(userId, role) {
+  const token = generateToken();
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 дней
+  await db.collection('sessions').add({ userId, role, token, expiresAt, createdAt: new Date().toISOString() });
+  return token;
+}
+
+async function validateToken(token) {
+  if (!token) return null;
+  const cached = _tokenCache.get(token);
+  if (cached && Date.now() - cached.at < TOKEN_CACHE_TTL) return cached.session;
+  const snap = await db.collection('sessions').where('token', '==', token).limit(1).get();
+  if (snap.empty) return null;
+  const session = { _docId: snap.docs[0].id, ...snap.docs[0].data() };
+  if (new Date(session.expiresAt) < new Date()) {
+    await snap.docs[0].ref.delete();
+    _tokenCache.delete(token);
+    return null;
+  }
+  _tokenCache.set(token, { session, at: Date.now() });
+  return session;
+}
+
+async function requireAuth(req, res, next) {
+  const auth = req.headers.authorization;
+  if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ error: 'Требуется авторизация' });
+  const session = await validateToken(auth.slice(7));
+  if (!session) return res.status(401).json({ error: 'Сессия истекла, войдите снова' });
+  req.sessionData = session;
+  next();
+}
+
+async function requireAdmin(req, res, next) {
+  const auth = req.headers.authorization;
+  if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ error: 'Требуется авторизация' });
+  const session = await validateToken(auth.slice(7));
+  if (!session) return res.status(401).json({ error: 'Сессия истекла, войдите снова' });
+  if (session.role !== 'admin') return res.status(403).json({ error: 'Доступ запрещён' });
+  req.sessionData = session;
+  next();
+}
 
 // ═══════════════════════════════════════════
 // ИНИЦИАЛИЗАЦИЯ
@@ -119,7 +186,7 @@ app.get('/api/img/:filePath(*)', async (req, res) => {
 // ═══════════════════════════════════════════
 // АВТОРИЗАЦИЯ
 // ═══════════════════════════════════════════
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', loginLimiter, async (req, res) => {
   try {
     const { login, password } = req.body;
     if (!login || !password) return res.status(400).json({ error: 'Введите логин и пароль' });
@@ -127,13 +194,41 @@ app.post('/api/login', async (req, res) => {
     if (snap.empty) return res.status(401).json({ error: 'Пользователь не найден' });
     const doc  = snap.docs[0];
     const user = { id: doc.id, ...doc.data() };
-    if (user.password !== password) return res.status(401).json({ error: 'Неверный пароль' });
+
+    // Проверка пароля: bcrypt или plaintext (миграция старых паролей)
+    let passwordMatch = false;
+    if (user.password && user.password.startsWith('$2b$')) {
+      passwordMatch = await bcrypt.compare(password, user.password);
+    } else {
+      passwordMatch = user.password === password;
+      if (passwordMatch) {
+        // Мигрируем в bcrypt при первом входе
+        const hashed = await bcrypt.hash(password, SALT_ROUNDS);
+        await doc.ref.update({ password: hashed });
+      }
+    }
+    if (!passwordMatch) return res.status(401).json({ error: 'Неверный пароль' });
+
+    const token = await createSession(user.id, user.role);
     delete user.password;
-    res.json({ user });
+    res.json({ user, token });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/me/:id', async (req, res) => {
+app.post('/api/logout', async (req, res) => {
+  try {
+    const auth = req.headers.authorization;
+    if (auth && auth.startsWith('Bearer ')) {
+      const token = auth.slice(7);
+      _tokenCache.delete(token);
+      const snap = await db.collection('sessions').where('token', '==', token).limit(1).get();
+      if (!snap.empty) await snap.docs[0].ref.delete();
+    }
+    res.json({ success: true });
+  } catch (e) { res.json({ success: true }); }
+});
+
+app.get('/api/me/:id', requireAuth, async (req, res) => {
   try {
     const doc = await db.collection('users').doc(req.params.id).get();
     if (!doc.exists) return res.status(404).json({ error: 'Не найден' });
@@ -146,7 +241,7 @@ app.get('/api/me/:id', async (req, res) => {
 // ═══════════════════════════════════════════
 // ПОЛЬЗОВАТЕЛИ
 // ═══════════════════════════════════════════
-app.get('/api/users', async (req, res) => {
+app.get('/api/users', requireAuth, async (req, res) => {
   try {
     const snap = await db.collection('users').where('role', '==', 'student').get();
     const users = snap.docs.map(d => { const u = { id: d.id, ...d.data() }; delete u.password; return u; });
@@ -154,7 +249,7 @@ app.get('/api/users', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.get('/api/users/:id', async (req, res) => {
+app.get('/api/users/:id', requireAuth, async (req, res) => {
   try {
     const doc = await db.collection('users').doc(req.params.id).get();
     if (!doc.exists) return res.status(404).json({ error: 'Не найден' });
@@ -164,14 +259,15 @@ app.get('/api/users/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/users', async (req, res) => {
+app.post('/api/users', requireAdmin, async (req, res) => {
   try {
     const { name, login, password, telegramId, sessions, paymentDate } = req.body;
     if (!name || !login || !password) return res.status(400).json({ error: 'Имя, логин и пароль обязательны' });
     const exists = await db.collection('users').where('login', '==', login).limit(1).get();
     if (!exists.empty) return res.status(400).json({ error: 'Логин уже занят' });
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     const ref = await db.collection('users').add({
-      name, login, password, role: 'student',
+      name, login, password: hashedPassword, role: 'student',
       telegramId: telegramId || null,
       sessions: parseInt(sessions) || 0,
       paymentDate: paymentDate || null,
@@ -184,12 +280,12 @@ app.post('/api/users', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.put('/api/users/:id', async (req, res) => {
+app.put('/api/users/:id', requireAdmin, async (req, res) => {
   try {
     const { name, password, telegramId, sessions, paymentDate } = req.body;
     const upd = {};
     if (name !== undefined) upd.name = name;
-    if (password) upd.password = password;
+    if (password) upd.password = await bcrypt.hash(password, SALT_ROUNDS);
     if (telegramId !== undefined) upd.telegramId = telegramId;
     if (sessions !== undefined) upd.sessions = parseInt(sessions);
     if (paymentDate !== undefined) upd.paymentDate = paymentDate;
@@ -198,14 +294,14 @@ app.put('/api/users/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/users/:id', async (req, res) => {
+app.delete('/api/users/:id', requireAdmin, async (req, res) => {
   try {
     await db.collection('users').doc(req.params.id).delete();
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/users/:id/attendance', async (req, res) => {
+app.post('/api/users/:id/attendance', requireAdmin, async (req, res) => {
   try {
     const ref = db.collection('users').doc(req.params.id);
     const doc = await ref.get();
@@ -226,7 +322,7 @@ app.post('/api/users/:id/attendance', async (req, res) => {
 // ═══════════════════════════════════════════
 // ПЛАН ТРЕНИРОВОК
 // ═══════════════════════════════════════════
-app.get('/api/users/:id/plan', async (req, res) => {
+app.get('/api/users/:id/plan', requireAuth, async (req, res) => {
   try {
     const doc = await db.collection('users').doc(req.params.id).get();
     if (!doc.exists) return res.status(404).json({ error: 'Не найден' });
@@ -235,7 +331,7 @@ app.get('/api/users/:id/plan', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/users/:id/plan', async (req, res) => {
+app.post('/api/users/:id/plan', requireAdmin, async (req, res) => {
   try {
     const { trainingPlan } = req.body;
     const now = new Date().toISOString();
@@ -252,7 +348,7 @@ app.post('/api/users/:id/plan', async (req, res) => {
 // ═══════════════════════════════════════════
 // ТРЕНИРОВКИ
 // ═══════════════════════════════════════════
-app.get('/api/workouts', async (req, res) => {
+app.get('/api/workouts', requireAuth, async (req, res) => {
   try {
     const { userId } = req.query;
     let snap;
@@ -267,7 +363,7 @@ app.get('/api/workouts', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/workouts', async (req, res) => {
+app.post('/api/workouts', requireAdmin, async (req, res) => {
   try {
     const { title, type, datetime, duration, studentIds, note } = req.body;
     if (!title || !datetime) return res.status(400).json({ error: 'Название и дата обязательны' });
@@ -289,7 +385,7 @@ app.post('/api/workouts', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/workouts/:id', async (req, res) => {
+app.delete('/api/workouts/:id', requireAdmin, async (req, res) => {
   try {
     await db.collection('workouts').doc(req.params.id).delete();
     res.json({ success: true });
@@ -299,7 +395,7 @@ app.delete('/api/workouts/:id', async (req, res) => {
 // ═══════════════════════════════════════════
 // ПРОГРЕСС (вес + фото)
 // ═══════════════════════════════════════════
-app.get('/api/progress/:userId', async (req, res) => {
+app.get('/api/progress/:userId', requireAuth, async (req, res) => {
   try {
     const snap = await db.collection('progress').where('userId', '==', req.params.userId).get();
     const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -308,7 +404,7 @@ app.get('/api/progress/:userId', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/progress', async (req, res) => {
+app.post('/api/progress', requireAuth, async (req, res) => {
   try {
     const { userId, weight, date } = req.body;
     if (!userId || !weight) return res.status(400).json({ error: 'userId и weight обязательны' });
@@ -322,7 +418,7 @@ app.post('/api/progress', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/progress/photo', upload.single('photo'), async (req, res) => {
+app.post('/api/progress/photo', requireAuth, upload.single('photo'), async (req, res) => {
   try {
     const { userId } = req.body;
     if (!userId || !req.file) return res.status(400).json({ error: 'userId и фото обязательны' });
@@ -345,7 +441,7 @@ app.post('/api/progress/photo', upload.single('photo'), async (req, res) => {
 
 // ✅ ИСПРАВЛЕНО: удаление фото прогресса — используем поле storagePath
 // Для старых записей без storagePath пробуем извлечь путь из URL /api/img/...
-app.delete('/api/progress/photo/:photoId', async (req, res) => {
+app.delete('/api/progress/photo/:photoId', requireAuth, async (req, res) => {
   try {
     const doc = await db.collection('progress').doc(req.params.photoId).get();
     if (!doc.exists) return res.status(404).json({ error: 'Фото не найдено' });
@@ -382,7 +478,7 @@ app.delete('/api/progress/photo/:photoId', async (req, res) => {
 });
 
 // Сброс всех записей веса ученика (только для тренера)
-app.delete('/api/progress/:userId/weight', async (req, res) => {
+app.delete('/api/progress/:userId/weight', requireAdmin, async (req, res) => {
   try {
     const snap = await db.collection('progress')
       .where('userId', '==', req.params.userId)
@@ -404,7 +500,7 @@ app.delete('/api/progress/:userId/weight', async (req, res) => {
 // ═══════════════════════════════════════════
 // ПОСТЫ
 // ═══════════════════════════════════════════
-app.get('/api/posts', async (req, res) => {
+app.get('/api/posts', requireAuth, async (req, res) => {
   try {
     const snap = await db.collection('posts').get();
     const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -413,7 +509,7 @@ app.get('/api/posts', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/posts', async (req, res) => {
+app.post('/api/posts', requireAdmin, async (req, res) => {
   try {
     const { text, link, hasPoll, pollOptions } = req.body;
     if (!text) return res.status(400).json({ error: 'Текст обязателен' });
@@ -434,14 +530,14 @@ app.post('/api/posts', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/posts/:id', async (req, res) => {
+app.delete('/api/posts/:id', requireAdmin, async (req, res) => {
   try {
     await db.collection('posts').doc(req.params.id).delete();
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/posts/:id/react', async (req, res) => {
+app.post('/api/posts/:id/react', requireAuth, async (req, res) => {
   try {
     const { userId, userName, emoji, single } = req.body;
     const ref = db.collection('posts').doc(req.params.id);
@@ -464,7 +560,7 @@ app.post('/api/posts/:id/react', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/posts/:id/vote', async (req, res) => {
+app.post('/api/posts/:id/vote', requireAuth, async (req, res) => {
   try {
     const { userId, userName, option } = req.body;
     const ref = db.collection('posts').doc(req.params.id);
@@ -484,7 +580,7 @@ app.post('/api/posts/:id/vote', async (req, res) => {
 // ═══════════════════════════════════════════
 // МАГАЗИН — поддержка нескольких фото
 // ═══════════════════════════════════════════
-app.get('/api/shop', async (req, res) => {
+app.get('/api/shop', requireAuth, async (req, res) => {
   try {
     const snap = await db.collection('shop').get();
     const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -494,7 +590,7 @@ app.get('/api/shop', async (req, res) => {
 });
 
 // ✅ Создание товара — первичная загрузка (одно или несколько фото через upload.array)
-app.post('/api/shop', upload.array('photos', 10), async (req, res) => {
+app.post('/api/shop', requireAdmin, upload.array('photos', 10), async (req, res) => {
   try {
     const { name, price } = req.body;
     if (!name || !price) return res.status(400).json({ error: 'Название и цена обязательны' });
@@ -523,7 +619,7 @@ app.post('/api/shop', upload.array('photos', 10), async (req, res) => {
 });
 
 // ✅ Добавить фото к существующему товару
-app.post('/api/shop/:id/photos', upload.single('photo'), async (req, res) => {
+app.post('/api/shop/:id/photos', requireAdmin, upload.single('photo'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'Фото обязательно' });
     const docRef = db.collection('shop').doc(req.params.id);
@@ -550,7 +646,7 @@ app.post('/api/shop/:id/photos', upload.single('photo'), async (req, res) => {
 });
 
 // ✅ Удалить одно фото товара по индексу
-app.delete('/api/shop/:id/photos/:idx', async (req, res) => {
+app.delete('/api/shop/:id/photos/:idx', requireAdmin, async (req, res) => {
   try {
     const idx = parseInt(req.params.idx);
     const docRef = db.collection('shop').doc(req.params.id);
@@ -575,7 +671,7 @@ app.delete('/api/shop/:id/photos/:idx', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/shop/:id', async (req, res) => {
+app.delete('/api/shop/:id', requireAdmin, async (req, res) => {
   try {
     // Удаляем все файлы товара из Storage
     const doc = await db.collection('shop').doc(req.params.id).get();
@@ -592,7 +688,7 @@ app.delete('/api/shop/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/shop/:id/order', async (req, res) => {
+app.post('/api/shop/:id/order', requireAuth, async (req, res) => {
   try {
     const { userId, userName } = req.body;
     const doc = await db.collection('shop').doc(req.params.id).get();
@@ -606,7 +702,7 @@ app.post('/api/shop/:id/order', async (req, res) => {
 // ═══════════════════════════════════════════
 // ДНЕВНИК ТРЕНИРОВОК
 // ═══════════════════════════════════════════
-app.get('/api/diary/:userId', async (req, res) => {
+app.get('/api/diary/:userId', requireAuth, async (req, res) => {
   try {
     const snap = await db.collection('diary')
       .where('userId', '==', req.params.userId)
@@ -620,7 +716,7 @@ app.get('/api/diary/:userId', async (req, res) => {
   }
 });
 
-app.get('/api/diary/:userId/:date', async (req, res) => {
+app.get('/api/diary/:userId/:date', requireAuth, async (req, res) => {
   try {
     const doc = await db.collection('diary')
       .doc(`${req.params.userId}_${req.params.date}`).get();
@@ -628,7 +724,7 @@ app.get('/api/diary/:userId/:date', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/diary/:userId', async (req, res) => {
+app.post('/api/diary/:userId', requireAuth, async (req, res) => {
   try {
     const { userId } = req.params;
     const { date, exercises, note, rating } = req.body;
@@ -664,7 +760,7 @@ app.post('/api/diary/:userId', async (req, res) => {
   }
 });
 
-app.delete('/api/diary/:userId/:entryId', async (req, res) => {
+app.delete('/api/diary/:userId/:entryId', requireAuth, async (req, res) => {
   try {
     const doc = await db.collection('diary').doc(req.params.entryId).get();
     if (!doc.exists) return res.status(404).json({ error: 'Запись не найдена' });
@@ -674,7 +770,7 @@ app.delete('/api/diary/:userId/:entryId', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.put('/api/diary/:userId/:entryId', async (req, res) => {
+app.put('/api/diary/:userId/:entryId', requireAuth, async (req, res) => {
   try {
     const { date, exercises, note, rating } = req.body;
     const doc = await db.collection('diary').doc(req.params.entryId).get();
@@ -691,7 +787,7 @@ app.put('/api/diary/:userId/:entryId', async (req, res) => {
 // ═══════════════════════════════════════════
 // ЛИЧНЫЕ РЕКОРДЫ
 // ═══════════════════════════════════════════
-app.get('/api/records/:userId', async (req, res) => {
+app.get('/api/records/:userId', requireAuth, async (req, res) => {
   try {
     const snap = await db.collection('records')
       .where('userId', '==', req.params.userId).get();
@@ -704,7 +800,7 @@ app.get('/api/records/:userId', async (req, res) => {
 // ═══════════════════════════════════════════
 // ОТЗЫВЫ
 // ═══════════════════════════════════════════
-app.get('/api/reviews', async (req, res) => {
+app.get('/api/reviews', requireAuth, async (req, res) => {
   try {
     const snap = await db.collection('reviews').get();
     const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -716,7 +812,7 @@ app.get('/api/reviews', async (req, res) => {
   }
 });
 
-app.post('/api/reviews', async (req, res) => {
+app.post('/api/reviews', requireAuth, async (req, res) => {
   try {
     const { userId, userName, rating, text } = req.body;
     if (!userId || !rating) return res.status(400).json({ error: 'userId и rating обязательны' });
@@ -731,7 +827,7 @@ app.post('/api/reviews', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/reviews/:id', async (req, res) => {
+app.delete('/api/reviews/:id', requireAdmin, async (req, res) => {
   try {
     const doc = await db.collection('reviews').doc(req.params.id).get();
     if (!doc.exists) return res.status(404).json({ error: 'Отзыв не найден' });
@@ -743,7 +839,7 @@ app.delete('/api/reviews/:id', async (req, res) => {
 // ═══════════════════════════════════════════
 // ЗАМЕТКИ ТРЕНЕРА
 // ═══════════════════════════════════════════
-app.get('/api/notes/:userId', async (req, res) => {
+app.get('/api/notes/:userId', requireAdmin, async (req, res) => {
   try {
     const snap = await db.collection('notes')
       .where('userId', '==', req.params.userId).get();
@@ -753,7 +849,7 @@ app.get('/api/notes/:userId', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/notes/:userId', async (req, res) => {
+app.post('/api/notes/:userId', requireAdmin, async (req, res) => {
   try {
     const { text } = req.body;
     if (!text) return res.status(400).json({ error: 'Текст обязателен' });
@@ -766,7 +862,7 @@ app.post('/api/notes/:userId', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/notes/:userId/:noteId', async (req, res) => {
+app.delete('/api/notes/:userId/:noteId', requireAdmin, async (req, res) => {
   try {
     await db.collection('notes').doc(req.params.noteId).delete();
     res.json({ success: true });
@@ -778,7 +874,7 @@ app.delete('/api/notes/:userId/:noteId', async (req, res) => {
 // ═══════════════════════════════════════════
 
 // GET /api/video-categories
-app.get('/api/video-categories', async (_req, res) => {
+app.get('/api/video-categories', requireAuth, async (_req, res) => {
   try {
     const snap = await db.collection('videoCategories').orderBy('createdAt').get();
     res.json(snap.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -786,7 +882,7 @@ app.get('/api/video-categories', async (_req, res) => {
 });
 
 // POST /api/video-categories  { name }
-app.post('/api/video-categories', async (req, res) => {
+app.post('/api/video-categories', requireAdmin, async (req, res) => {
   try {
     const name = (req.body.name || '').trim();
     if (!name) return res.status(400).json({ error: 'Название обязательно' });
@@ -798,7 +894,7 @@ app.post('/api/video-categories', async (req, res) => {
 });
 
 // DELETE /api/video-categories/:id — удаляет категорию + все её видео
-app.delete('/api/video-categories/:id', async (req, res) => {
+app.delete('/api/video-categories/:id', requireAdmin, async (req, res) => {
   try {
     const catId = req.params.id;
     const videos = await db.collection('exerciseVideos').where('categoryId', '==', catId).get();
@@ -824,7 +920,7 @@ app.delete('/api/video-categories/:id', async (req, res) => {
 // ═══════════════════════════════════════════
 
 // GET /api/exercise-videos[?categoryId=xxx]
-app.get('/api/exercise-videos', async (req, res) => {
+app.get('/api/exercise-videos', requireAuth, async (req, res) => {
   try {
     let query = db.collection('exerciseVideos');
     if (req.query.categoryId) {
@@ -836,7 +932,7 @@ app.get('/api/exercise-videos', async (req, res) => {
 });
 
 // POST /api/exercise-videos  multipart: categoryId, title, video
-app.post('/api/exercise-videos', uploadVideo.single('video'), async (req, res) => {
+app.post('/api/exercise-videos', requireAdmin, uploadVideo.single('video'), async (req, res) => {
   try {
     const categoryId   = (req.body.categoryId   || '').trim();
     const categoryName = (req.body.categoryName || '').trim();
@@ -869,7 +965,7 @@ app.post('/api/exercise-videos', uploadVideo.single('video'), async (req, res) =
 });
 
 // DELETE /api/exercise-videos/:id
-app.delete('/api/exercise-videos/:id', async (req, res) => {
+app.delete('/api/exercise-videos/:id', requireAdmin, async (req, res) => {
   try {
     const doc = await db.collection('exerciseVideos').doc(req.params.id).get();
     if (!doc.exists) return res.status(404).json({ error: 'Видео не найдено' });
@@ -945,7 +1041,7 @@ app.get('/api/fatsecret/food/:id', async (req, res) => {
 // ИЗБРАННОЕ ПИТАНИЕ
 // ═══════════════════════════════════════════
 
-app.get('/api/favorites/:userId', async (req, res) => {
+app.get('/api/favorites/:userId', requireAuth, async (req, res) => {
   try {
     const snap = await db.collection('favorites').where('userId', '==', req.params.userId).get();
     const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -954,7 +1050,7 @@ app.get('/api/favorites/:userId', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/favorites/:userId', async (req, res) => {
+app.post('/api/favorites/:userId', requireAuth, async (req, res) => {
   try {
     const { name, type, kcal, protein, fat, carbs } = req.body;
     if (!name) return res.status(400).json({ error: 'Название обязательно' });
@@ -971,7 +1067,7 @@ app.post('/api/favorites/:userId', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/favorites/:userId/:favId', async (req, res) => {
+app.delete('/api/favorites/:userId/:favId', requireAuth, async (req, res) => {
   try {
     await db.collection('favorites').doc(req.params.favId).delete();
     res.json({ success: true });
@@ -982,7 +1078,7 @@ app.delete('/api/favorites/:userId/:favId', async (req, res) => {
 // КАСТОМНЫЕ БЛЮДА ПОЛЬЗОВАТЕЛЯ
 // ═══════════════════════════════════════════
 
-app.get('/api/custom-foods/:userId', async (req, res) => {
+app.get('/api/custom-foods/:userId', requireAuth, async (req, res) => {
   try {
     const snap = await db.collection('customFoods').where('userId', '==', req.params.userId).get();
     const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -991,7 +1087,7 @@ app.get('/api/custom-foods/:userId', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/custom-foods/:userId', async (req, res) => {
+app.post('/api/custom-foods/:userId', requireAuth, async (req, res) => {
   try {
     const { name, ingredients, kcal, protein, fat, carbs } = req.body;
     if (!name) return res.status(400).json({ error: 'Название обязательно' });
@@ -1020,7 +1116,7 @@ app.post('/api/custom-foods/:userId', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/custom-foods/:userId/:foodId', async (req, res) => {
+app.delete('/api/custom-foods/:userId/:foodId', requireAuth, async (req, res) => {
   try {
     await db.collection('customFoods').doc(req.params.foodId).delete();
     res.json({ success: true });
@@ -1030,7 +1126,7 @@ app.delete('/api/custom-foods/:userId/:foodId', async (req, res) => {
 // ═══════════════════════════════════════════
 // ПИТАНИЕ
 // ═══════════════════════════════════════════
-app.get('/api/nutrition/:userId', async (req, res) => {
+app.get('/api/nutrition/:userId', requireAuth, async (req, res) => {
   try {
     // Используем только один where чтобы избежать требования составного индекса Firestore
     const snap = await db.collection('nutrition').where('userId', '==', req.params.userId).get();
@@ -1041,7 +1137,7 @@ app.get('/api/nutrition/:userId', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/nutrition/:userId', async (req, res) => {
+app.post('/api/nutrition/:userId', requireAuth, async (req, res) => {
   try {
     const { name, type, kcal, protein, fat, carbs, date } = req.body;
     if (!name) return res.status(400).json({ error: 'Название обязательно' });
@@ -1060,7 +1156,7 @@ app.post('/api/nutrition/:userId', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/nutrition/:userId/:entryId', async (req, res) => {
+app.delete('/api/nutrition/:userId/:entryId', requireAuth, async (req, res) => {
   try {
     await db.collection('nutrition').doc(req.params.entryId).delete();
     res.json({ success: true });
@@ -1070,7 +1166,7 @@ app.delete('/api/nutrition/:userId/:entryId', async (req, res) => {
 // ═══════════════════════════════════════════
 // ЭКСПОРТ EXCEL
 // ═══════════════════════════════════════════
-app.get('/api/export/students', async (req, res) => {
+app.get('/api/export/students', requireAdmin, async (req, res) => {
   try {
     const snap = await db.collection('users').where('role', '==', 'student').get();
     const rows = snap.docs.map(d => {
@@ -1097,7 +1193,7 @@ app.get('/api/export/students', async (req, res) => {
 // ═══════════════════════════════════════════
 // ЭНДПОИНТ ПРОВЕРКИ УВЕДОМЛЕНИЙ
 // ═══════════════════════════════════════════
-app.post('/api/notifications/test', async (req, res) => {
+app.post('/api/notifications/test', requireAdmin, async (req, res) => {
   const { chatId } = req.body;
   const target = chatId || COACH_TG;
   if (!bot) return res.json({ success: false, reason: 'TELEGRAM_BOT_TOKEN не задан в .env' });
@@ -1131,7 +1227,7 @@ app.post('/api/cross-register', async (req, res) => {
 });
 
 // Получить всех записавшихся (только для авторизованных — тренер)
-app.get('/api/cross-register', async (_req, res) => {
+app.get('/api/cross-register', requireAdmin, async (_req, res) => {
   try {
     const snap = await db.collection('crossRegistrants').get();
     const list = snap.docs
@@ -1142,7 +1238,7 @@ app.get('/api/cross-register', async (_req, res) => {
 });
 
 // Удалить заявку
-app.delete('/api/cross-register/:id', async (req, res) => {
+app.delete('/api/cross-register/:id', requireAdmin, async (req, res) => {
   try {
     await db.collection('crossRegistrants').doc(req.params.id).delete();
     res.json({ success: true });
@@ -1154,7 +1250,7 @@ app.delete('/api/cross-register/:id', async (req, res) => {
 // ═══════════════════════════════════════════
 
 // Сохранить пробежку
-app.post('/api/runs', async (req, res) => {
+app.post('/api/runs', requireAuth, async (req, res) => {
   try {
     const { userId, userName, distance, duration, avgSpeed, date } = req.body;
     if (!userId || distance == null || duration == null) return res.status(400).json({ error: 'Недостаточно данных' });
@@ -1172,7 +1268,7 @@ app.post('/api/runs', async (req, res) => {
 });
 
 // История пробежек пользователя
-app.get('/api/runs/user/:userId', async (req, res) => {
+app.get('/api/runs/user/:userId', requireAuth, async (req, res) => {
   try {
     const snap = await db.collection('runs')
       .where('userId', '==', req.params.userId)
@@ -1186,7 +1282,7 @@ app.get('/api/runs/user/:userId', async (req, res) => {
 });
 
 // Лидерборд — агрегация по дистанции за период
-app.get('/api/runs/leaderboard', async (req, res) => {
+app.get('/api/runs/leaderboard', requireAuth, async (req, res) => {
   try {
     const period = req.query.period || 'week'; // today | week | all
     // Получаем всё и фильтруем в JS — чтобы не требовать составные индексы Firestore
