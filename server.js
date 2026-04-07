@@ -1323,11 +1323,10 @@ app.get('/api/runs/leaderboard', requireAuth, async (req, res) => {
     docs.forEach(r => {
       if (!r.userId) return;
       if (!map[r.userId]) {
-        map[r.userId] = { userId: r.userId, userName: r.userName || 'Аноним', totalDistance: 0, totalRuns: 0, bestSpeed: 0 };
+        map[r.userId] = { userId: r.userId, userName: r.userName || 'Аноним', totalDistance: 0, totalRuns: 0 };
       }
       map[r.userId].totalDistance += r.distance || 0;
       map[r.userId].totalRuns += 1;
-      if ((r.avgSpeed || 0) > map[r.userId].bestSpeed) map[r.userId].bestSpeed = r.avgSpeed;
     });
     const list = Object.values(map).sort((a, b) => b.totalDistance - a.totalDistance);
     res.json(list);

@@ -984,10 +984,6 @@
               <div class="cross-result-val" id="resDist">—</div>
               <div class="cross-result-lbl">Дистанция</div>
             </div>
-            <div class="cross-result-item">
-              <div class="cross-result-val" id="resSpeed">—</div>
-              <div class="cross-result-lbl">Ср. скорость</div>
-            </div>
           </div>
           <div style="display:flex;gap:10px;justify-content:center">
             <button class="btn btn-p" onclick="crossSaveRun()">💾 Сохранить</button>
@@ -3100,6 +3096,35 @@ let _crossMyMarker = null;
 let _crossLiveInterval = null;
 let _crossOtherMarkers = {};
 let _crossWakeLock = null; // Wake Lock чтобы экран не гасил таймер
+let _crossNotifInterval = null; // интервал уведомлений
+
+// --- Push-уведомления о пробежке ---
+async function _crossRequestNotifPerm() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') await Notification.requestPermission();
+}
+
+function _crossSendNotif() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  if (document.visibilityState === 'visible') return; // не спамим когда приложение открыто
+  const dist = (_crossDistM / 1000).toFixed(2);
+  const time = fmtTime(_crossElapsed);
+  new Notification('🏃 Coach Space — тренировка идёт', {
+    body: `⏱ ${time}  •  📍 ${dist} км`,
+    icon: '/icon-192.png',
+    tag: 'cross-run', // заменяет предыдущее — не спамит
+    renotify: true,
+    silent: false
+  });
+}
+
+function _crossStartNotifInterval() {
+  _crossStopNotifInterval();
+  _crossNotifInterval = setInterval(_crossSendNotif, 30000); // каждые 30 сек
+}
+function _crossStopNotifInterval() {
+  if (_crossNotifInterval) { clearInterval(_crossNotifInterval); _crossNotifInterval = null; }
+}
 
 // --- Web Worker таймер ---
 function _crossWorkerStart(startTime) {
@@ -3260,6 +3285,8 @@ function crossStart() {
   _crossWorkerStart(_crossStartTime);
   // Wake Lock — не даём экрану засыпать
   _crossAcquireWakeLock();
+  // Уведомления — запрашиваем разрешение и стартуем интервал
+  _crossRequestNotifPerm().then(_crossStartNotifInterval);
   initCrossMap();
   _crossLiveInterval = setInterval(crossPollOthers, 4000);
   let _lastPosSentAt = 0;
@@ -3292,6 +3319,7 @@ function crossPause() {
   _crossState = 'paused';
   _crossWorkerStop();
   _crossReleaseWakeLock();
+  _crossStopNotifInterval();
   if (_crossWatchId !== null) { navigator.geolocation.clearWatch(_crossWatchId); _crossWatchId = null; }
   if (_crossLiveInterval) { clearInterval(_crossLiveInterval); _crossLiveInterval = null; }
   if (ME) api('/api/runs/active','POST',{userId:ME.id,isActive:false}).catch(()=>{});
@@ -3315,6 +3343,7 @@ function crossResume() {
   document.getElementById('crossPauseBtn').onclick = crossPause;
   _crossWorkerStart(_crossStartTime);
   _crossAcquireWakeLock();
+  _crossStartNotifInterval();
   _crossLiveInterval = setInterval(crossPollOthers, 4000);
   let _lastPosSentAt = 0;
   _crossWatchId = navigator.geolocation.watchPosition(pos => {
@@ -3339,17 +3368,16 @@ function crossResume() {
 function crossFinish() {
   _crossWorkerStop();
   _crossReleaseWakeLock();
+  _crossStopNotifInterval();
   if (_crossWatchId !== null) { navigator.geolocation.clearWatch(_crossWatchId); _crossWatchId = null; }
   if (_crossLiveInterval) { clearInterval(_crossLiveInterval); _crossLiveInterval = null; }
   if (ME) api('/api/runs/active','POST',{userId:ME.id,isActive:false}).catch(()=>{});
   _crossState = 'finished';
-  const avgSpd = _crossElapsed > 0 ? (_crossDistM / _crossElapsed * 3.6) : 0;
-  _crossResult = { distance: _crossDistM, duration: _crossElapsed, avgSpeed: avgSpd, date: new Date().toISOString() };
+  _crossResult = { distance: _crossDistM, duration: _crossElapsed, date: new Date().toISOString() };
   document.getElementById('crossTrainScreen').style.display = 'none';
   document.getElementById('crossResultScreen').style.display = 'block';
   document.getElementById('resTime').textContent = fmtTime(_crossElapsed);
   document.getElementById('resDist').textContent = fmtDist(_crossDistM) + ' км';
-  document.getElementById('resSpeed').textContent = avgSpd.toFixed(1) + ' км/ч';
 }
 
 async function crossSaveRun() {
@@ -3360,7 +3388,6 @@ async function crossSaveRun() {
       userName: ME.name,
       distance: _crossResult.distance,
       duration: _crossResult.duration,
-      avgSpeed: _crossResult.avgSpeed,
       date: _crossResult.date
     });
     toast('✅ Пробежка сохранена!', 's');
@@ -3373,6 +3400,7 @@ async function crossSaveRun() {
 function crossReset() {
   _crossWorkerStop();
   _crossReleaseWakeLock();
+  _crossStopNotifInterval();
   _crossState = 'idle'; _crossElapsed = 0; _crossDistM = 0; _crossLastPos = null; _crossResult = null; _crossStartTime = 0;
   document.getElementById('crossTrainScreen').style.display = 'block';
   document.getElementById('crossResultScreen').style.display = 'none';
@@ -3406,7 +3434,7 @@ function renderLeaderboard(list, containerId) {
       <div class="lb-pos${pos<=3?' '+medals[pos-1]:''}">${pos <= 3 ? ['🥇','🥈','🥉'][pos-1] : pos}</div>
       <div>
         <div class="lb-name">${esc(row.userName)}${isMe?' <span style="color:var(--ac);font-size:11px">(вы)</span>':''}</div>
-        <div class="lb-meta">${row.totalRuns} пробеж${row.totalRuns===1?'ка':row.totalRuns<5?'ки':'ек'} · лучшая скорость ${row.bestSpeed.toFixed(1)} км/ч</div>
+        <div class="lb-meta">${row.totalRuns} пробеж${row.totalRuns===1?'ка':row.totalRuns<5?'ки':'ек'}</div>
       </div>
       <div class="lb-dist">${distKm} км</div>
     </div>`;
@@ -3435,7 +3463,7 @@ async function loadCrossHistory() {
         <div class="run-hist-info">
           <div class="run-hist-date">${dateStr}</div>
           <div class="run-hist-dist">${fmtDist(r.distance)} км</div>
-          <div class="run-hist-meta">${fmtTime(r.duration)} · ${r.avgSpeed.toFixed(1)} км/ч</div>
+          <div class="run-hist-meta">${fmtTime(r.duration)}</div>
         </div>
       </div>`;
     }).join('');
