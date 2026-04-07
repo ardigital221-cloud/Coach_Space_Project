@@ -709,14 +709,6 @@
       </div>
     </div>
 
-    <div class="land-desc">
-      <div class="land-desc-title">Как это работает</div>
-      <div class="land-desc-item"><div class="land-desc-dot">1</div>Записывайся на забег — заполни форму ниже</div>
-      <div class="land-desc-item"><div class="land-desc-dot">2</div>В день старта открой приложение, нажми «Кросс» → «Старт»</div>
-      <div class="land-desc-item"><div class="land-desc-dot">3</div>GPS отслеживает дистанцию и скорость в реальном времени</div>
-      <div class="land-desc-item"><div class="land-desc-dot">4</div>После финиша результат попадает в общий рейтинг</div>
-    </div>
-
     <button class="land-cta" onclick="openMo('mCrossReg')" style="max-width:480px">Хочу участвовать</button>
   </div>
 </div>
@@ -746,6 +738,7 @@
 
 <div id="loginPage">
   <div class="lcard">
+    <button class="btn btn-g sm" onclick="showLanding()" style="margin-bottom:18px;width:fit-content">← Назад</button>
     <div class="l-logo">⚡ Coach Space</div>
     <div class="l-sub">Платформа для тренировок и прогресса</div>
     <div class="fg"><label class="fl">Логин</label><input class="fi" id="inL" placeholder="Ваш логин" autocomplete="off"/></div>
@@ -2935,6 +2928,11 @@ function showLogin(){
   document.getElementById('loginPage').classList.add('show');
 }
 
+function showLanding(){
+  document.getElementById('loginPage').classList.remove('show');
+  document.getElementById('landingPage').classList.add('show');
+}
+
 // Регистрация на забег
 async function submitCrossReg(){
   const name=(document.getElementById('cregName').value||'').trim();
@@ -3109,16 +3107,18 @@ function crossStart() {
   _crossTimer = setInterval(() => { _crossElapsed++; crossUpdateUI(); }, 1000);
   _crossWatchId = navigator.geolocation.watchPosition(pos => {
     if (_crossState !== 'running') return;
+    if (pos.coords.accuracy > 50) return; // фильтр неточных позиций
     const {latitude: lat, longitude: lon} = pos.coords;
     if (_crossLastPos) {
       const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
-      if (d < 200) _crossDistM += d; // фильтр скачков GPS
+      if (d >= 2 && d < 100) _crossDistM += d; // фильтр шума (<2м) и скачков GPS (>100м)
     }
     _crossLastPos = {lat, lon};
+    document.getElementById('crossGpsWarn').style.display = 'none';
   }, err => {
     console.warn('GPS:', err.message);
     document.getElementById('crossGpsWarn').style.display = 'block';
-  }, {enableHighAccuracy: true, maximumAge: 2000, timeout: 10000});
+  }, {enableHighAccuracy: true, maximumAge: 0, timeout: 15000});
 }
 
 function crossPause() {
@@ -3146,13 +3146,15 @@ function crossResume() {
   _crossTimer = setInterval(() => { _crossElapsed++; crossUpdateUI(); }, 1000);
   _crossWatchId = navigator.geolocation.watchPosition(pos => {
     if (_crossState !== 'running') return;
+    if (pos.coords.accuracy > 50) return; // фильтр неточных позиций
     const {latitude: lat, longitude: lon} = pos.coords;
     if (_crossLastPos) {
       const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
-      if (d < 200) _crossDistM += d;
+      if (d >= 2 && d < 100) _crossDistM += d; // фильтр шума (<2м) и скачков GPS (>100м)
     }
     _crossLastPos = {lat, lon};
-  }, err => console.warn('GPS:', err.message), {enableHighAccuracy: true, maximumAge: 2000, timeout: 10000});
+    document.getElementById('crossGpsWarn').style.display = 'none';
+  }, err => console.warn('GPS:', err.message), {enableHighAccuracy: true, maximumAge: 0, timeout: 15000});
 }
 
 function crossFinish() {

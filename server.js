@@ -1189,10 +1189,11 @@ app.get('/api/runs/user/:userId', async (req, res) => {
 app.get('/api/runs/leaderboard', async (req, res) => {
   try {
     const period = req.query.period || 'week'; // today | week | all
-    let snap;
-    if (period === 'all') {
-      snap = await db.collection('runs').get();
-    } else {
+    // Получаем всё и фильтруем в JS — чтобы не требовать составные индексы Firestore
+    const snap = await db.collection('runs').get();
+    let docs = snap.docs.map(d => d.data());
+
+    if (period !== 'all') {
       const now = new Date();
       let from;
       if (period === 'today') {
@@ -1203,12 +1204,13 @@ app.get('/api/runs/leaderboard', async (req, res) => {
         d.setDate(d.getDate() - 7);
         from = d.toISOString();
       }
-      snap = await db.collection('runs').where('createdAt', '>=', from).get();
+      docs = docs.filter(r => (r.createdAt || r.date || '') >= from);
     }
+
     // Агрегируем по userId
     const map = {};
-    snap.docs.forEach(doc => {
-      const r = doc.data();
+    docs.forEach(r => {
+      if (!r.userId) return;
       if (!map[r.userId]) {
         map[r.userId] = { userId: r.userId, userName: r.userName || 'Аноним', totalDistance: 0, totalRuns: 0, bestSpeed: 0 };
       }
