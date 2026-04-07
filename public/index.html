@@ -7,6 +7,12 @@
   <meta http-equiv="Expires" content="0"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
   <title>Coach Space</title>
+  <link rel="manifest" href="/manifest.json"/>
+  <link rel="apple-touch-icon" href="/icon-180.png"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Coach Space"/>
+  <meta name="theme-color" content="#080c14"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -679,7 +685,7 @@
   <div class="land-bg"></div>
   <div class="land-inner">
     <div class="land-top">
-      <div class="land-logo">⚡ Coach Space</div>
+      <div class="land-logo" onclick="showInstallPrompt()" style="cursor:pointer;user-select:none">⚡ Coach Space</div>
       <button class="land-login-link" onclick="showLogin()">Войти →</button>
     </div>
 
@@ -3575,6 +3581,84 @@ function selectSharedFood(food) {
   document.getElementById('ownNutGrams').value = 100;
   ownNutCalc();
 }
+
+// ── PWA Install ──────────────────────────────────────────────
+let _installPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _installPrompt = e;
+});
+
+function showInstallPrompt() {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isInStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+
+  if (isInStandalone) {
+    toast('Приложение уже установлено ✓');
+    return;
+  }
+
+  if (isIOS) {
+    document.getElementById('iosInstallModal').style.display = 'flex';
+    return;
+  }
+
+  if (_installPrompt) {
+    _installPrompt.prompt();
+    _installPrompt.userChoice.then(r => {
+      if (r.outcome === 'accepted') toast('Приложение добавлено на главный экран ✓');
+      _installPrompt = null;
+    });
+    return;
+  }
+
+  // Fallback if prompt not available (already installed or browser doesn't support)
+  toast('Откройте меню браузера и выберите «Добавить на главный экран»');
+}
+
+function closeIOSModal() {
+  document.getElementById('iosInstallModal').style.display = 'none';
+}
+
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}
 </script>
+
+<!-- iOS Install Modal -->
+<div id="iosInstallModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeIOSModal()">
+  <div style="background:#1a1f2e;border-radius:20px 20px 0 0;padding:28px 24px 40px;width:100%;max-width:480px;box-sizing:border-box">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:40px;margin-bottom:8px">⚡</div>
+      <div style="font-size:18px;font-weight:700;color:#fff">Установить Coach Space</div>
+      <div style="font-size:13px;color:#8892a4;margin-top:6px">Добавьте приложение на главный экран iPhone</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:14px;background:#0d1117;border-radius:12px;padding:14px">
+        <div style="font-size:26px;flex-shrink:0">1️⃣</div>
+        <div>
+          <div style="color:#fff;font-size:14px;font-weight:600">Нажмите кнопку «Поделиться»</div>
+          <div style="color:#8892a4;font-size:12px;margin-top:2px">Иконка <span style="color:#fff">⬆️</span> внизу Safari</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;background:#0d1117;border-radius:12px;padding:14px">
+        <div style="font-size:26px;flex-shrink:0">2️⃣</div>
+        <div>
+          <div style="color:#fff;font-size:14px;font-weight:600">Выберите «На экран «Домой»»</div>
+          <div style="color:#8892a4;font-size:12px;margin-top:2px">Прокрутите список действий вниз</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;background:#0d1117;border-radius:12px;padding:14px">
+        <div style="font-size:26px;flex-shrink:0">3️⃣</div>
+        <div>
+          <div style="color:#fff;font-size:14px;font-weight:600">Нажмите «Добавить»</div>
+          <div style="color:#8892a4;font-size:12px;margin-top:2px">Coach Space появится на главном экране</div>
+        </div>
+      </div>
+    </div>
+    <button onclick="closeIOSModal()" style="width:100%;padding:14px;background:linear-gradient(135deg,#7c3aed,#5b21b6);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:600;cursor:pointer">Понятно</button>
+  </div>
+</div>
 </body>
 </html>
