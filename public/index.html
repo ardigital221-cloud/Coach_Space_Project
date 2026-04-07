@@ -1022,7 +1022,7 @@
       <div class="across-tabs">
         <button class="across-tab active" onclick="switchAcrossTab('leaderboard',this)">🏆 Рейтинг забега</button>
         <button class="across-tab" onclick="switchAcrossTab('registrants',this)">📋 Заявки на забег</button>
-        <button class="across-tab" onclick="switchAcrossTab('students',this)">👥 Участники CS</button>
+        <button class="across-tab" onclick="switchAcrossTab('students',this)">🏃 Участники кросса</button>
       </div>
 
       <!-- Вкладка: Рейтинг -->
@@ -1050,11 +1050,26 @@
         </div>
       </div>
 
-      <!-- Вкладка: Участники Coach Space -->
+      <!-- Вкладка: Участники кросса -->
       <div class="across-section" id="acrossStudentsSection">
         <div class="card">
-          <div class="sh"><div class="st">👥 Участники Coach Space</div></div>
-          <div id="acrossStudentsList"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
+          <div class="sh">
+            <div class="st">🏃 Участники кросса</div>
+            <button class="btn btn-p sm" onclick="openAddCrossParticipant()">+ Добавить</button>
+          </div>
+          <div id="crossPartCount" class="creg-count"></div>
+          <div id="crossPartList"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
+        </div>
+
+        <!-- Форма добавления участника кросса -->
+        <div id="addCrossPartForm" style="display:none" class="card" style="margin-top:12px">
+          <div class="st" style="margin-bottom:12px">➕ Новый участник кросса</div>
+          <div class="fg"><label class="fl">Имя участника</label><input class="fi" id="crossPartName" placeholder="Иван Иванов"/></div>
+          <div class="fg"><label class="fl">Заметка (необязательно)</label><input class="fi" id="crossPartNote" placeholder="Команда, клуб..."/></div>
+          <div class="mf" style="margin-top:12px">
+            <button class="btn btn-g" onclick="closeAddCrossParticipant()">Отмена</button>
+            <button class="btn btn-p" id="crossPartSaveBtn" onclick="saveCrossParticipant()">Сохранить</button>
+          </div>
         </div>
       </div>
     </div>
@@ -3067,21 +3082,58 @@ async function deleteCrossReg(id, btn){
   catch(e){toast('Ошибка: '+e.message,'e');btn.disabled=false;}
 }
 
-// Загрузить участников Coach Space в панели тренера
+// Загрузить участников кросса
 async function loadAcrossStudents(){
-  const list=document.getElementById('acrossStudentsList');
+  const list=document.getElementById('crossPartList');
+  const cnt=document.getElementById('crossPartCount');
+  if(!list)return;
+  list.innerHTML='<div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div>';
   try{
-    const data=await api('/api/users');
-    if(!data.length){list.innerHTML='<div class="empty" style="padding:16px 0"><div class="ei">👥</div>Нет участников</div>';return;}
-    list.innerHTML=data.map(u=>`
+    const data=await api('/api/cross-participants');
+    if(cnt) cnt.textContent=data.length ? `Всего: ${data.length} чел.` : '';
+    if(!data.length){list.innerHTML='<div class="empty" style="padding:16px 0"><div class="ei">🏃</div>Нет участников кросса</div>';return;}
+    list.innerHTML=data.map(p=>`
       <div class="creg-row">
-        <div class="creg-ava" style="background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.2)">${(u.name||'?')[0].toUpperCase()}</div>
+        <div class="creg-ava" style="background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.2)">${(p.name||'?')[0].toUpperCase()}</div>
         <div class="creg-info">
-          <div class="creg-name">${esc(u.name)}</div>
-          <div class="creg-meta">@${esc(u.login)} · ${u.sessions||0} занятий</div>
+          <div class="creg-name">${esc(p.name)}</div>
+          ${p.note?`<div class="creg-meta">${esc(p.note)}</div>`:''}
         </div>
+        <button class="btn btn-g sm" onclick="deleteCrossPart('${p.id}',this)">🗑</button>
       </div>`).join('');
   }catch(e){list.innerHTML='<div class="empty" style="padding:16px 0">Ошибка загрузки</div>';}
+}
+
+function openAddCrossParticipant(){
+  document.getElementById('addCrossPartForm').style.display='block';
+  document.getElementById('crossPartName').focus();
+}
+
+function closeAddCrossParticipant(){
+  document.getElementById('addCrossPartForm').style.display='none';
+  document.getElementById('crossPartName').value='';
+  document.getElementById('crossPartNote').value='';
+}
+
+async function saveCrossParticipant(){
+  const name=document.getElementById('crossPartName').value.trim();
+  if(!name){toast('Введите имя','e');return;}
+  const btn=document.getElementById('crossPartSaveBtn');
+  btn.disabled=true; btn.textContent='Сохраняем...';
+  try{
+    await api('/api/cross-participants','POST',{name,note:document.getElementById('crossPartNote').value.trim()});
+    toast('Участник добавлен ✓');
+    closeAddCrossParticipant();
+    loadAcrossStudents();
+  }catch(e){toast('Ошибка: '+e.message,'e');}
+  finally{btn.disabled=false;btn.textContent='Сохранить';}
+}
+
+async function deleteCrossPart(id,btn){
+  if(!confirm('Удалить участника?'))return;
+  btn.disabled=true;
+  try{await api('/api/cross-participants/'+id,'DELETE');loadAcrossStudents();}
+  catch(e){toast('Ошибка: '+e.message,'e');btn.disabled=false;}
 }
 
 document.getElementById('uPd').value=new Date(Date.now()+30*86400000).toISOString().split('T')[0];

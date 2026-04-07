@@ -1261,6 +1261,43 @@ app.delete('/api/cross-register/:id', requireAdmin, async (req, res) => {
 });
 
 // ═══════════════════════════════════════════
+// УЧАСТНИКИ КРОССА (отдельно от участников CS)
+// ═══════════════════════════════════════════
+
+// Получить список участников кросса
+app.get('/api/cross-participants', requireAdmin, async (_req, res) => {
+  try {
+    const snap = await db.collection('crossParticipants').get();
+    const list = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ru'));
+    res.json(list);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Добавить участника кросса
+app.post('/api/cross-participants', requireAdmin, async (req, res) => {
+  try {
+    const { name, note } = req.body;
+    if (!name || !name.trim()) return res.status(400).json({ error: 'Имя обязательно' });
+    const ref = await db.collection('crossParticipants').add({
+      name: name.trim(),
+      note: (note || '').trim(),
+      addedAt: new Date().toISOString()
+    });
+    res.json({ id: ref.id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Удалить участника кросса
+app.delete('/api/cross-participants/:id', requireAdmin, async (req, res) => {
+  try {
+    await db.collection('crossParticipants').doc(req.params.id).delete();
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ═══════════════════════════════════════════
 // КРОСС — ПРОБЕЖКИ
 // ═══════════════════════════════════════════
 
