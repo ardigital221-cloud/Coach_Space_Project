@@ -721,7 +721,6 @@
     <div class="fg"><label class="fl">Имя и фамилия *</label><input class="fi" id="cregName" placeholder="Иван Иванов"/></div>
     <div class="fg"><label class="fl">Телефон</label><input class="fi" id="cregPhone" type="tel" placeholder="+7 700 000 00 00"/></div>
     <div class="fg"><label class="fl">Telegram (username или @)</label><input class="fi" id="cregTg" placeholder="@username"/></div>
-    <div class="fg"><label class="fl">Город</label><input class="fi" id="cregCity" placeholder="Алматы"/></div>
     <div class="ferr" id="cregErr"></div>
     <div class="mf">
       <button class="btn btn-g" onclick="closeMo('mCrossReg')">Отмена</button>
@@ -2938,18 +2937,17 @@ async function submitCrossReg(){
   const name=(document.getElementById('cregName').value||'').trim();
   const phone=(document.getElementById('cregPhone').value||'').trim();
   const tg=(document.getElementById('cregTg').value||'').trim();
-  const city=(document.getElementById('cregCity').value||'').trim();
   const err=document.getElementById('cregErr');
   err.style.display='none';
   if(!name){err.style.display='block';err.textContent='Введите имя';return;}
   const btn=document.getElementById('cregBtn');
   btn.disabled=true;btn.textContent='...';
   try{
-    await fetch('/api/cross-register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,telegram:tg,city})});
+    await fetch('/api/cross-register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,telegram:tg})});
     document.getElementById('crossRegForm').style.display='none';
     document.getElementById('crossRegSuccess').style.display='block';
     // сброс
-    ['cregName','cregPhone','cregTg','cregCity'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['cregName','cregPhone','cregTg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});;
   }catch(e){err.style.display='block';err.textContent='Ошибка: '+e.message;}
   btn.disabled=false;btn.textContent='Записаться';
 }
@@ -2958,7 +2956,7 @@ async function submitCrossReg(){
 function _resetCrossRegModal(){
   document.getElementById('crossRegForm').style.display='block';
   document.getElementById('crossRegSuccess').style.display='none';
-  ['cregName','cregPhone','cregTg','cregCity'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['cregName','cregPhone','cregTg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});;
   const err=document.getElementById('cregErr');if(err)err.style.display='none';
 }
 // Переопределяем closeMo чтобы сбрасывать форму при закрытии
@@ -2996,7 +2994,7 @@ async function loadCrossRegistrants(){
     list.innerHTML=data.map(r=>{
       const d=new Date(r.registeredAt);
       const dateStr=d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
-      const meta=[r.phone,r.telegram,r.city].filter(Boolean).join(' · ');
+      const meta=[r.phone,r.telegram].filter(Boolean).join(' · ');
       return`<div class="creg-row">
         <div class="creg-ava">🏃</div>
         <div class="creg-info">
