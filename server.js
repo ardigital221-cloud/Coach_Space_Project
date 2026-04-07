@@ -261,13 +261,14 @@ app.get('/api/users/:id', requireAuth, async (req, res) => {
 
 app.post('/api/users', requireAdmin, async (req, res) => {
   try {
-    const { name, login, password, telegramId, sessions, paymentDate } = req.body;
+    const { name, login, password, telegramId, sessions, paymentDate, role } = req.body;
     if (!name || !login || !password) return res.status(400).json({ error: 'Имя, логин и пароль обязательны' });
     const exists = await db.collection('users').where('login', '==', login).limit(1).get();
     if (!exists.empty) return res.status(400).json({ error: 'Логин уже занят' });
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+    const userRole = role === 'cross' ? 'cross' : 'student';
     const ref = await db.collection('users').add({
-      name, login, password: hashedPassword, role: 'student',
+      name, login, password: hashedPassword, role: userRole,
       telegramId: telegramId || null,
       sessions: parseInt(sessions) || 0,
       paymentDate: paymentDate || null,
