@@ -1320,6 +1320,43 @@ app.get('/api/runs/leaderboard', requireAuth, async (req, res) => {
 });
 
 // ═══════════════════════════════════════════
+// КРОСС — АКТИВНЫЕ БЕГУНЫ (live-map)
+// ═══════════════════════════════════════════
+
+// POST /api/runs/active — обновить/удалить мою позицию
+app.post('/api/runs/active', requireAuth, async (req, res) => {
+  try {
+    const { userId, lat, lon, isActive } = req.body;
+    if (!userId) return res.status(400).json({ error: 'userId обязателен' });
+    const docRef = db.collection('activeRunners').doc(userId);
+    if (isActive === false) {
+      await docRef.set({ userId, isActive: false, updatedAt: new Date().toISOString() }, { merge: true });
+    } else {
+      await docRef.set({
+        userId,
+        lat: parseFloat(lat) || 0,
+        lon: parseFloat(lon) || 0,
+        isActive: true,
+        updatedAt: new Date().toISOString()
+      });
+    }
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// GET /api/runs/active — получить всех активных бегунов (обновившихся за последние 5 минут)
+app.get('/api/runs/active', requireAuth, async (req, res) => {
+  try {
+    const cutoff = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const snap = await db.collection('activeRunners').where('isActive', '==', true).get();
+    const runners = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(r => r.updatedAt && r.updatedAt >= cutoff);
+    res.json(runners);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ═══════════════════════════════════════════
 // CRON — напоминания об оплате (каждый день в 9:00)
 // ═══════════════════════════════════════════
 cron.schedule('0 9 * * *', async () => {

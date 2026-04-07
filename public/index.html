@@ -10,6 +10,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root{
       --bg:#07080f;--bg2:#0c0e1a;--card:rgba(12,14,26,.92);
@@ -578,7 +580,7 @@
     .cross-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:160px;height:160px;background:radial-gradient(circle,rgba(56,189,248,.18),transparent 70%);pointer-events:none;}
     .cross-state-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--blu);opacity:.8;margin-bottom:8px;}
     .cross-timer{font-family:'Unbounded',sans-serif;font-size:52px;font-weight:700;color:var(--tx);line-height:1;letter-spacing:2px;margin-bottom:20px;text-shadow:0 0 30px rgba(56,189,248,.3);}
-    .cross-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px;}
+    .cross-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:22px;}
     .cross-metric{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--r2);padding:14px 8px;}
     .cross-metric-val{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:700;color:var(--blu);line-height:1;}
     .cross-metric-lbl{font-size:10px;color:var(--mu2);margin-top:4px;}
@@ -882,6 +884,10 @@
     <div class="panel" id="p-uplan">
       <div class="sh"><div class="st">📋 План тренировок</div><span id="planUpdatedAt" style="font-size:11px;color:var(--mu2)"></span></div>
       <div id="uPlanContent"></div>
+      <div class="card" style="margin-top:16px">
+        <div class="sh"><div class="st">📹 Видеотека</div></div>
+        <div id="uVidContent"><div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div></div>
+      </div>
     </div>
     <div class="panel" id="p-udiary">
       <div class="sh">
@@ -920,9 +926,8 @@
       <div id="vidCatList"><div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div></div>
     </div>
 
-    <div class="panel" id="p-uvid">
-      <div id="uVidContent"><div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div></div>
-    </div>
+    <!-- p-uvid kept for DOM compatibility but content moved to p-uplan -->
+    <div class="panel" id="p-uvid"></div>
 
     <div class="panel" id="p-ushop">
       <div class="st" style="margin-bottom:14px">🛒 Магазин</div>
@@ -949,16 +954,12 @@
           <div class="cross-timer" id="crossTimer">00:00</div>
           <div class="cross-metrics">
             <div class="cross-metric">
-              <div class="cross-metric-val" id="crossDist">0.00</div>
-              <div class="cross-metric-lbl">км</div>
+              <div class="cross-metric-val" id="crossDist">0</div>
+              <div class="cross-metric-lbl">м</div>
             </div>
             <div class="cross-metric">
-              <div class="cross-metric-val" id="crossSpeed">0.0</div>
-              <div class="cross-metric-lbl">км/ч</div>
-            </div>
-            <div class="cross-metric">
-              <div class="cross-metric-val" id="crossPace">—</div>
-              <div class="cross-metric-lbl">мин/км</div>
+              <div class="cross-metric-val" id="crossTime">00:00</div>
+              <div class="cross-metric-lbl">время</div>
             </div>
           </div>
           <button class="cross-start-btn" id="crossStartBtn" onclick="crossToggleRun()">▶</button>
@@ -966,6 +967,7 @@
             <button class="cross-pause-btn" id="crossPauseBtn" onclick="crossPause()">⏸ Пауза</button>
             <button class="cross-stop-btn" onclick="crossFinish()">⏹ Завершить</button>
           </div>
+          <div id="crossMap" style="width:100%;height:280px;border-radius:14px;margin-top:16px;display:none"></div>
         </div>
       </div>
 
@@ -1376,6 +1378,7 @@
       <div class="nut-tab" id="ntab-build" onclick="switchNutTab('build')">🍳 Блюдо</div>
       <div class="nut-tab" id="ntab-fav" onclick="switchNutTab('fav')">⭐ Избранное</div>
       <div class="nut-tab" id="ntab-recent" onclick="switchNutTab('recent')">🕐 Недавние</div>
+      <div class="nut-tab" id="ntab-own" onclick="switchNutTab('own')">🥕 Свой продукт</div>
     </div>
 
     <!-- ── Вкладка: Поиск ── -->
@@ -1501,6 +1504,23 @@
         <button class="btn btn-g" onclick="closeMo('mAddNut');resetNutModal()">Отмена</button>
       </div>
     </div>
+
+    <!-- ── Вкладка: Свой продукт ── -->
+    <div class="nut-tab-panel" id="npanel-own">
+      <div class="fg"><label class="fl">Название продукта</label><input class="fi" id="ownNutName" placeholder="Например: Греческий йогурт"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="fg"><label class="fl">Ккал / 100г</label><input class="fi" id="ownNutKcal" type="number" placeholder="0"/></div>
+        <div class="fg"><label class="fl">Белки / 100г</label><input class="fi" id="ownNutProt" type="number" step="0.1" placeholder="0"/></div>
+        <div class="fg"><label class="fl">Жиры / 100г</label><input class="fi" id="ownNutFat" type="number" step="0.1" placeholder="0"/></div>
+        <div class="fg"><label class="fl">Углеводы / 100г</label><input class="fi" id="ownNutCarb" type="number" step="0.1" placeholder="0"/></div>
+      </div>
+      <div class="fg"><label class="fl">Порция (грамм)</label><input class="fi" id="ownNutGrams" type="number" placeholder="100" value="100" oninput="ownNutCalc()"/></div>
+      <div id="ownNutPreview" style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;color:var(--mu2)"></div>
+      <div class="mf" style="padding-top:12px">
+        <button class="btn btn-g" onclick="closeMo('mAddNut');resetNutModal()">Отмена</button>
+        <button class="btn btn-p" onclick="saveOwnNutEntry()">Добавить</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1614,7 +1634,7 @@ function startApp(){
 
 const TABS={
   admin:[{id:'ah',icon:'🏠',lbl:'Главная'},{id:'acal',icon:'📅',lbl:'Календарь'},{id:'aw',icon:'🏋️',lbl:'Тренировки'},{id:'aprog',icon:'📈',lbl:'Прогресс'},{id:'arev',icon:'⭐',lbl:'Отзывы'},{id:'avid',icon:'🎬',lbl:'Видео'},{id:'ashop',icon:'🛒',lbl:'Магазин'},{id:'anut',icon:'🥗',lbl:'Питание'},{id:'across',icon:'🏃',lbl:'Кросс'}],
-  user: [{id:'uh',icon:'🏠',lbl:'Главная'},{id:'uplan',icon:'📋',lbl:'План'},{id:'udiary',icon:'📊',lbl:'Дневник'},{id:'uprog',icon:'📈',lbl:'Прогресс'},{id:'uvid',icon:'🎬',lbl:'Видео'},{id:'ushop',icon:'🛒',lbl:'Магазин'},{id:'unut',icon:'🥗',lbl:'Питание'},{id:'ucross',icon:'🏃',lbl:'Кросс'}]
+  user: [{id:'uh',icon:'🏠',lbl:'Главная'},{id:'uplan',icon:'📋',lbl:'План'},{id:'uprog',icon:'📈',lbl:'Прогресс'},{id:'ushop',icon:'🛒',lbl:'Магазин'},{id:'unut',icon:'🥗',lbl:'Питание'},{id:'ucross',icon:'🏃',lbl:'Кросс'}]
 };
 function buildNav(){
   const nav=document.getElementById('bnav'),tabs=ME.role==='admin'?TABS.admin:TABS.user;
@@ -1634,12 +1654,10 @@ function showTab(id,btn){
   if(id==='uw')    loadUserWorkouts();
   if(id==='uprog') loadUserProgress();
   if(id==='ushop') loadUserShop();
-  if(id==='uplan') loadUserPlan();
-  if(id==='udiary') loadDiary();
+  if(id==='uplan') { loadUserPlan(); loadUserVideoLibrary(); }
   if(id==='acal')  loadCalendar();
   if(id==='arev')  loadReviews();
   if(id==='avid')  loadVideoLibrary();
-  if(id==='uvid')  loadUserVideoLibrary();
   if(id==='anut')  loadAdminNutrition();
   if(id==='unut')  loadUserNutrition();
   if(id==='ucross') loadUserCross();
@@ -2539,7 +2557,7 @@ function anutDateShift(d){const dt=new Date(_anutDate);dt.setDate(dt.getDate()+d
 // ═══ ВКЛАДКИ МОДАЛА ПИТАНИЯ ═══
 function switchNutTab(tab){
   _nutActiveTab=tab;
-  ['search','build','fav','recent'].forEach(t=>{
+  ['search','build','fav','recent','own'].forEach(t=>{
     document.getElementById('ntab-'+t)?.classList.toggle('active',t===tab);
     document.getElementById('npanel-'+t)?.classList.toggle('active',t===tab);
   });
@@ -2786,6 +2804,11 @@ function resetNutModal(){
   hideDropdown('nutDropdown');hideDropdown('buildDropdown');
   const title=document.getElementById('nutModalTitle');
   if(title)title.textContent='🥗 Добавить приём пищи';
+  // Reset own product tab
+  const ownFields=['ownNutName','ownNutKcal','ownNutProt','ownNutFat','ownNutCarb'];
+  ownFields.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const ownGrams=document.getElementById('ownNutGrams');if(ownGrams)ownGrams.value='100';
+  const ownPrev=document.getElementById('ownNutPreview');if(ownPrev)ownPrev.innerHTML='';
   switchNutTab('search');
 }
 
@@ -3048,11 +3071,63 @@ document.getElementById('uPd').value=new Date(Date.now()+30*86400000).toISOStrin
 let _crossState = 'idle'; // idle | running | paused | finished
 let _crossTimer = null;
 let _crossElapsed = 0;    // секунды (накопленное время)
+let _crossStartTime = 0;  // Date.now() при старте (с учётом уже прошедшего времени)
 let _crossPauseStart = 0;
 let _crossDistM = 0;      // метры
 let _crossLastPos = null;
 let _crossWatchId = null;
 let _crossResult = null;
+let _crossMap = null;
+let _crossMyMarker = null;
+let _crossLiveInterval = null;
+let _crossOtherMarkers = {};
+
+function initCrossMap() {
+  const mapEl = document.getElementById('crossMap');
+  if (!mapEl) return;
+  mapEl.style.display = 'block';
+  if (!_crossMap) {
+    _crossMap = L.map('crossMap', {zoomControl:true, attributionControl:false}).setView([43.238, 76.889], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(_crossMap);
+  }
+  setTimeout(() => { if (_crossMap) _crossMap.invalidateSize(); }, 200);
+}
+
+async function crossUpdateLiveMap(lat, lon) {
+  if (!_crossMap) return;
+  const latlng = [lat, lon];
+  if (!_crossMyMarker) {
+    _crossMyMarker = L.circleMarker(latlng, {radius:9,color:'#38bdf8',fillColor:'#38bdf8',fillOpacity:.9,weight:2}).addTo(_crossMap).bindPopup('Вы');
+  } else {
+    _crossMyMarker.setLatLng(latlng);
+  }
+  _crossMap.panTo(latlng);
+  // Send position to server
+  if (ME) api('/api/runs/active','POST',{userId:ME.id,lat,lon,isActive:true}).catch(()=>{});
+}
+
+async function crossPollOthers() {
+  if (!_crossMap || !ME) return;
+  try {
+    const runners = await api('/api/runs/active');
+    const seen = new Set();
+    for (const r of runners) {
+      if (r.userId === ME.id) continue;
+      seen.add(r.userId);
+      const latlng = [r.lat, r.lon];
+      if (_crossOtherMarkers[r.userId]) {
+        _crossOtherMarkers[r.userId].setLatLng(latlng);
+      } else {
+        _crossOtherMarkers[r.userId] = L.circleMarker(latlng, {radius:7,color:'#a78bfa',fillColor:'#a78bfa',fillOpacity:.8,weight:2})
+          .addTo(_crossMap).bindPopup(esc(r.userId));
+      }
+    }
+    // Remove markers for runners no longer active
+    for (const uid of Object.keys(_crossOtherMarkers)) {
+      if (!seen.has(uid)) { _crossOtherMarkers[uid].remove(); delete _crossOtherMarkers[uid]; }
+    }
+  } catch(e) { /* silent */ }
+}
 
 function haversine(lat1, lon1, lat2, lon2) {
   const R = 6371000;
@@ -3082,11 +3157,12 @@ function fmtPace(distM, seconds) {
 
 function crossUpdateUI() {
   document.getElementById('crossTimer').textContent = fmtTime(_crossElapsed);
-  const km = _crossDistM / 1000;
-  document.getElementById('crossDist').textContent = km.toFixed(2);
-  const spd = _crossElapsed > 0 ? (_crossDistM / _crossElapsed * 3.6) : 0;
-  document.getElementById('crossSpeed').textContent = spd.toFixed(1);
-  document.getElementById('crossPace').textContent = fmtPace(_crossDistM, _crossElapsed);
+  // Distance in meters with thousands separator
+  const m = Math.round(_crossDistM);
+  document.getElementById('crossDist').textContent = m >= 1000
+    ? Math.floor(m/1000) + ' ' + String(m % 1000).padStart(3,'0')
+    : String(m);
+  document.getElementById('crossTime').textContent = fmtTime(_crossElapsed);
 }
 
 function crossToggleRun() {
@@ -3104,6 +3180,7 @@ function crossStart() {
   }
   _crossState = 'running';
   _crossElapsed = 0; _crossDistM = 0; _crossLastPos = null;
+  _crossStartTime = Date.now(); // system-clock anchor
   document.getElementById('crossStateLbl').textContent = 'Тренировка идёт...';
   document.getElementById('crossStartBtn').innerHTML = '⏸';
   document.getElementById('crossStartBtn').classList.add('running');
@@ -3111,7 +3188,12 @@ function crossStart() {
   document.getElementById('crossCtrl').style.display = 'flex';
   document.getElementById('crossPauseBtn').textContent = '⏸ Пауза';
   document.getElementById('crossPauseBtn').onclick = crossPause;
-  _crossTimer = setInterval(() => { _crossElapsed++; crossUpdateUI(); }, 1000);
+  _crossTimer = setInterval(() => {
+    _crossElapsed = Math.floor((Date.now() - _crossStartTime) / 1000);
+    crossUpdateUI();
+  }, 1000);
+  initCrossMap();
+  _crossLiveInterval = setInterval(crossPollOthers, 4000);
   _crossWatchId = navigator.geolocation.watchPosition(pos => {
     if (_crossState !== 'running') return;
     if (pos.coords.accuracy > 50) return; // фильтр неточных позиций
@@ -3122,6 +3204,8 @@ function crossStart() {
     }
     _crossLastPos = {lat, lon};
     document.getElementById('crossGpsWarn').style.display = 'none';
+    crossUpdateLiveMap(lat, lon);
+    // Send position update every ~5s (throttle via GPS events)
   }, err => {
     console.warn('GPS:', err.message);
     document.getElementById('crossGpsWarn').style.display = 'block';
@@ -3130,9 +3214,13 @@ function crossStart() {
 
 function crossPause() {
   if (_crossState !== 'running') return;
+  // Save elapsed before pausing
+  _crossElapsed = Math.floor((Date.now() - _crossStartTime) / 1000);
   _crossState = 'paused';
   clearInterval(_crossTimer);
   if (_crossWatchId !== null) { navigator.geolocation.clearWatch(_crossWatchId); _crossWatchId = null; }
+  if (_crossLiveInterval) { clearInterval(_crossLiveInterval); _crossLiveInterval = null; }
+  if (ME) api('/api/runs/active','POST',{userId:ME.id,isActive:false}).catch(()=>{});
   document.getElementById('crossStateLbl').textContent = 'Пауза';
   document.getElementById('crossStartBtn').innerHTML = '▶';
   document.getElementById('crossStartBtn').classList.remove('running');
@@ -3144,13 +3232,19 @@ function crossPause() {
 function crossResume() {
   if (_crossState !== 'paused') return;
   _crossState = 'running';
+  // Adjust start time so that elapsed continues from where we paused
+  _crossStartTime = Date.now() - (_crossElapsed * 1000);
   document.getElementById('crossStateLbl').textContent = 'Тренировка идёт...';
   document.getElementById('crossStartBtn').innerHTML = '⏸';
   document.getElementById('crossStartBtn').classList.add('running');
   document.getElementById('crossStartBtn').onclick = crossPause;
   document.getElementById('crossPauseBtn').textContent = '⏸ Пауза';
   document.getElementById('crossPauseBtn').onclick = crossPause;
-  _crossTimer = setInterval(() => { _crossElapsed++; crossUpdateUI(); }, 1000);
+  _crossTimer = setInterval(() => {
+    _crossElapsed = Math.floor((Date.now() - _crossStartTime) / 1000);
+    crossUpdateUI();
+  }, 1000);
+  _crossLiveInterval = setInterval(crossPollOthers, 4000);
   _crossWatchId = navigator.geolocation.watchPosition(pos => {
     if (_crossState !== 'running') return;
     if (pos.coords.accuracy > 50) return; // фильтр неточных позиций
@@ -3161,12 +3255,15 @@ function crossResume() {
     }
     _crossLastPos = {lat, lon};
     document.getElementById('crossGpsWarn').style.display = 'none';
+    crossUpdateLiveMap(lat, lon);
   }, err => console.warn('GPS:', err.message), {enableHighAccuracy: true, maximumAge: 0, timeout: 15000});
 }
 
 function crossFinish() {
   clearInterval(_crossTimer);
   if (_crossWatchId !== null) { navigator.geolocation.clearWatch(_crossWatchId); _crossWatchId = null; }
+  if (_crossLiveInterval) { clearInterval(_crossLiveInterval); _crossLiveInterval = null; }
+  if (ME) api('/api/runs/active','POST',{userId:ME.id,isActive:false}).catch(()=>{});
   _crossState = 'finished';
   const avgSpd = _crossElapsed > 0 ? (_crossDistM / _crossElapsed * 3.6) : 0;
   _crossResult = { distance: _crossDistM, duration: _crossElapsed, avgSpeed: avgSpd, date: new Date().toISOString() };
@@ -3196,19 +3293,25 @@ async function crossSaveRun() {
 }
 
 function crossReset() {
-  _crossState = 'idle'; _crossElapsed = 0; _crossDistM = 0; _crossLastPos = null; _crossResult = null;
+  _crossState = 'idle'; _crossElapsed = 0; _crossDistM = 0; _crossLastPos = null; _crossResult = null; _crossStartTime = 0;
   document.getElementById('crossTrainScreen').style.display = 'block';
   document.getElementById('crossResultScreen').style.display = 'none';
   document.getElementById('crossStateLbl').textContent = 'Готов к старту';
   document.getElementById('crossTimer').textContent = '00:00';
-  document.getElementById('crossDist').textContent = '0.00';
-  document.getElementById('crossSpeed').textContent = '0.0';
-  document.getElementById('crossPace').textContent = '—';
+  document.getElementById('crossDist').textContent = '0';
+  document.getElementById('crossTime').textContent = '00:00';
   document.getElementById('crossStartBtn').innerHTML = '▶';
   document.getElementById('crossStartBtn').classList.remove('running');
   document.getElementById('crossStartBtn').onclick = crossToggleRun;
   document.getElementById('crossCtrl').style.display = 'none';
   document.getElementById('crossGpsWarn').style.display = 'none';
+  // Hide map
+  const mapEl = document.getElementById('crossMap');
+  if (mapEl) mapEl.style.display = 'none';
+  // Stop live polling
+  if (_crossLiveInterval) { clearInterval(_crossLiveInterval); _crossLiveInterval = null; }
+  // Mark inactive
+  if (ME) api('/api/runs/active','POST',{userId:ME.id,isActive:false}).catch(()=>{});
 }
 
 function renderLeaderboard(list, containerId) {
@@ -3283,6 +3386,47 @@ function loadAdminCross() {
   } else if (activeSec.id === 'acrossStudentsSection') {
     loadAcrossStudents();
   }
+}
+
+// ═══════════════════════════════════════════
+// ПИТАНИЕ — СВОЙ ПРОДУКТ
+// ═══════════════════════════════════════════
+function ownNutCalc() {
+  const grams = parseFloat(document.getElementById('ownNutGrams').value) || 100;
+  const k100 = parseFloat(document.getElementById('ownNutKcal').value) || 0;
+  const p100 = parseFloat(document.getElementById('ownNutProt').value) || 0;
+  const f100 = parseFloat(document.getElementById('ownNutFat').value) || 0;
+  const c100 = parseFloat(document.getElementById('ownNutCarb').value) || 0;
+  const mul = grams / 100;
+  document.getElementById('ownNutPreview').innerHTML =
+    `<b>${grams}г:</b> ${Math.round(k100*mul)} ккал · Б: ${(p100*mul).toFixed(1)} · Ж: ${(f100*mul).toFixed(1)} · У: ${(c100*mul).toFixed(1)}`;
+}
+
+async function saveOwnNutEntry() {
+  const name = document.getElementById('ownNutName').value.trim();
+  if (!name) { toast('Введите название', 'e'); return; }
+  const grams = parseFloat(document.getElementById('ownNutGrams').value) || 100;
+  const k100 = parseFloat(document.getElementById('ownNutKcal').value) || 0;
+  const p100 = parseFloat(document.getElementById('ownNutProt').value) || 0;
+  const f100 = parseFloat(document.getElementById('ownNutFat').value) || 0;
+  const c100 = parseFloat(document.getElementById('ownNutCarb').value) || 0;
+  const mul = grams / 100;
+  const mealType = document.getElementById('nutType')?.value || 'snack';
+  try {
+    await api(`/api/nutrition/${ME.id}`, 'POST', {
+      name: `${name} (${grams}г)`,
+      type: mealType,
+      kcal: Math.round(k100 * mul),
+      protein: parseFloat((p100 * mul).toFixed(1)),
+      fat: parseFloat((f100 * mul).toFixed(1)),
+      carbs: parseFloat((c100 * mul).toFixed(1)),
+      date: _nutDate
+    });
+    toast('✅ Добавлено', 's');
+    closeMo('mAddNut');
+    resetNutModal();
+    loadUserNutrition();
+  } catch(e) { toast(e.message, 'e'); }
 }
 </script>
 </body>
