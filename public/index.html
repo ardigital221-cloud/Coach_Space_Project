@@ -874,13 +874,24 @@
         <div><b style="font-size:14px">Связаться с тренером</b><br><span style="font-size:12px;color:var(--mu2)">Написать в Telegram</span></div>
       </a>
       <div class="div"></div>
+      <div class="st" style="margin-bottom:10px">🏋️ Мои тренировки</div>
+      <div id="uWorkouts"></div>
+
+      <div class="div"></div>
+      <div class="st" style="margin-bottom:10px">📅 Расписание</div>
+      <div class="cal-nav">
+        <button class="btn btn-g sm" onclick="uCalPrev()">‹</button>
+        <div class="cal-month" id="uCalMonthLabel"></div>
+        <button class="btn btn-g sm" onclick="uCalNext()">›</button>
+      </div>
+      <div class="cal-grid" id="uCalGrid"></div>
+      <div class="cal-day-events" id="uCalEvents"></div>
+
+      <div class="div"></div>
       <div class="st" style="margin-bottom:12px">📢 Новости</div>
       <div id="uPosts"></div>
     </div>
-    <div class="panel" id="p-uw">
-      <div class="st" style="margin-bottom:14px">🏋️ Мои тренировки</div>
-      <div id="uWorkouts"></div>
-    </div>
+    <div class="panel" id="p-uw" style="display:none"></div>
     <div class="panel" id="p-uprog">
       <div class="sh"><div class="st">📈 Мой прогресс</div><button class="btn btn-p sm" onclick="openMo('mAddWt')">+ Вес</button></div>
       <div class="card card-a"><div class="ct">График веса</div><div class="chart-w"><canvas id="wChart"></canvas></div></div>
@@ -1882,9 +1893,63 @@ async function loadProgPanel(){try{const s=allStudents.length?allStudents:await 
 async function loadAdminProg(){const uid=document.getElementById('progSel').value;const box=document.getElementById('progContent');if(!uid){box.innerHTML='';return;}box.innerHTML=`<div class="empty"><div class="sp-ring" style="margin:30px auto"></div></div>`;try{const[progressData,diaryData]=await Promise.all([authFetch('/api/progress/'+uid,{headers:{'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[]),authFetch('/api/diary/'+uid,{headers:{'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[])]);const weights=(Array.isArray(progressData)?progressData:[]).filter(d=>d.type==='weight');const photos=(Array.isArray(progressData)?progressData:[]).filter(d=>d.type==='photo');const entries=Array.isArray(diaryData)?diaryData:[];let html='';html+=`<div class="card card-a"><div class="ct">⚖️ График веса</div>`;html+=weights.length?`<div class="chart-w"><canvas id="adm-wc"></canvas></div>`:`<div class="empty" style="padding:20px 0"><div class="ei">⚖️</div>Нет данных о весе</div>`;html+=`</div>`;if(photos.length){html+=`<div class="st" style="margin-bottom:10px">📸 Фото прогресса</div><div class="ph-g">`;html+=photos.map(p=>`<img class="ph-img" src="${p.photoUrl}" onclick="openLightbox('${p.photoUrl}')"/>`).join('');html+=`</div><div style="margin-bottom:16px"></div>`;}html+=`<div class="sh" style="margin-bottom:12px"><div class="st">📊 Дневник тренировок</div><span style="font-size:12px;color:var(--mu2)">${entries.length} записей</span></div>`;if(!entries.length){html+=`<div class="empty" style="padding:20px 0"><div class="ei">📊</div>Ученик ещё не вёл дневник</div>`;}else{html+=entries.map(e=>{const stars=e.rating?'⭐'.repeat(e.rating):'';const d=new Date(e.date).toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short',year:'numeric'});const exCount=(e.exercises||[]).length;return`<div class="diary-day" style="cursor:default"><div class="diary-day-head"><span style="font-size:18px">🏋️</span><div><div class="diary-day-date">${d}</div><div class="diary-day-excount">${exCount} упражнений${e.note?' · '+esc(e.note.slice(0,50)):''}</div></div><div class="diary-day-rating">${stars}</div></div>${(e.exercises||[]).length?`<div style="margin-top:10px">`+e.exercises.map(ex=>{const chips=(ex.sets||[]).map(s=>`<span class="diary-set-chip">${s.weight?s.weight+'кг×':''}${s.reps}</span>`).join('');return`<div class="diary-ex-row"><span class="diary-ex-name">${esc(ex.name)}</span><div class="diary-ex-sets">${chips}</div></div>`;}).join('')+`</div>`:''}</div>`;}).join('');}box.innerHTML=html;if(weights.length)new Chart(document.getElementById('adm-wc'),chartCfg(weights));}catch(e){box.innerHTML=`<div class="empty">${esc(e.message)}</div>`;}}
 
 // ═══ ГЛАВНАЯ УЧЕНИКА ═══
-async function loadUserHome(){try{ME=await api('/api/me/'+ME.id);}catch{}const n=document.getElementById('subN');n.textContent=ME.sessions;n.style.color=ME.sessions<=0?'var(--red)':ME.sessions<=2?'var(--yel)':'var(--ac)';document.getElementById('subPay').textContent=ME.paymentDate?new Date(ME.paymentDate).toLocaleDateString('ru-RU'):'—';document.getElementById('streak').style.display=ME.sessions>0?'flex':'none';document.getElementById('planBtn').innerHTML='';loadUserPosts();if(!document.getElementById('reviewHomeBtn')){const tgBtn=document.querySelector('.tg-a');if(tgBtn){const btn=document.createElement('button');btn.id='reviewHomeBtn';btn.className='tg-a';btn.style.cssText='cursor:pointer;border:none;text-align:left;width:100%;background:rgba(255,255,255,.03)';btn.innerHTML='<span style="font-size:26px">⭐</span><div><b style="font-size:14px">Оставить отзыв</b><br><span style="font-size:12px;color:var(--mu2)">Оцените тренировку</span></div>';btn.onclick=()=>openMo('mReview');tgBtn.parentNode.insertBefore(btn,tgBtn.nextSibling);}}}
+async function loadUserHome(){try{ME=await api('/api/me/'+ME.id);}catch{}const n=document.getElementById('subN');n.textContent=ME.sessions;n.style.color=ME.sessions<=0?'var(--red)':ME.sessions<=2?'var(--yel)':'var(--ac)';document.getElementById('subPay').textContent=ME.paymentDate?new Date(ME.paymentDate).toLocaleDateString('ru-RU'):'—';document.getElementById('streak').style.display=ME.sessions>0?'flex':'none';document.getElementById('planBtn').innerHTML='';loadUserPosts();loadUserWorkouts();loadUserCalendar();if(!document.getElementById('reviewHomeBtn')){const tgBtn=document.querySelector('.tg-a');if(tgBtn){const btn=document.createElement('button');btn.id='reviewHomeBtn';btn.className='tg-a';btn.style.cssText='cursor:pointer;border:none;text-align:left;width:100%;background:rgba(255,255,255,.03)';btn.innerHTML='<span style="font-size:26px">⭐</span><div><b style="font-size:14px">Оставить отзыв</b><br><span style="font-size:12px;color:var(--mu2)">Оцените тренировку</span></div>';btn.onclick=()=>openMo('mReview');tgBtn.parentNode.insertBefore(btn,tgBtn.nextSibling);}}}
 async function loadUserPosts(){const box=document.getElementById('uPosts');try{const posts=await api('/api/posts');if(!posts.length){box.innerHTML=`<div class="empty"><div class="ei">📢</div>Новостей пока нет</div>`;return;}box.innerHTML=posts.map(p=>renderPost(p,false)).join('');}catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}}
-async function loadUserWorkouts(){const box=document.getElementById('uWorkouts');try{const ws=await api('/api/workouts?userId='+ME.id);if(!ws.length){box.innerHTML=`<div class="empty"><div class="ei">🏋️</div>Тренировок пока нет</div>`;return;}const now=Date.now();const future=ws.filter(w=>new Date(w.datetime).getTime()>=now);const past=ws.filter(w=>new Date(w.datetime).getTime()<now).reverse();let html='';if(future.length){html+=`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--ac);margin-bottom:10px">Предстоящие</div>`;html+=future.map(w=>`<div class="wcard ${w.type==='group'?'group':''}"><div class="w-title">${esc(w.title)}<span class="wbadge ${w.type==='group'?'wb-g':'wb-p'}">${w.type==='group'?'Группа':'Личная'}</span></div><div class="w-meta">📅 ${new Date(w.datetime).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} · ⏱ ${w.duration} мин</div>${w.note?`<div class="w-note">📝 ${esc(w.note)}</div>`:''}</div>`).join('');}if(past.length){html+=`<div class="div"></div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu2);margin-bottom:10px">История</div>`;html+=past.slice(0,8).map(w=>`<div class="wcard" style="opacity:.5;border-left-color:var(--mu)"><div class="w-title">${esc(w.title)}</div><div class="w-meta">📅 ${new Date(w.datetime).toLocaleDateString('ru-RU')} · ⏱ ${w.duration} мин</div></div>`).join('');}box.innerHTML=html;}catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}}
+async function loadUserWorkouts(){const box=document.getElementById('uWorkouts');if(!box)return;box.innerHTML='<div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div>';try{const ws=await api('/api/workouts?userId='+ME.id);if(!ws.length){box.innerHTML=`<div class="empty"><div class="ei">🏋️</div>Тренировок пока нет</div>`;return;}const now=Date.now();const future=ws.filter(w=>new Date(w.datetime).getTime()>=now);const past=ws.filter(w=>new Date(w.datetime).getTime()<now).reverse();let html='';if(future.length){html+=`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--ac);margin-bottom:10px">Предстоящие</div>`;html+=future.map(w=>`<div class="wcard ${w.type==='group'?'group':''}"><div class="w-title">${esc(w.title)}<span class="wbadge ${w.type==='group'?'wb-g':'wb-p'}">${w.type==='group'?'Группа':'Личная'}</span></div><div class="w-meta">📅 ${new Date(w.datetime).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} · ⏱ ${w.duration} мин</div>${w.note?`<div class="w-note">📝 ${esc(w.note)}</div>`:''}</div>`).join('');}if(past.length){html+=`<div class="div"></div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu2);margin-bottom:10px">История</div>`;html+=past.slice(0,8).map(w=>`<div class="wcard" style="opacity:.5;border-left-color:var(--mu)"><div class="w-title">${esc(w.title)}</div><div class="w-meta">📅 ${new Date(w.datetime).toLocaleDateString('ru-RU')} · ⏱ ${w.duration} мин</div></div>`).join('');}box.innerHTML=html;}catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}}
+
+// ═══ ПОЛЬЗОВАТЕЛЬСКИЙ КАЛЕНДАРЬ ═══
+let _uCalYear = new Date().getFullYear();
+let _uCalMonth = new Date().getMonth();
+let _uCalWorkouts = [];
+
+async function loadUserCalendar(){
+  try {
+    _uCalWorkouts = await api('/api/workouts?userId='+ME.id);
+  } catch(e){ _uCalWorkouts=[]; }
+  renderUserCalendar();
+}
+
+function renderUserCalendar(){
+  const grid = document.getElementById('uCalGrid');
+  const label = document.getElementById('uCalMonthLabel');
+  const events = document.getElementById('uCalEvents');
+  if(!grid) return;
+  const RU_M = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+  const RU_D = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  label.textContent = RU_M[_uCalMonth] + ' ' + _uCalYear;
+  const today = new Date().toISOString().split('T')[0];
+  let html = RU_D.map(d=>`<div class="cal-head-cell">${d}</div>`).join('');
+  const firstDay = new Date(_uCalYear, _uCalMonth, 1);
+  const startDow = (firstDay.getDay()+6)%7;
+  const daysInMonth = new Date(_uCalYear, _uCalMonth+1, 0).getDate();
+  const daysInPrevM = new Date(_uCalYear, _uCalMonth, 0).getDate();
+  for(let i=0;i<startDow;i++) html+=`<div class="cal-cell other-month">${daysInPrevM-startDow+1+i}</div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr=`${_uCalYear}-${String(_uCalMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasW = _uCalWorkouts.some(w=>w.datetime&&w.datetime.startsWith(dateStr));
+    const isToday = dateStr===today;
+    let cls='cal-cell'+(hasW?' has-workout':'')+(isToday?' today':'');
+    const dot = hasW?'<div class="cal-dots"><div class="cal-dot cal-dot-w"></div></div>':'';
+    html+=`<div class="${cls}" onclick="showUserCalDay('${dateStr}')">${d}${dot}</div>`;
+  }
+  const total=startDow+daysInMonth;
+  const remain=total%7===0?0:7-(total%7);
+  for(let i=1;i<=remain;i++) html+=`<div class="cal-cell other-month">${i}</div>`;
+  grid.innerHTML=html;
+  events.innerHTML='';
+}
+
+function showUserCalDay(dateStr){
+  const ws = _uCalWorkouts.filter(w=>w.datetime&&w.datetime.startsWith(dateStr));
+  const box = document.getElementById('uCalEvents');
+  if(!ws.length){ box.innerHTML=''; return; }
+  const d = new Date(dateStr).toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+  box.innerHTML=`<div style="margin-top:10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--ac);margin-bottom:8px">${d}</div>`+
+    ws.map(w=>`<div class="wcard ${w.type==='group'?'group':''}"><div class="w-title">${esc(w.title)}<span class="wbadge ${w.type==='group'?'wb-g':'wb-p'}">${w.type==='group'?'Группа':'Личная'}</span></div><div class="w-meta">⏰ ${new Date(w.datetime).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})} · ⏱ ${w.duration} мин</div>${w.note?`<div class="w-note">📝 ${esc(w.note)}</div>`:''}</div>`).join('');
+}
+
+function uCalPrev(){ _uCalMonth--; if(_uCalMonth<0){_uCalMonth=11;_uCalYear--;} renderUserCalendar(); }
+function uCalNext(){ _uCalMonth++; if(_uCalMonth>11){_uCalMonth=0;_uCalYear++;} renderUserCalendar(); }
 
 // ═══ ПРОГРЕСС УЧЕНИКА ═══
 async function loadUserProgress(){document.getElementById('wtD').value=new Date().toISOString().split('T')[0];try{const data=await api('/api/progress/'+ME.id);const weights=data.filter(d=>d.type==='weight');const photos=data.filter(d=>d.type==='photo');if(wChartInst){wChartInst.destroy();wChartInst=null;}const chartBox=document.querySelector('#p-uprog .chart-w');if(chartBox){if(weights.length){chartBox.innerHTML='<canvas id="wChart"></canvas>';wChartInst=new Chart(document.getElementById('wChart'),chartCfg(weights));}else{chartBox.innerHTML=`<div class="empty"><div class="ei">⚖️</div>Добавьте первую запись веса</div>`;}}const pg=document.getElementById('phGrid');pg.innerHTML=photos.length?photos.map(p=>`<div class="ph-wrap"><img class="ph-img" src="${p.photoUrl}" onclick="openLightbox('${esc(p.photoUrl)}')"/><button class="ph-del" onclick="deletePhoto('${p.id}',event)" title="Удалить фото">✕</button></div>`).join(''):`<div class="empty" style="grid-column:1/-1"><div class="ei">📸</div>Нет фото</div>`;}catch(e){toast('Ошибка загрузки прогресса: '+e.message,'e');}}
