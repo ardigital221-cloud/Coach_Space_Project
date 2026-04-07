@@ -1379,6 +1379,7 @@
       <div class="nut-tab" id="ntab-fav" onclick="switchNutTab('fav')">⭐ Избранное</div>
       <div class="nut-tab" id="ntab-recent" onclick="switchNutTab('recent')">🕐 Недавние</div>
       <div class="nut-tab" id="ntab-own" onclick="switchNutTab('own')">🥕 Свой продукт</div>
+      <div class="nut-tab" id="ntab-shared" onclick="switchNutTab('shared')">👥 Общие</div>
     </div>
 
     <!-- ── Вкладка: Поиск ── -->
@@ -1505,6 +1506,14 @@
       </div>
     </div>
 
+    <!-- ── Вкладка: Общие продукты ── -->
+    <div class="nut-tab-panel" id="npanel-shared">
+      <div id="sharedFoodsList" class="nut-recent-list"><div class="empty" style="padding:20px 0"><div class="sp-ring" style="margin:0 auto 8px"></div>Загрузка...</div></div>
+      <div class="mf" style="padding-top:12px">
+        <button class="btn btn-g" onclick="closeMo('mAddNut');resetNutModal()">Отмена</button>
+      </div>
+    </div>
+
     <!-- ── Вкладка: Свой продукт ── -->
     <div class="nut-tab-panel" id="npanel-own">
       <div class="fg"><label class="fl">Название продукта</label><input class="fi" id="ownNutName" placeholder="Например: Греческий йогурт"/></div>
@@ -1516,6 +1525,10 @@
       </div>
       <div class="fg"><label class="fl">Порция (грамм)</label><input class="fi" id="ownNutGrams" type="number" placeholder="100" value="100" oninput="ownNutCalc()"/></div>
       <div id="ownNutPreview" style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px;margin:10px 0;font-size:13px;color:var(--mu2)"></div>
+      <label style="display:flex;align-items:center;gap:10px;padding:8px 0;cursor:pointer;font-size:14px;color:var(--mu2)">
+        <input type="checkbox" id="ownNutShare" style="width:18px;height:18px;accent-color:var(--ac)"/>
+        Поделиться с другими пользователями
+      </label>
       <div class="mf" style="padding-top:12px">
         <button class="btn btn-g" onclick="closeMo('mAddNut');resetNutModal()">Отмена</button>
         <button class="btn btn-p" onclick="saveOwnNutEntry()">Добавить</button>
@@ -2557,12 +2570,13 @@ function anutDateShift(d){const dt=new Date(_anutDate);dt.setDate(dt.getDate()+d
 // ═══ ВКЛАДКИ МОДАЛА ПИТАНИЯ ═══
 function switchNutTab(tab){
   _nutActiveTab=tab;
-  ['search','build','fav','recent','own'].forEach(t=>{
+  ['search','build','fav','recent','own','shared'].forEach(t=>{
     document.getElementById('ntab-'+t)?.classList.toggle('active',t===tab);
     document.getElementById('npanel-'+t)?.classList.toggle('active',t===tab);
   });
   if(tab==='search')setTimeout(()=>document.getElementById('nutName')?.focus(),100);
   if(tab==='build')setTimeout(()=>document.getElementById('buildIngName')?.focus(),100);
+  if(tab==='shared')loadSharedFoods();
 }
 
 // ═══ ПОИСК ПРОДУКТОВ ═══
@@ -2809,6 +2823,7 @@ function resetNutModal(){
   ownFields.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const ownGrams=document.getElementById('ownNutGrams');if(ownGrams)ownGrams.value='100';
   const ownPrev=document.getElementById('ownNutPreview');if(ownPrev)ownPrev.innerHTML='';
+  const ownShare=document.getElementById('ownNutShare');if(ownShare)ownShare.checked=false;
   switchNutTab('search');
 }
 
@@ -3069,11 +3084,10 @@ document.getElementById('uPd').value=new Date(Date.now()+30*86400000).toISOStrin
 // КРОСС — GPS ТРЕНИРОВКА
 // ═══════════════════════════════════════════
 let _crossState = 'idle'; // idle | running | paused | finished
-let _crossTimer = null;
-let _crossElapsed = 0;    // секунды (накопленное время)
-let _crossStartTime = 0;  // Date.now() при старте (с учётом уже прошедшего времени)
-let _crossPauseStart = 0;
-let _crossDistM = 0;      // метры
+let _crossWorker = null;   // Web Worker для таймера
+let _crossElapsed = 0;     // секунды (накопленное время)
+let _crossStartTime = 0;   // Date.now() anchor
+let _crossDistM = 0;       // метры
 let _crossLastPos = null;
 let _crossWatchId = null;
 let _crossResult = null;
@@ -3081,6 +3095,56 @@ let _crossMap = null;
 let _crossMyMarker = null;
 let _crossLiveInterval = null;
 let _crossOtherMarkers = {};
+let _crossWakeLock = null; // Wake Lock чтобы экран не гасил таймер
+
+// --- Web Worker таймер ---
+function _crossWorkerStart(startTime) {
+  if (_crossWorker) { _crossWorker.terminate(); _crossWorker = null; }
+  try {
+    _crossWorker = new Worker('/timer-worker.js');
+    _crossWorker.onmessage = e => {
+      _crossElapsed = e.data.elapsed;
+      crossUpdateUI();
+    };
+    _crossWorker.postMessage({ cmd: 'start', startTime });
+  } catch(err) {
+    // Fallback: обычный setInterval если Worker недоступен
+    console.warn('Worker недоступен, используем setInterval');
+    _crossWorker = { _iv: setInterval(() => {
+      _crossElapsed = Math.floor((Date.now() - startTime) / 1000);
+      crossUpdateUI();
+    }, 1000), terminate() { clearInterval(this._iv); } };
+  }
+}
+
+function _crossWorkerStop() {
+  if (_crossWorker) { _crossWorker.terminate(); _crossWorker = null; }
+}
+
+// --- Wake Lock (не даём экрану гаснуть) ---
+async function _crossAcquireWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      _crossWakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch(e) { console.log('WakeLock недоступен:', e.message); }
+}
+function _crossReleaseWakeLock() {
+  if (_crossWakeLock) { _crossWakeLock.release().catch(()=>{}); _crossWakeLock = null; }
+}
+
+// --- Page Visibility: когда возвращаемся из фона — синхронизируем время ---
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && _crossState === 'running') {
+    // Пересчитываем elapsed из системного времени — таймер не "уснул"
+    _crossElapsed = Math.floor((Date.now() - _crossStartTime) / 1000);
+    crossUpdateUI();
+    // Переотправляем позицию на сервер при возврате
+    if (_crossLastPos && ME) {
+      api('/api/runs/active','POST',{userId:ME.id,lat:_crossLastPos.lat,lon:_crossLastPos.lon,isActive:true}).catch(()=>{});
+    }
+  }
+});
 
 function initCrossMap() {
   const mapEl = document.getElementById('crossMap');
@@ -3180,7 +3244,7 @@ function crossStart() {
   }
   _crossState = 'running';
   _crossElapsed = 0; _crossDistM = 0; _crossLastPos = null;
-  _crossStartTime = Date.now(); // system-clock anchor
+  _crossStartTime = Date.now();
   document.getElementById('crossStateLbl').textContent = 'Тренировка идёт...';
   document.getElementById('crossStartBtn').innerHTML = '⏸';
   document.getElementById('crossStartBtn').classList.add('running');
@@ -3188,24 +3252,30 @@ function crossStart() {
   document.getElementById('crossCtrl').style.display = 'flex';
   document.getElementById('crossPauseBtn').textContent = '⏸ Пауза';
   document.getElementById('crossPauseBtn').onclick = crossPause;
-  _crossTimer = setInterval(() => {
-    _crossElapsed = Math.floor((Date.now() - _crossStartTime) / 1000);
-    crossUpdateUI();
-  }, 1000);
+  // Web Worker таймер — работает даже при свёрнутом браузере
+  _crossWorkerStart(_crossStartTime);
+  // Wake Lock — не даём экрану засыпать
+  _crossAcquireWakeLock();
   initCrossMap();
   _crossLiveInterval = setInterval(crossPollOthers, 4000);
+  let _lastPosSentAt = 0;
   _crossWatchId = navigator.geolocation.watchPosition(pos => {
     if (_crossState !== 'running') return;
-    if (pos.coords.accuracy > 50) return; // фильтр неточных позиций
+    if (pos.coords.accuracy > 50) return;
     const {latitude: lat, longitude: lon} = pos.coords;
     if (_crossLastPos) {
       const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
-      if (d >= 2 && d < 100) _crossDistM += d; // фильтр шума (<2м) и скачков GPS (>100м)
+      if (d >= 2 && d < 100) _crossDistM += d;
     }
     _crossLastPos = {lat, lon};
     document.getElementById('crossGpsWarn').style.display = 'none';
     crossUpdateLiveMap(lat, lon);
-    // Send position update every ~5s (throttle via GPS events)
+    // Отправляем позицию не чаще раз в 5 сек
+    const now = Date.now();
+    if (now - _lastPosSentAt > 5000 && ME) {
+      _lastPosSentAt = now;
+      api('/api/runs/active','POST',{userId:ME.id,userName:ME.name,lat,lon,isActive:true}).catch(()=>{});
+    }
   }, err => {
     console.warn('GPS:', err.message);
     document.getElementById('crossGpsWarn').style.display = 'block';
@@ -3214,10 +3284,10 @@ function crossStart() {
 
 function crossPause() {
   if (_crossState !== 'running') return;
-  // Save elapsed before pausing
   _crossElapsed = Math.floor((Date.now() - _crossStartTime) / 1000);
   _crossState = 'paused';
-  clearInterval(_crossTimer);
+  _crossWorkerStop();
+  _crossReleaseWakeLock();
   if (_crossWatchId !== null) { navigator.geolocation.clearWatch(_crossWatchId); _crossWatchId = null; }
   if (_crossLiveInterval) { clearInterval(_crossLiveInterval); _crossLiveInterval = null; }
   if (ME) api('/api/runs/active','POST',{userId:ME.id,isActive:false}).catch(()=>{});
@@ -3232,7 +3302,6 @@ function crossPause() {
 function crossResume() {
   if (_crossState !== 'paused') return;
   _crossState = 'running';
-  // Adjust start time so that elapsed continues from where we paused
   _crossStartTime = Date.now() - (_crossElapsed * 1000);
   document.getElementById('crossStateLbl').textContent = 'Тренировка идёт...';
   document.getElementById('crossStartBtn').innerHTML = '⏸';
@@ -3240,27 +3309,32 @@ function crossResume() {
   document.getElementById('crossStartBtn').onclick = crossPause;
   document.getElementById('crossPauseBtn').textContent = '⏸ Пауза';
   document.getElementById('crossPauseBtn').onclick = crossPause;
-  _crossTimer = setInterval(() => {
-    _crossElapsed = Math.floor((Date.now() - _crossStartTime) / 1000);
-    crossUpdateUI();
-  }, 1000);
+  _crossWorkerStart(_crossStartTime);
+  _crossAcquireWakeLock();
   _crossLiveInterval = setInterval(crossPollOthers, 4000);
+  let _lastPosSentAt = 0;
   _crossWatchId = navigator.geolocation.watchPosition(pos => {
     if (_crossState !== 'running') return;
-    if (pos.coords.accuracy > 50) return; // фильтр неточных позиций
+    if (pos.coords.accuracy > 50) return;
     const {latitude: lat, longitude: lon} = pos.coords;
     if (_crossLastPos) {
       const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
-      if (d >= 2 && d < 100) _crossDistM += d; // фильтр шума (<2м) и скачков GPS (>100м)
+      if (d >= 2 && d < 100) _crossDistM += d;
     }
     _crossLastPos = {lat, lon};
     document.getElementById('crossGpsWarn').style.display = 'none';
     crossUpdateLiveMap(lat, lon);
+    const now = Date.now();
+    if (now - _lastPosSentAt > 5000 && ME) {
+      _lastPosSentAt = now;
+      api('/api/runs/active','POST',{userId:ME.id,userName:ME.name,lat,lon,isActive:true}).catch(()=>{});
+    }
   }, err => console.warn('GPS:', err.message), {enableHighAccuracy: true, maximumAge: 0, timeout: 15000});
 }
 
 function crossFinish() {
-  clearInterval(_crossTimer);
+  _crossWorkerStop();
+  _crossReleaseWakeLock();
   if (_crossWatchId !== null) { navigator.geolocation.clearWatch(_crossWatchId); _crossWatchId = null; }
   if (_crossLiveInterval) { clearInterval(_crossLiveInterval); _crossLiveInterval = null; }
   if (ME) api('/api/runs/active','POST',{userId:ME.id,isActive:false}).catch(()=>{});
@@ -3293,6 +3367,8 @@ async function crossSaveRun() {
 }
 
 function crossReset() {
+  _crossWorkerStop();
+  _crossReleaseWakeLock();
   _crossState = 'idle'; _crossElapsed = 0; _crossDistM = 0; _crossLastPos = null; _crossResult = null; _crossStartTime = 0;
   document.getElementById('crossTrainScreen').style.display = 'block';
   document.getElementById('crossResultScreen').style.display = 'none';
@@ -3412,21 +3488,59 @@ async function saveOwnNutEntry() {
   const c100 = parseFloat(document.getElementById('ownNutCarb').value) || 0;
   const mul = grams / 100;
   const mealType = document.getElementById('nutType')?.value || 'snack';
+  const isShared = document.getElementById('ownNutShare')?.checked || false;
   try {
+    // Сохраняем в базу продуктов (для поиска другими)
+    await api(`/api/custom-foods/${ME.id}`, 'POST', {
+      name, kcal: Math.round(k100), protein: parseFloat(p100.toFixed(1)),
+      fat: parseFloat(f100.toFixed(1)), carbs: parseFloat(c100.toFixed(1)),
+      isShared, userName: ME.name
+    });
+    // Добавляем в дневник питания за сегодня
     await api(`/api/nutrition/${ME.id}`, 'POST', {
-      name: `${name} (${grams}г)`,
-      type: mealType,
+      name: `${name} (${grams}г)`, type: mealType,
       kcal: Math.round(k100 * mul),
       protein: parseFloat((p100 * mul).toFixed(1)),
       fat: parseFloat((f100 * mul).toFixed(1)),
       carbs: parseFloat((c100 * mul).toFixed(1)),
       date: _nutDate
     });
-    toast('✅ Добавлено', 's');
+    toast(isShared ? '✅ Добавлено и опубликовано для всех' : '✅ Добавлено', 's');
     closeMo('mAddNut');
     resetNutModal();
     loadUserNutrition();
   } catch(e) { toast(e.message, 'e'); }
+}
+
+async function loadSharedFoods() {
+  const box = document.getElementById('sharedFoodsList');
+  if (!box) return;
+  box.innerHTML = '<div class="empty" style="padding:20px 0"><div class="sp-ring" style="margin:0 auto 8px"></div>Загрузка...</div>';
+  try {
+    const foods = await api('/api/shared-foods');
+    if (!foods.length) { box.innerHTML = '<div class="empty" style="padding:20px 0"><div class="ei">👥</div>Пока нет общих продуктов</div>'; return; }
+    box.innerHTML = foods.map(f => `
+      <div class="nut-recent-item" style="cursor:pointer" onclick="selectSharedFood(${JSON.stringify(f).replace(/"/g,'&quot;')})">
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:14px">${esc(f.name)}</div>
+          <div style="font-size:12px;color:var(--mu2)">${f.kcal} ккал · Б:${f.protein} Ж:${f.fat} У:${f.carbs} (на 100г)</div>
+          <div style="font-size:11px;color:var(--mu2);margin-top:2px">от ${esc(f.userName||'Пользователь')}</div>
+        </div>
+        <button class="btn btn-p sm" style="flex-shrink:0" onclick="event.stopPropagation();selectSharedFood(${JSON.stringify(f).replace(/"/g,'&quot;')})">+ Добавить</button>
+      </div>`).join('');
+  } catch(e) { box.innerHTML = `<div class="empty" style="padding:20px 0"><div class="ei">⚠️</div>${esc(e.message)}</div>`; }
+}
+
+function selectSharedFood(food) {
+  // Переключаем на свой продукт и заполняем поля
+  switchNutTab('own');
+  document.getElementById('ownNutName').value = food.name;
+  document.getElementById('ownNutKcal').value = food.kcal;
+  document.getElementById('ownNutProt').value = food.protein;
+  document.getElementById('ownNutFat').value = food.fat;
+  document.getElementById('ownNutCarb').value = food.carbs;
+  document.getElementById('ownNutGrams').value = 100;
+  ownNutCalc();
 }
 </script>
 </body>

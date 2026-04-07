@@ -1078,6 +1078,16 @@ app.delete('/api/favorites/:userId/:favId', requireAuth, async (req, res) => {
 // КАСТОМНЫЕ БЛЮДА ПОЛЬЗОВАТЕЛЯ
 // ═══════════════════════════════════════════
 
+// Общие продукты (от всех пользователей, isShared=true)
+app.get('/api/shared-foods', requireAuth, async (req, res) => {
+  try {
+    const snap = await db.collection('customFoods').where('isShared', '==', true).get();
+    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    res.json(items);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('/api/custom-foods/:userId', requireAuth, async (req, res) => {
   try {
     const snap = await db.collection('customFoods').where('userId', '==', req.params.userId).get();
@@ -1089,16 +1099,19 @@ app.get('/api/custom-foods/:userId', requireAuth, async (req, res) => {
 
 app.post('/api/custom-foods/:userId', requireAuth, async (req, res) => {
   try {
-    const { name, ingredients, kcal, protein, fat, carbs } = req.body;
+    const { name, ingredients, kcal, protein, fat, carbs, isShared, userName } = req.body;
     if (!name) return res.status(400).json({ error: 'Название обязательно' });
-    // Проверяем дубликат по имени
     const exists = await db.collection('customFoods')
       .where('userId', '==', req.params.userId)
       .where('name', '==', name).limit(1).get();
     let id;
     if (!exists.empty) {
-      // Обновляем существующее
-      await exists.docs[0].ref.update({ ingredients: ingredients || [], kcal: parseInt(kcal)||0, protein: parseFloat(protein)||0, fat: parseFloat(fat)||0, carbs: parseFloat(carbs)||0, updatedAt: new Date().toISOString() });
+      await exists.docs[0].ref.update({
+        ingredients: ingredients || [], kcal: parseInt(kcal)||0, protein: parseFloat(protein)||0,
+        fat: parseFloat(fat)||0, carbs: parseFloat(carbs)||0,
+        isShared: !!isShared, userName: userName || '',
+        updatedAt: new Date().toISOString()
+      });
       id = exists.docs[0].id;
     } else {
       const ref = await db.collection('customFoods').add({
@@ -1108,6 +1121,8 @@ app.post('/api/custom-foods/:userId', requireAuth, async (req, res) => {
         protein: parseFloat(protein) || 0,
         fat: parseFloat(fat) || 0,
         carbs: parseFloat(carbs) || 0,
+        isShared: !!isShared,
+        userName: userName || '',
         createdAt: new Date().toISOString()
       });
       id = ref.id;
