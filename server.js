@@ -891,8 +891,8 @@ app.delete('/api/exercise-videos/:id', async (req, res) => {
 // FATSECRET — поиск продуктов (Node.js 18+ built-in fetch)
 // ═══════════════════════════════════════════
 
-const FS_CLIENT_ID     = process.env.FATSECRET_CLIENT_ID     || '945cda6d57594c9abe8c3c17cc2970e8';
-const FS_CLIENT_SECRET = process.env.FATSECRET_CLIENT_SECRET || '419eb06f2f8746449f43929513877d59';
+const FS_CLIENT_ID     = process.env.FATSECRET_CLIENT_ID;
+const FS_CLIENT_SECRET = process.env.FATSECRET_CLIENT_SECRET;
 let _fsToken = null, _fsTokenExpiry = 0;
 
 async function getFatSecretToken() {
