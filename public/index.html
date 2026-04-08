@@ -808,11 +808,24 @@
       <div class="div"></div>
       <div class="sh"><div class="st">📢 Новости</div><button class="btn btn-g sm" onclick="openMo('mPost')">+ Пост</button></div>
       <div id="aPosts"></div>
-    </div>
-    <div class="panel" id="p-aw">
+      <div class="div"></div>
+      <div class="st" style="margin-bottom:10px">📅 Календарь тренировок</div>
+      <div class="cal-legend">
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--ac)"></div>Тренировка</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--yel)"></div>Дата оплаты</div>
+      </div>
+      <div class="cal-nav">
+        <button class="btn btn-g sm" onclick="calPrev()">‹</button>
+        <div class="cal-month" id="calMonthLabel"></div>
+        <button class="btn btn-g sm" onclick="calNext()">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-day-events" id="calEvents"></div>
+      <div class="div"></div>
       <div class="sh"><div class="st">🔔 Пуш уведомления</div><button class="btn btn-p sm" onclick="openMo('mAddW')">+ Создать</button></div>
       <div id="aWorkouts"></div>
     </div>
+    <div class="panel" id="p-aw" style="display:none"></div>
     <div class="panel" id="p-aprog">
       <div class="card"><div class="ct">Выберите ученика</div>
         <select class="fsel" id="progSel" onchange="loadAdminProg()"><option value="">— выберите —</option></select>
@@ -913,20 +926,7 @@
       </div>
       <div id="diaryList"></div>
     </div>
-    <div class="panel" id="p-acal">
-      <div class="st" style="margin-bottom:10px">📅 Календарь тренировок</div>
-      <div class="cal-legend">
-        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--ac)"></div>Тренировка</div>
-        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--yel)"></div>Дата оплаты</div>
-      </div>
-      <div class="cal-nav">
-        <button class="btn btn-g sm" onclick="calPrev()">‹</button>
-        <div class="cal-month" id="calMonthLabel"></div>
-        <button class="btn btn-g sm" onclick="calNext()">›</button>
-      </div>
-      <div class="cal-grid" id="calGrid"></div>
-      <div class="cal-day-events" id="calEvents"></div>
-    </div>
+    <div class="panel" id="p-acal" style="display:none"></div>
     <div class="panel" id="p-arev" style="display:none"></div>
     <div class="panel" id="p-avid">
       <div class="sh">
@@ -1671,7 +1671,7 @@ function startApp(){
 }
 
 const TABS={
-  admin:[{id:'ah',icon:'🏠',lbl:'Главная'},{id:'acal',icon:'📅',lbl:'Календарь'},{id:'aw',icon:'🔔',lbl:'Пуш'},{id:'aprog',icon:'📈',lbl:'Прогресс'},{id:'avid',icon:'🎬',lbl:'Видео'},{id:'ashop',icon:'🛒',lbl:'Магазин'},{id:'anut',icon:'🥗',lbl:'Питание'},{id:'across',icon:'🏃',lbl:'Кросс'}],
+  admin:[{id:'ah',icon:'🏠',lbl:'Главная'},{id:'aprog',icon:'📈',lbl:'Прогресс'},{id:'avid',icon:'🎬',lbl:'Видео'},{id:'ashop',icon:'🛒',lbl:'Магазин'},{id:'anut',icon:'🥗',lbl:'Питание'},{id:'across',icon:'🏃',lbl:'Кросс'}],
   user: [{id:'uh',icon:'🏠',lbl:'Главная'},{id:'uplan',icon:'📋',lbl:'План'},{id:'uprog',icon:'📈',lbl:'Прогресс'},{id:'ushop',icon:'🛒',lbl:'Магазин'},{id:'unut',icon:'🥗',lbl:'Питание'},{id:'ucross',icon:'🏃',lbl:'Кросс'}],
   cross:[{id:'ucross',icon:'🏃',lbl:'Кросс'}]
 };
@@ -1685,8 +1685,7 @@ function showTab(id,btn){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('p-'+id).classList.add('active');
-  if(id==='ah')    loadAdminHome();
-  if(id==='aw')    loadAdminWorkouts();
+  if(id==='ah')    { loadAdminHome(); loadCalendar(); loadAdminWorkouts(); }
   if(id==='aprog') loadProgPanel();
   if(id==='ashop') loadAdminShop();
   if(id==='uh')    loadUserHome();
@@ -1694,7 +1693,6 @@ function showTab(id,btn){
   if(id==='uprog') loadUserProgress();
   if(id==='ushop') loadUserShop();
   if(id==='uplan') { loadUserPlan(); loadUserVideoLibrary(); }
-  if(id==='acal')  loadCalendar();
   if(id==='avid')  loadVideoLibrary();
   if(id==='anut')  loadAdminNutrition();
   if(id==='unut')  loadUserNutrition();
@@ -3494,15 +3492,21 @@ function crossStart() {
   let _lastPosSentAt = 0;
   _crossWatchId = navigator.geolocation.watchPosition(pos => {
     if (_crossState !== 'running') return;
-    if (pos.coords.accuracy > 50) return;
+    const acc = pos.coords.accuracy;
     const {latitude: lat, longitude: lon} = pos.coords;
-    if (_crossLastPos) {
-      const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
-      if (d >= 2 && d < 100) _crossDistM += d;
+    if (acc <= 150) {
+      if (_crossLastPos) {
+        const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
+        if (d >= 2 && d < 500) _crossDistM += d;
+      }
+      _crossLastPos = {lat, lon};
+      document.getElementById('crossGpsWarn').style.display = 'none';
+      crossUpdateLiveMap(lat, lon);
+    } else {
+      // Точность плохая — обновляем позицию без добавления метров,
+      // чтобы не накапливать большой прыжок при возврате сигнала
+      _crossLastPos = {lat, lon};
     }
-    _crossLastPos = {lat, lon};
-    document.getElementById('crossGpsWarn').style.display = 'none';
-    crossUpdateLiveMap(lat, lon);
     // Отправляем позицию не чаще раз в 5 сек
     const now = Date.now();
     if (now - _lastPosSentAt > 5000 && ME) {
@@ -3550,15 +3554,18 @@ function crossResume() {
   let _lastPosSentAt = 0;
   _crossWatchId = navigator.geolocation.watchPosition(pos => {
     if (_crossState !== 'running') return;
-    if (pos.coords.accuracy > 50) return;
+    const acc = pos.coords.accuracy;
     const {latitude: lat, longitude: lon} = pos.coords;
-    if (_crossLastPos) {
-      const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
-      if (d >= 2 && d < 100) _crossDistM += d;
+    if (acc <= 150) {
+      if (_crossLastPos) {
+        const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
+        if (d >= 2 && d < 500) _crossDistM += d;
+      }
+      _crossLastPos = {lat, lon};
+      crossUpdateLiveMap(lat, lon);
+    } else {
+      _crossLastPos = {lat, lon};
     }
-    _crossLastPos = {lat, lon};
-    document.getElementById('crossGpsWarn').style.display = 'none';
-    crossUpdateLiveMap(lat, lon);
     const now = Date.now();
     if (now - _lastPosSentAt > 5000 && ME) {
       _lastPosSentAt = now;
