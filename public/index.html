@@ -439,7 +439,6 @@
     @keyframes slideUp {from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
     @keyframes spin    {to{transform:rotate(360deg)}}
     @keyframes pulse   {0%,100%{transform:scale(1)}50%{transform:scale(1.16)}}
-    /* ═══ ПИТАНИЕ — НОВЫЙ ДИЗАЙН ═══ */
     .nut-macro-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);overflow:hidden;margin-bottom:14px;}
     .nut-mb-item{background:rgba(255,255,255,.025);padding:12px 6px;text-align:center;}
     .nut-mb-val{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;color:var(--tx);line-height:1;}
@@ -461,19 +460,16 @@
     .nut-meal-entry-kcal{font-size:13px;font-weight:700;color:var(--ac);flex-shrink:0;}
     .nut-meal-entry-del{background:none;border:none;color:var(--mu2);font-size:14px;cursor:pointer;padding:4px 6px;opacity:.5;transition:opacity .15s;flex-shrink:0;}
     .nut-meal-entry-del:hover{opacity:1;color:var(--red);}
-    /* ═══ ВЫБРАННЫЙ ПРОДУКТ ═══ */
     .nut-sel-card{background:rgba(139,92,246,.08);border:1px solid var(--ba);border-radius:var(--r2);padding:12px 14px;margin-bottom:10px;position:relative;}
     .nut-sel-name{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:4px;padding-right:80px;line-height:1.3;}
     .nut-sel-per100{font-size:11px;color:var(--mu2);}
     .nut-sel-clear{position:absolute;top:10px;right:10px;background:none;border:1px solid rgba(255,255,255,.1);color:var(--mu2);font-size:11px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .15s;}
     .nut-sel-clear:hover{color:var(--red);border-color:rgba(239,68,68,.3);}
-    /* ═══ БАР РАСЧЁТА КБЖУ ═══ */
     .nut-calc-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.06);border-radius:var(--r2);overflow:hidden;margin-bottom:12px;}
     .nut-cb-item{background:rgba(255,255,255,.025);padding:10px 4px;text-align:center;}
     .nut-cb-item.kcal .nut-cb-val,.nut-cb-kcal{color:var(--ac);}
     .nut-cb-val{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;color:var(--tx);line-height:1;}
     .nut-cb-lbl{font-size:9px;color:var(--mu2);text-transform:uppercase;letter-spacing:.4px;margin-top:3px;}
-    /* ═══ КОНСТРУКТОР ИНГРЕДИЕНТЫ ═══ */
     .nut-ing-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:var(--r2);margin-bottom:6px;}
     .nut-ing-info{flex:1;min-width:0;}
     .nut-ing-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tx);}
@@ -483,13 +479,11 @@
     .nut-ing-del:hover{opacity:1;color:var(--red);}
     .nut-total-bar{background:rgba(139,92,246,.06);border:1px solid var(--ba);border-radius:var(--r2);padding:10px;margin:10px 0;}
     .nut-total-lbl{font-size:10px;color:var(--mu2);text-transform:uppercase;letter-spacing:.5px;font-weight:700;text-align:center;margin-bottom:8px;}
-    /* ═══ MODAL ВКЛАДКИ ═══ */
     .nut-modal-tabs{display:flex;gap:0;margin-bottom:14px;background:rgba(255,255,255,.04);border-radius:var(--r2);padding:3px;}
     .nut-tab{flex:1;padding:8px 4px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;border-radius:calc(var(--r2) - 2px);color:var(--mu2);cursor:pointer;transition:all .18s;border:1px solid transparent;}
     .nut-tab.active{background:var(--acd);color:var(--ac);border-color:var(--ba);}
     .nut-tab-panel{display:none;}
     .nut-tab-panel.active{display:block;}
-    /* ═══ НЕДАВНИЕ ═══ */
     .nut-recent-list{max-height:320px;overflow-y:auto;}
     .nut-recent-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r2);cursor:pointer;transition:background .15s;margin-bottom:4px;}
     .nut-recent-item:hover{background:rgba(139,92,246,.1);}
@@ -498,7 +492,6 @@
     .nut-recent-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tx);}
     .nut-recent-macros{font-size:11px;color:var(--mu2);margin-top:2px;}
     .nut-recent-kcal{font-size:13px;font-weight:700;color:var(--ac);flex-shrink:0;}
-    /* ═══ FATSECRET ПОИСК ═══ */
     .nut-dropdown{position:absolute;top:calc(100% + 2px);left:0;right:0;z-index:600;background:rgba(10,12,22,.98);border:1px solid var(--ba);border-radius:0 0 var(--r2) var(--r2);max-height:220px;overflow-y:auto;display:none;box-shadow:0 8px 32px rgba(0,0,0,.5);}
     .nut-dd-item{padding:10px 14px;cursor:pointer;transition:background .15s;border-bottom:1px solid rgba(255,255,255,.04);}
     .nut-dd-item:last-child{border-bottom:none;}
@@ -520,7 +513,6 @@
     .nut-star-row.active .nut-star-icon{transform:scale(1.15);}
     .nut-star-lbl{font-size:13px;color:var(--mu2);flex:1;}
     .nut-star-row.active .nut-star-lbl{color:var(--yel);font-weight:600;}
-    /* ═══ ПИТАНИЕ ═══ */
     .nut-date-nav{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
     .nut-date-nav input{flex:1;text-align:center;}
     .nut-kcal-card{background:linear-gradient(135deg,var(--acd),rgba(255,255,255,.015));border:1px solid var(--ba);border-radius:var(--r);padding:18px 20px;margin-bottom:14px;display:flex;align-items:center;gap:16px;position:relative;overflow:hidden;}
@@ -548,7 +540,6 @@
     .nut-student-row:hover{border-color:var(--ba);background:var(--acd);transform:translateX(3px);}
     .nut-back-btn{display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--ac);font-size:13px;font-weight:600;cursor:pointer;padding:0;margin-bottom:16px;opacity:.85;transition:opacity .15s;}
     .nut-back-btn:hover{opacity:1;}
-    /* ═══ ВИДЕОТЕКА ═══ */
     .upload-zone{border:1.5px dashed rgba(139,92,246,.25);border-radius:var(--r);padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(139,92,246,.03);}
     .upload-zone:hover,.upload-zone.dragover{border-color:var(--ac);background:rgba(139,92,246,.08);box-shadow:0 0 0 3px rgba(139,92,246,.08);}
     .upload-progress{height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:10px;overflow:hidden;display:none;}
@@ -581,7 +572,6 @@
     .video-thumb:hover .video-play-overlay{background:rgba(0,0,0,.15);}
     .video-play-icon{width:44px;height:44px;border-radius:50%;background:rgba(139,92,246,.9);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;box-shadow:0 4px 16px rgba(139,92,246,.4);}
 
-    /* ═══ КРОСС ═══ */
     .cross-hero{background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(99,102,241,.08));border:1px solid rgba(56,189,248,.25);border-radius:22px;padding:28px 22px;margin-bottom:16px;text-align:center;position:relative;overflow:hidden;}
     .cross-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:160px;height:160px;background:radial-gradient(circle,rgba(56,189,248,.18),transparent 70%);pointer-events:none;}
     .cross-state-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--blu);opacity:.8;margin-bottom:8px;}
@@ -624,7 +614,6 @@
     .run-hist-meta{font-size:11px;color:var(--mu2);}
     .cross-gps-warn{background:rgba(251,113,133,.08);border:1px solid rgba(251,113,133,.2);border-radius:var(--r2);padding:12px 14px;font-size:13px;color:var(--red);margin-bottom:12px;display:none;}
 
-    /* ═══ ЛЕНДИНГ ═══ */
     #landingPage{position:fixed;inset:0;z-index:200;background:var(--bg);display:none;flex-direction:column;overflow-y:auto;}
     #landingPage.show{display:flex;}
     .land-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
@@ -656,13 +645,11 @@
     .land-desc-item:last-child{margin-bottom:0;}
     .land-desc-dot{width:20px;height:20px;border-radius:8px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.2);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px;}
 
-    /* ═══ МОДАЛКА РЕГИСТРАЦИИ НА ЗАБЕГ ═══ */
     .reg-success{text-align:center;padding:20px 0;}
     .reg-success-icon{font-size:56px;margin-bottom:12px;}
     .reg-success-title{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:700;color:var(--blu);margin-bottom:8px;}
     .reg-success-sub{font-size:13px;color:var(--mu2);line-height:1.6;}
 
-    /* ═══ ПАНЕЛЬ КРОСС У ТРЕНЕРА — ПЕРЕКЛЮЧАТЕЛЬ ═══ */
     .across-tabs{display:flex;gap:8px;margin-bottom:16px;}
     .across-tab{flex:1;padding:11px;border-radius:var(--r2);border:1px solid rgba(255,255,255,.07);font-size:12px;font-weight:700;text-align:center;cursor:pointer;background:rgba(255,255,255,.03);color:var(--mu2);transition:all .22s;font-family:'Unbounded',sans-serif;}
     .across-tab.active{border-color:var(--blu);color:var(--blu);background:rgba(56,189,248,.1);}
@@ -680,7 +667,6 @@
 <body>
 <div id="splash"><div class="sp-logo">⚡ Coach Space</div><div class="sp-ring"></div></div>
 
-<!-- ЛЕНДИНГ-ВИЗИТКА -->
 <div id="landingPage">
   <div class="land-bg"></div>
   <div class="land-inner">
@@ -721,7 +707,6 @@
   </div>
 </div>
 
-<!-- МОДАЛКА РЕГИСТРАЦИИ НА ЗАБЕГ -->
 <div class="mo" id="mCrossReg"><div class="modal">
   <div class="mh"></div>
   <div id="crossRegForm">
@@ -802,7 +787,6 @@
           </div>
         </div>
       </div>
-      <!-- ✅ ИЗМЕНЕНО: добавлена кнопка «Шаблоны» -->
       <div class="sh"><div class="st">👥 Ученики</div><div style="display:flex;gap:6px"><button class="btn btn-g sm" onclick="openTemplates()">📄 Шаблоны</button><button class="btn btn-p sm" onclick="openMo('mAddU')">+ Добавить</button></div></div>
       <div id="aStudents"></div>
       <div class="div"></div>
@@ -936,7 +920,6 @@
       <div id="vidCatList"><div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div></div>
     </div>
 
-    <!-- p-uvid kept for DOM compatibility but content moved to p-uplan -->
     <div class="panel" id="p-uvid"></div>
 
     <div class="panel" id="p-ushop">
@@ -953,11 +936,9 @@
       <div id="aNutContent"><div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div></div>
     </div>
 
-    <!-- КРОСС — ПОЛЬЗОВАТЕЛЬ -->
     <div class="panel" id="p-ucross">
       <div class="cross-gps-warn" id="crossGpsWarn">GPS недоступен. Проверьте разрешения геолокации в браузере.</div>
 
-      <!-- Экран тренировки -->
       <div id="crossTrainScreen">
         <div class="cross-hero">
           <div class="cross-state-lbl" id="crossStateLbl">Готов к старту</div>
@@ -981,7 +962,6 @@
         </div>
       </div>
 
-      <!-- Экран результата -->
       <div id="crossResultScreen" style="display:none">
         <div class="cross-result-card">
           <div class="cross-result-title">🏁 Пробежка завершена!</div>
@@ -1002,7 +982,6 @@
         </div>
       </div>
 
-      <!-- Лидерборд -->
       <div class="card">
         <div class="sh"><div class="st">🏆 Рейтинг</div></div>
         <div class="lb-filter">
@@ -1013,23 +992,19 @@
         <div id="crossLeaderboard"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
       </div>
 
-      <!-- История пробежек -->
       <div class="card">
         <div class="sh"><div class="st">📋 Мои пробежки</div></div>
         <div id="crossHistory"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
       </div>
     </div>
 
-    <!-- КРОСС — ТРЕНЕР -->
     <div class="panel" id="p-across">
-      <!-- Переключатель вкладок -->
       <div class="across-tabs">
         <button class="across-tab active" onclick="switchAcrossTab('leaderboard',this)">🏆 Рейтинг забега</button>
         <button class="across-tab" onclick="switchAcrossTab('registrants',this)">📋 Заявки на забег</button>
         <button class="across-tab" onclick="switchAcrossTab('students',this)">🏃 Участники кросса</button>
       </div>
 
-      <!-- Вкладка: Рейтинг -->
       <div class="across-section active" id="acrossLeaderboardSection">
         <div class="card">
           <div class="sh"><div class="st">🏆 Рейтинг участников</div></div>
@@ -1042,7 +1017,6 @@
         </div>
       </div>
 
-      <!-- Вкладка: Заявки на забег -->
       <div class="across-section" id="acrossRegistrantsSection">
         <div class="card">
           <div class="sh">
@@ -1054,7 +1028,6 @@
         </div>
       </div>
 
-      <!-- Вкладка: Участники кросса -->
       <div class="across-section" id="acrossStudentsSection">
         <div class="card">
           <div class="sh">
@@ -1065,17 +1038,14 @@
           <div id="crossPartList"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
         </div>
 
-        <!-- Форма добавления участника кросса -->
         <div id="addCrossPartForm" style="display:none;margin-top:12px" class="card">
           <div class="st" style="margin-bottom:12px">➕ Добавить участника кросса</div>
 
-          <!-- Переключатель: вручную / из зала -->
           <div style="display:flex;gap:8px;margin-bottom:14px">
             <button id="crossPartModeManual" class="btn btn-p sm" style="flex:1" onclick="switchCrossPartMode('manual')">✏️ Вручную</button>
             <button id="crossPartModeFromCS" class="btn btn-g sm" style="flex:1" onclick="switchCrossPartMode('fromcs')">👥 Из зала</button>
           </div>
 
-          <!-- Ручной ввод -->
           <div id="crossPartManualBlock">
             <div class="fg"><label class="fl">Имя участника</label><input class="fi" id="crossPartName" placeholder="Иван Иванов"/></div>
             <div class="fg"><label class="fl">Заметка (необязательно)</label><input class="fi" id="crossPartNote" placeholder="Команда, клуб..."/></div>
@@ -1087,7 +1057,6 @@
             </div>
           </div>
 
-          <!-- Выбор из участников зала -->
           <div id="crossPartFromCSBlock" style="display:none">
             <div class="fg"><label class="fl">Поиск по имени</label><input class="fi" id="crossPartSearch" placeholder="Начните вводить имя..." oninput="filterCSMembers()"/></div>
             <div id="crossPartCSList" style="max-height:220px;overflow-y:auto;margin-top:4px"></div>
@@ -1106,7 +1075,6 @@
 
 <nav class="bnav" id="bnav" style="display:none"></nav>
 
-<!-- МОДАЛКИ -->
 <div class="mo" id="mAddU"><div class="modal">
   <div class="mh"></div><div class="mt">➕ Новый ученик</div>
   <div class="fg"><label class="fl">Имя</label><input class="fi" id="uN" placeholder="Иван Иванов"/></div>
@@ -1316,7 +1284,6 @@
   <div class="mf"><button class="btn btn-g" onclick="closeMo('mNotes')">Закрыть</button></div>
 </div></div>
 
-<!-- ✅ НОВЫЕ МОДАЛКИ: Копирование плана + Шаблоны -->
 <div class="mo" id="mCopyPlan"><div class="modal" style="max-width:500px">
   <div class="mh"></div>
   <div class="mt">📋 Копировать план</div>
@@ -1411,9 +1378,7 @@
       <div class="nut-tab" id="ntab-shared" onclick="switchNutTab('shared')">👥 Общие</div>
     </div>
 
-    <!-- ── Вкладка: Поиск ── -->
     <div class="nut-tab-panel active" id="npanel-search">
-      <!-- область поиска (скрывается после выбора) -->
       <div id="nutSearchArea">
         <div class="fg" style="position:relative">
           <label class="fl">Поиск продукта</label>
@@ -1422,7 +1387,6 @@
         </div>
         <div style="text-align:center;padding:10px 0;font-size:12px;color:var(--mu2)">Поиск по базе продуктов и вашим блюдам</div>
       </div>
-      <!-- карточка выбранного продукта -->
       <div id="nutSelectedCard" style="display:none">
         <div class="nut-sel-card">
           <div class="nut-sel-name" id="nutSelName"></div>
@@ -1459,7 +1423,6 @@
       </div>
     </div>
 
-    <!-- ── Вкладка: Конструктор блюда ── -->
     <div class="nut-tab-panel" id="npanel-build">
       <div class="fg">
         <label class="fl">Название блюда</label>
@@ -1470,7 +1433,6 @@
         <input class="fi" id="buildIngName" placeholder="Поиск ингредиента..." autocomplete="off"/>
         <div class="nut-dropdown" id="buildDropdown"></div>
       </div>
-      <!-- выбранный ингредиент (настройка веса) -->
       <div id="buildIngCard" style="display:none">
         <div class="nut-sel-card" style="margin-bottom:8px">
           <div class="nut-sel-name" id="buildIngSelName"></div>
@@ -1490,9 +1452,7 @@
           <div class="nut-cb-item"><div class="nut-cb-val" id="bncb-c">0г</div><div class="nut-cb-lbl">Углеводы</div></div>
         </div>
       </div>
-      <!-- список добавленных ингредиентов -->
       <div id="buildIngList"></div>
-      <!-- итого -->
       <div id="buildTotalBox" style="display:none">
         <div class="nut-total-bar">
           <div class="nut-total-lbl">ИТОГО БЛЮДО</div>
@@ -1519,7 +1479,6 @@
       </div>
     </div>
 
-    <!-- ── Вкладка: Избранное ── -->
     <div class="nut-tab-panel" id="npanel-fav">
       <div id="nutFavList" class="nut-recent-list"><div class="empty" style="padding:20px 0"><div class="ei">⭐</div>Нет избранного</div></div>
       <div class="mf" style="padding-top:12px">
@@ -1527,7 +1486,6 @@
       </div>
     </div>
 
-    <!-- ── Вкладка: Недавние ── -->
     <div class="nut-tab-panel" id="npanel-recent">
       <div id="nutRecentList" class="nut-recent-list"><div class="empty" style="padding:20px 0"><div class="ei">🕐</div>Нет недавних записей</div></div>
       <div class="mf" style="padding-top:12px">
@@ -1535,7 +1493,6 @@
       </div>
     </div>
 
-    <!-- ── Вкладка: Общие продукты ── -->
     <div class="nut-tab-panel" id="npanel-shared">
       <div id="sharedFoodsList" class="nut-recent-list"><div class="empty" style="padding:20px 0"><div class="sp-ring" style="margin:0 auto 8px"></div>Загрузка...</div></div>
       <div class="mf" style="padding-top:12px">
@@ -1543,7 +1500,6 @@
       </div>
     </div>
 
-    <!-- ── Вкладка: Свой продукт ── -->
     <div class="nut-tab-panel" id="npanel-own">
       <div class="fg"><label class="fl">Название продукта</label><input class="fi" id="ownNutName" placeholder="Например: Греческий йогурт"/></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -1700,7 +1656,6 @@ function showTab(id,btn){
   if(id==='across') loadAdminCross();
 }
 
-// ═══ МАГАЗИН ═══
 const galleryState = {};
 function getItemPhotos(item){if(item.photos&&item.photos.length)return item.photos.map(p=>p.url||p);if(item.photoUrl)return[item.photoUrl];return[];}
 function renderShopGallery(item,isAdmin){
@@ -1726,7 +1681,6 @@ async function delShopItem(id){if(!confirm('Удалить товар?'))return;
 async function loadUserShop(){const g=document.getElementById('uShopGrid');try{const items=await api('/api/shop');if(!items.length){g.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">🛒</div>Магазин пуст</div>`;return;}g.innerHTML=items.map(i=>`<div class="shopi">${renderShopGallery(i,false)}<div class="sbody"><div class="sname">${esc(i.name)}</div><div class="sprice">${i.price} ₸</div><button class="btn btn-p sm" style="width:100%;margin-top:auto" onclick="orderItem('${i.id}','${esc(i.name)}')">Заказать</button></div></div>`).join('');}catch(e){g.innerHTML=`<div class="empty">${e.message}</div>`;}}
 async function orderItem(id,name){if(!confirm(`Заказать «${name}»? Тренер получит уведомление в Telegram.`))return;try{await api('/api/shop/'+id+'/order','POST',{userId:ME.id,userName:ME.name});toast('✅ Заказ отправлен! Тренер свяжется с вами.','s');}catch(e){toast(e.message,'e');}}
 
-// ═══ ПЛАН ═══
 let _pedPlan={1:[],2:[],3:[],4:[]},_pedWeek=1,_pedUserId='';
 async function openUploadPlan(userId,userName){
   _pedUserId=userId;_pedDirty=false;
@@ -1735,7 +1689,6 @@ async function openUploadPlan(userId,userName){
   _pedWeek=1;
   try{const data=await api('/api/users/'+userId+'/plan');_pedPlan=data.trainingPlan?{1:data.trainingPlan[1]||[],2:data.trainingPlan[2]||[],3:data.trainingPlan[3]||[],4:data.trainingPlan[4]||[]}:{1:[],2:[],3:[],4:[]};}catch{_pedPlan={1:[],2:[],3:[],4:[]};}
   if(!_pedPlan[1].length){_pedPlan[1]=[{block:'Верх',exercise:'',sets:'',reps:''},{block:'Ноги',exercise:'',sets:'',reps:''}];}
-  // Populate exercise suggestions from all weeks
   const exSet=new Set();
   for(let w=1;w<=4;w++){(_pedPlan[w]||[]).forEach(e=>{if(e.exercise.trim())exSet.add(e.exercise.trim());});}
   const dl=document.getElementById('pedExSuggest');
@@ -1755,7 +1708,6 @@ function pedRenameBlock(input){const oldName=input.dataset.original,newName=inpu
 function copyWeekAny(){pedReadDOM();const from=parseInt(document.getElementById('pedCopyFrom').value);const toVal=document.getElementById('pedCopyTo').value;if(toVal!=='all'&&parseInt(toVal)===from){toast('Выберите другую неделю','e');return;}const src=JSON.parse(JSON.stringify(_pedPlan[from]));if(toVal==='all'){const others=[1,2,3,4].filter(w=>w!==from);if(!confirm(`Скопировать Неделю ${from} на все остальные (${others.join(', ')})? Данные будут заменены.`))return;others.forEach(w=>{_pedPlan[w]=JSON.parse(JSON.stringify(src));});toast(`✅ Неделя ${from} скопирована на недели ${others.join(', ')}`,'s');}else{const to=parseInt(toVal);if(!confirm(`Скопировать Неделю ${from} → Неделю ${to}? Данные недели ${to} будут заменены.`))return;_pedPlan[to]=JSON.parse(JSON.stringify(src));toast(`✅ Неделя ${from} → Неделя ${to}`,'s');}pedRenderWeekTabs();}
 async function savePlanEditor(){pedReadDOM();const clean={};for(let w=1;w<=4;w++){clean[w]=(_pedPlan[w]||[]).filter(e=>e.exercise.trim());}const total=Object.values(clean).reduce((s,a)=>s+a.length,0);if(!total){toast('Добавьте хотя бы одно упражнение','e');return;}try{await api('/api/users/'+_pedUserId+'/plan','POST',{trainingPlan:clean});_pedDirty=false;toast(`✅ План сохранён: ${total} упражнений`,'s');closeMo('mPlanEditor');allStudents=[];loadAdminHome();}catch(e){toast('Ошибка: '+e.message,'e');}}
 
-// ═══ DRAG & DROP для упражнений ═══
 let _pedDragIdx=null,_pedDragBlock=null;
 function pedDragStart(e,row){
   pedReadDOM();
@@ -1792,7 +1744,6 @@ let _trainingPlan=null,_currentWeek=1;
 async function loadUserPlan(){const box=document.getElementById('uPlanContent');box.innerHTML=`<div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div>`;try{const data=await api('/api/users/'+ME.id+'/plan');if(!data.trainingPlan){box.innerHTML=`<div class="plan-upload-hint"><div style="font-size:36px;margin-bottom:10px">📋</div><div style="font-weight:600;margin-bottom:6px">План тренировок ещё не загружен</div><div>Тренер загрузит ваш персональный план — он появится здесь автоматически</div></div>`;return;}_trainingPlan=data.trainingPlan;if(data.planUpdatedAt){const d=new Date(data.planUpdatedAt);document.getElementById('planUpdatedAt').textContent='обновлён '+d.toLocaleDateString('ru-RU');}renderPlanWeek(_currentWeek);}catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}}
 function renderPlanWeek(week){_currentWeek=week;const box=document.getElementById('uPlanContent');if(!_trainingPlan)return;const exercises=_trainingPlan[week]||[];const BLOCK_ICONS={'верх':'💪','ноги':'🦵','руки':'💪','ягодицы':'🍑','спина':'🏋️','грудь':'🏋️','плечи':'🎯','пресс':'🔥','кардио':'🏃','разминка':'🤸'};function blockIcon(name){const low=(name||'').toLowerCase();for(const[kw,ic]of Object.entries(BLOCK_ICONS)){if(low.startsWith(kw))return ic;}return'💪';}let html=`<div class="week-switcher">`;for(let w=1;w<=4;w++){const cnt=(_trainingPlan[w]||[]).length;html+=`<button class="week-btn${w===week?' active':''}" onclick="renderPlanWeek(${w})">Неделя ${w}<br><span style="font-size:10px;opacity:.6">${cnt} упр.</span></button>`;}html+=`</div>`;if(!exercises.length){html+=`<div class="plan-empty"><div style="font-size:36px;margin-bottom:8px">🏖</div>Неделя ${week} пока пустая</div>`;box.innerHTML=html;return;}const blockOrder=[],blocks={};exercises.forEach((ex,idx)=>{const b=ex.block||'';if(!blocks[b]){blocks[b]=[];blockOrder.push(b);}blocks[b].push({...ex,num:idx+1});});for(const blockName of blockOrder){const exList=blocks[blockName];html+=`<div class="plan-block">`;if(blockName)html+=`<div class="plan-block-title">${blockIcon(blockName)} ${esc(blockName)}</div>`;html+=`<div><table class="ex-table"><thead><tr><th>#</th><th>Упражнение</th><th style="text-align:center">Подходы</th><th style="text-align:center">Повторения</th></tr></thead><tbody>`;exList.forEach(ex=>{html+=`<tr><td class="ex-num">${ex.num}</td><td style="font-weight:500">${esc(ex.exercise)}</td><td style="text-align:center"><span class="ex-sets">${ex.sets||'—'}</span></td><td style="text-align:center"><span class="ex-reps">${ex.reps||'—'}</span></td></tr>`;});html+=`</tbody></table></div><div class="ex-cards">`;exList.forEach(ex=>{html+=`<div class="ex-card"><div class="ex-card-num">${ex.num}</div><div class="ex-card-name">${esc(ex.exercise)}</div><div class="ex-card-meta"><div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase">Подх.</div><div class="ex-card-sets">${ex.sets||'—'}</div></div><div><div style="font-size:9px;color:var(--mu2);text-transform:uppercase">Повт.</div><div class="ex-card-reps">${ex.reps||'—'}</div></div></div></div>`;});html+=`</div></div>`;}box.innerHTML=html;}
 
-// ═══ ГЛАВНАЯ ТРЕНЕРА ═══
 async function loadAdminHome(){loadAdminStats();loadAdminStudents();loadAdminPosts();}
 async function loadAdminStats(){try{const s=await api('/api/users');allStudents=s;const today=new Date().toISOString().split('T')[0];document.getElementById('aStats').innerHTML=`<div class="sb"><div class="sn cg">${s.length}</div><div class="sl">Учеников</div></div><div class="sb"><div class="sn cw">${s.filter(x=>x.sessions<=2&&x.sessions>0).length}</div><div class="sl">Мало занятий</div></div><div class="sb"><div class="sn cr">${s.filter(x=>x.sessions<=0).length}</div><div class="sl">Абонемент 0</div></div><div class="sb"><div class="sn cw">${s.filter(x=>x.paymentDate===today).length}</div><div class="sl">Оплата сегодня</div></div>`;}catch(e){toast(e.message,'e');}}
 
@@ -1855,13 +1806,11 @@ async function delPost(id){if(!confirm('Удалить пост?'))return;try{aw
 async function reactPost(postId,emoji){if(!ME)return;try{await api(`/api/posts/${postId}/react`,'POST',{userId:ME.id,userName:ME.name,emoji,single:true});const posts=await api('/api/posts');const p=posts.find(x=>x.id===postId);if(!p)return;const el=document.getElementById('post-'+postId);if(el)el.outerHTML=renderPost(p,ME.role==='admin');}catch(e){toast(e.message,'e');}}
 async function votePost(postId,option){if(!ME)return;try{await api(`/api/posts/${postId}/vote`,'POST',{userId:ME.id,userName:ME.name,option});const posts=await api('/api/posts');const p=posts.find(x=>x.id===postId);if(!p)return;const el=document.getElementById('post-'+postId);if(el)el.outerHTML=renderPost(p,false);}catch(e){toast(e.message,'e');}}
 
-// ═══ ПОЛЬЗОВАТЕЛИ ═══
 async function addUser(){const name=v('uN'),login=v('uL'),pwd=v('uPw'),tg=v('uTg'),sess=v('uSe'),pd=v('uPd');if(!name||!login||!pwd){toast('Имя, логин и пароль обязательны','e');return;}try{await api('/api/users','POST',{name,login,password:pwd,telegramId:tg||null,sessions:parseInt(sess)||0,paymentDate:pd||null});toast(`✅ Ученик ${name} добавлен`,'s');closeMo('mAddU');clr(['uN','uL','uPw','uTg','uPd']);document.getElementById('uSe').value='8';allStudents=[];loadAdminHome();}catch(e){toast(e.message,'e');}}
 async function openEditUser(id){try{const u=await api('/api/users/'+id);document.getElementById('eId').value=u.id;document.getElementById('eN').value=u.name;document.getElementById('ePw').value='';document.getElementById('eTg').value=u.telegramId||'';document.getElementById('eSe').value=u.sessions;document.getElementById('ePd').value=u.paymentDate||'';openMo('mEditU');}catch(e){toast(e.message,'e');}}
 async function saveEditUser(){const id=document.getElementById('eId').value;const d={name:v('eN'),telegramId:v('eTg')||null,sessions:parseInt(v('eSe'))||0,paymentDate:v('ePd')||null};const np=v('ePw');if(np)d.password=np;try{await api('/api/users/'+id,'PUT',d);toast('✅ Сохранено','s');closeMo('mEditU');allStudents=[];loadAdminHome();}catch(e){toast(e.message,'e');}}
 async function delUser(id){if(!confirm('Удалить ученика?'))return;try{await api('/api/users/'+id,'DELETE');toast('Удалён','w');allStudents=[];loadAdminHome();}catch(e){toast(e.message,'e');}}
 
-// ═══ ТРЕНИРОВКИ ═══
 async function loadAdminWorkouts(){const box=document.getElementById('aWorkouts');try{const ws=await api('/api/workouts');if(!ws.length){box.innerHTML=`<div class="empty"><div class="ei">🏋️</div>Тренировок нет. Создайте первую!</div>`;return;}const byDate={};ws.forEach(w=>{const d=new Date(w.datetime).toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});if(!byDate[d])byDate[d]=[];byDate[d].push(w);});box.innerHTML=Object.entries(byDate).map(([date,items])=>`<div style="margin-bottom:16px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu2);margin-bottom:8px">${date}</div>${items.map(w=>renderWCard(w,true)).join('')}</div>`).join('');}catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}}
 function renderWCard(w,isAdmin){const time=new Date(w.datetime).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});const isGrp=w.type==='group';const chips=(w.studentIds||[]).map(sid=>{const s=allStudents.find(x=>x.id===sid);return`<span class="chip">${s?esc(s.name):sid}</span>`;}).join('');return`<div class="wcard ${isGrp?'group':''}"><div class="w-title">${esc(w.title)}<span class="wbadge ${isGrp?'wb-g':'wb-p'}">${isGrp?'Группа':'Персональная'}</span></div><div class="w-meta">🕐 ${time} · ⏱ ${w.duration} мин</div>${chips?`<div class="w-chips">${chips}</div>`:''}${w.note?`<div class="w-note">📝 ${esc(w.note)}</div>`:''}${isAdmin?`<div><button class="btn btn-d sm" onclick="delWorkout('${w.id}')">🗑 Удалить</button></div>`:''}</div>`;}
 async function delWorkout(id){if(!confirm('Удалить?'))return;try{await api('/api/workouts/'+id,'DELETE');loadAdminWorkouts();}catch(e){toast(e.message,'e');}}
@@ -1869,16 +1818,13 @@ async function onOpenAddW(){const now=new Date();now.setMinutes(now.getMinutes()
 function onWType(){document.getElementById('wStuLbl').textContent=document.getElementById('wType').value==='group'?'Ученики группы':'Ученик';}
 async function createWorkout(){const title=v('wTitle'),type=document.getElementById('wType').value,dt=v('wDt'),dur=v('wDur'),note=v('wNote');if(!title||!dt){toast('Название и дата обязательны','e');return;}const ids=[...document.querySelectorAll('#wChecks input:checked')].map(c=>c.value);if(!ids.length){toast('Выберите хотя бы одного ученика','e');return;}try{await api('/api/workouts','POST',{title,type,datetime:dt,duration:parseInt(dur)||60,studentIds:ids,note:note||''});toast('✅ Тренировка создана','s');closeMo('mAddW');clr(['wTitle','wNote']);document.getElementById('wDur').value='60';document.querySelectorAll('#wChecks input').forEach(c=>{c.checked=false;});document.querySelectorAll('.stu-check').forEach(l=>l.classList.remove('sel'));loadAdminWorkouts();}catch(e){toast(e.message,'e');}}
 
-// ═══ ПРОГРЕСС ТРЕНЕРА ═══
 async function loadProgPanel(){try{const s=allStudents.length?allStudents:await api('/api/users');allStudents=s;const sel=document.getElementById('progSel');sel.innerHTML='<option value="">— выберите ученика —</option>'+s.map(u=>`<option value="${u.id}">${esc(u.name)}</option>`).join('');document.getElementById('progContent').innerHTML='';}catch(e){toast(e.message,'e');}}
 async function loadAdminProg(){const uid=document.getElementById('progSel').value;const box=document.getElementById('progContent');if(!uid){box.innerHTML='';return;}box.innerHTML=`<div class="empty"><div class="sp-ring" style="margin:30px auto"></div></div>`;try{const[progressData,diaryData]=await Promise.all([authFetch('/api/progress/'+uid,{headers:{'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[]),authFetch('/api/diary/'+uid,{headers:{'Accept':'application/json'}}).then(r=>r.json()).catch(()=>[])]);const weights=(Array.isArray(progressData)?progressData:[]).filter(d=>d.type==='weight');const photos=(Array.isArray(progressData)?progressData:[]).filter(d=>d.type==='photo');const entries=Array.isArray(diaryData)?diaryData:[];let html='';html+=`<div class="card card-a"><div class="ct">⚖️ График веса</div>`;html+=weights.length?`<div class="chart-w"><canvas id="adm-wc"></canvas></div>`:`<div class="empty" style="padding:20px 0"><div class="ei">⚖️</div>Нет данных о весе</div>`;html+=`</div>`;if(photos.length){html+=`<div class="st" style="margin-bottom:10px">📸 Фото прогресса</div><div class="ph-g">`;html+=photos.map(p=>`<img class="ph-img" src="${p.photoUrl}" onclick="openLightbox('${p.photoUrl}')"/>`).join('');html+=`</div><div style="margin-bottom:16px"></div>`;}html+=`<div class="sh" style="margin-bottom:12px"><div class="st">📊 Дневник тренировок</div><span style="font-size:12px;color:var(--mu2)">${entries.length} записей</span></div>`;if(!entries.length){html+=`<div class="empty" style="padding:20px 0"><div class="ei">📊</div>Ученик ещё не вёл дневник</div>`;}else{html+=entries.map(e=>{const stars=e.rating?'⭐'.repeat(e.rating):'';const d=new Date(e.date).toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short',year:'numeric'});const exCount=(e.exercises||[]).length;return`<div class="diary-day" style="cursor:default"><div class="diary-day-head"><span style="font-size:18px">🏋️</span><div><div class="diary-day-date">${d}</div><div class="diary-day-excount">${exCount} упражнений${e.note?' · '+esc(e.note.slice(0,50)):''}</div></div><div class="diary-day-rating">${stars}</div></div>${(e.exercises||[]).length?`<div style="margin-top:10px">`+e.exercises.map(ex=>{const chips=(ex.sets||[]).map(s=>`<span class="diary-set-chip">${s.weight?s.weight+'кг×':''}${s.reps}</span>`).join('');return`<div class="diary-ex-row"><span class="diary-ex-name">${esc(ex.name)}</span><div class="diary-ex-sets">${chips}</div></div>`;}).join('')+`</div>`:''}</div>`;}).join('');}box.innerHTML=html;if(weights.length)new Chart(document.getElementById('adm-wc'),chartCfg(weights));}catch(e){box.innerHTML=`<div class="empty">${esc(e.message)}</div>`;}}
 
-// ═══ ГЛАВНАЯ УЧЕНИКА ═══
 async function loadUserHome(){try{ME=await api('/api/me/'+ME.id);}catch{}const n=document.getElementById('subN');n.textContent=ME.sessions;n.style.color=ME.sessions<=0?'var(--red)':ME.sessions<=2?'var(--yel)':'var(--ac)';document.getElementById('subPay').textContent=ME.paymentDate?new Date(ME.paymentDate).toLocaleDateString('ru-RU'):'—';document.getElementById('streak').style.display=ME.sessions>0?'flex':'none';document.getElementById('planBtn').innerHTML='';loadUserPosts();loadUserWorkouts();loadUserCalendar();}
 async function loadUserPosts(){const box=document.getElementById('uPosts');try{const posts=await api('/api/posts');if(!posts.length){box.innerHTML=`<div class="empty"><div class="ei">📢</div>Новостей пока нет</div>`;return;}box.innerHTML=posts.map(p=>renderPost(p,false)).join('');}catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}}
 async function loadUserWorkouts(){const box=document.getElementById('uWorkouts');if(!box)return;box.innerHTML='<div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div>';try{const ws=await api('/api/workouts?userId='+ME.id);if(!ws.length){box.innerHTML=`<div class="empty"><div class="ei">🏋️</div>Тренировок пока нет</div>`;return;}const now=Date.now();const future=ws.filter(w=>new Date(w.datetime).getTime()>=now);const past=ws.filter(w=>new Date(w.datetime).getTime()<now).reverse();let html='';if(future.length){html+=`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--ac);margin-bottom:10px">Предстоящие</div>`;html+=future.map(w=>`<div class="wcard ${w.type==='group'?'group':''}"><div class="w-title">${esc(w.title)}<span class="wbadge ${w.type==='group'?'wb-g':'wb-p'}">${w.type==='group'?'Группа':'Личная'}</span></div><div class="w-meta">📅 ${new Date(w.datetime).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} · ⏱ ${w.duration} мин</div>${w.note?`<div class="w-note">📝 ${esc(w.note)}</div>`:''}</div>`).join('');}if(past.length){html+=`<div class="div"></div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu2);margin-bottom:10px">История</div>`;html+=past.slice(0,8).map(w=>`<div class="wcard" style="opacity:.5;border-left-color:var(--mu)"><div class="w-title">${esc(w.title)}</div><div class="w-meta">📅 ${new Date(w.datetime).toLocaleDateString('ru-RU')} · ⏱ ${w.duration} мин</div></div>`).join('');}box.innerHTML=html;}catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}}
 
-// ═══ ПОЛЬЗОВАТЕЛЬСКИЙ КАЛЕНДАРЬ ═══
 let _uCalYear = new Date().getFullYear();
 let _uCalMonth = new Date().getMonth();
 let _uCalWorkouts = [];
@@ -1932,14 +1878,12 @@ function showUserCalDay(dateStr){
 function uCalPrev(){ _uCalMonth--; if(_uCalMonth<0){_uCalMonth=11;_uCalYear--;} renderUserCalendar(); }
 function uCalNext(){ _uCalMonth++; if(_uCalMonth>11){_uCalMonth=0;_uCalYear++;} renderUserCalendar(); }
 
-// ═══ ПРОГРЕСС УЧЕНИКА ═══
 async function loadUserProgress(){document.getElementById('wtD').value=new Date().toISOString().split('T')[0];try{const data=await api('/api/progress/'+ME.id);const weights=data.filter(d=>d.type==='weight');const photos=data.filter(d=>d.type==='photo');if(wChartInst){wChartInst.destroy();wChartInst=null;}const chartBox=document.querySelector('#p-uprog .chart-w');if(chartBox){if(weights.length){chartBox.innerHTML='<canvas id="wChart"></canvas>';wChartInst=new Chart(document.getElementById('wChart'),chartCfg(weights));}else{chartBox.innerHTML=`<div class="empty"><div class="ei">⚖️</div>Добавьте первую запись веса</div>`;}}const pg=document.getElementById('phGrid');pg.innerHTML=photos.length?photos.map(p=>`<div class="ph-wrap"><img class="ph-img" src="${p.photoUrl}" onclick="openLightbox('${esc(p.photoUrl)}')"/><button class="ph-del" onclick="deletePhoto('${p.id}',event)" title="Удалить фото">✕</button></div>`).join(''):`<div class="empty" style="grid-column:1/-1"><div class="ei">📸</div>Нет фото</div>`;}catch(e){toast('Ошибка загрузки прогресса: '+e.message,'e');}}
 async function addWeight(){const w=v('wtV'),d=v('wtD');if(!w){toast('Введите вес','e');return;}try{await api('/api/progress','POST',{userId:ME.id,weight:w,date:d});toast('✅ Вес сохранён','s');closeMo('mAddWt');document.getElementById('wtV').value='';loadUserProgress();}catch(e){toast(e.message,'e');}}
 function prevPhoto(e){const f=e.target.files[0];if(!f)return;const p=document.getElementById('phPrev');p.src=URL.createObjectURL(f);p.style.display='block';document.getElementById('phUpLbl').style.display='none';}
 async function uploadPhoto(){const file=document.getElementById('phFile').files[0];if(!file){toast('Выберите фото','e');return;}toast('⏳ Загрузка фото...','w');const fd=new FormData();fd.append('userId',ME.id);fd.append('photo',file);try{const r=await authFetch('/api/progress/photo',{method:'POST',body:fd});const d=await r.json();if(!r.ok)throw new Error(d.error);toast('✅ Фото загружено','s');closeMo('mAddPh');document.getElementById('phFile').value='';document.getElementById('phPrev').style.display='none';document.getElementById('phUpLbl').style.display='flex';loadUserProgress();}catch(e){toast('Ошибка: '+e.message,'e');}}
 async function deletePhoto(photoId,e){if(e)e.stopPropagation();if(!confirm('Удалить это фото?'))return;try{await api('/api/progress/photo/'+photoId,'DELETE');toast('🗑 Фото удалено','w');loadUserProgress();}catch(err){toast('Ошибка: '+err.message,'e');}}
 
-// ═══ ДНЕВНИК ═══
 let _diaryRating=0;let _diaryPlan=null;let _diaryWeek=1;let _diaryActiveBlock=null;let _diaryEntryId=null;let _diaryExercises=[];let _diaryAllExercises=[];let _diaryCustomCount=0;
 let _pickerCb=null;const _drumState={drum1:0,drum2:0};const _drumItems={drum1:[],drum2:[]};
 function drumBuild(drumId,items){_drumItems[drumId]=items;_drumState[drumId]=0;const track=document.getElementById(drumId+'-track');track.innerHTML=items.map(v=>`<div class="drum-item">${v}</div>`).join('');drumApply(drumId);}
@@ -1973,7 +1917,6 @@ function resetDiaryModal(){document.getElementById('diarySaveBtn').setAttribute(
 async function deleteDiary(entryId){if(!confirm('Удалить запись тренировки?'))return;try{await api('/api/diary/'+ME.id+'/'+entryId,'DELETE');toast('🗑 Запись удалена','w');loadDiary();}catch(e){toast('Ошибка: '+e.message,'e');}}
 async function editDiary(entryId){try{const r=await authFetch('/api/diary/'+ME.id,{headers:{'Accept':'application/json'}});const entries=await r.json();const e=entries.find(x=>x.id===entryId);if(!e){toast('Запись не найдена','e');return;}_diaryEntryId=entryId;_diaryRating=e.rating||0;document.getElementById('diaryDate').value=e.date;document.getElementById('diaryNote').value=e.note||'';document.getElementById('diaryModalTitle').textContent='✏️ Редактировать запись';document.getElementById('diarySaveBtn').setAttribute('onclick',`saveDiaryEdit('${entryId}')`);document.querySelectorAll('#starRow .star-btn').forEach((b,i)=>b.classList.toggle('active',i<_diaryRating));document.getElementById('diaryWeekBar').style.display='none';_diaryExercises=(e.exercises||[]).map(ex=>({name:ex.name,block:'',custom:true,planSets:'',planReps:'',expanded:true,sets:(ex.sets||[]).map(s=>({weight:s.weight!==undefined?s.weight:'',reps:s.reps||'',done:false}))}));renderDiaryExList();openMo('mDiary');}catch(err){toast('Ошибка: '+err.message,'e');}}
 
-// ═══ КАЛЕНДАРЬ ═══
 let _calYear=new Date().getFullYear(),_calMonth=new Date().getMonth(),_calWorkouts=[];
 const RU_MONTHS=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const RU_DAYS=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
@@ -1983,7 +1926,6 @@ function calNext(){_calMonth++;if(_calMonth>11){_calMonth=0;_calYear++;}renderCa
 function renderCalendar(){document.getElementById('calMonthLabel').textContent=RU_MONTHS[_calMonth]+' '+_calYear;const grid=document.getElementById('calGrid');const today=new Date().toISOString().split('T')[0];const paymentDates=new Set(allStudents.map(s=>s.paymentDate).filter(Boolean));let html=RU_DAYS.map(d=>`<div class="cal-head-cell">${d}</div>`).join('');const firstDay=new Date(_calYear,_calMonth,1);const startDow=(firstDay.getDay()+6)%7;const daysInMonth=new Date(_calYear,_calMonth+1,0).getDate();const daysInPrevM=new Date(_calYear,_calMonth,0).getDate();for(let i=0;i<startDow;i++)html+=`<div class="cal-cell other-month">${daysInPrevM-startDow+1+i}</div>`;for(let d=1;d<=daysInMonth;d++){const dateStr=`${_calYear}-${String(_calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const hasW=_calWorkouts.some(w=>w.datetime&&w.datetime.startsWith(dateStr));const hasP=paymentDates.has(dateStr);const isToday=dateStr===today;let cls='cal-cell';if(hasW)cls+=' has-workout';if(hasP)cls+=' has-payment';if(isToday)cls+=' today';let dots='';if(hasW||hasP){dots='<div class="cal-dots">';if(hasW)dots+=`<div class="cal-dot cal-dot-w"></div>`;if(hasP)dots+=`<div class="cal-dot cal-dot-p"></div>`;dots+='</div>';}html+=`<div class="${cls}" onclick="showCalDay('${dateStr}')">${d}${dots}</div>`;}const total=startDow+daysInMonth;const remain=total%7===0?0:7-(total%7);for(let i=1;i<=remain;i++)html+=`<div class="cal-cell other-month">${i}</div>`;grid.innerHTML=html;document.getElementById('calEvents').innerHTML='';}
 function showCalDay(dateStr){const ws=_calWorkouts.filter(w=>w.datetime&&w.datetime.startsWith(dateStr));const payers=allStudents.filter(s=>s.paymentDate===dateStr);const evBox=document.getElementById('calEvents');const d=new Date(dateStr).toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});if(!ws.length&&!payers.length){evBox.innerHTML=`<div style="color:var(--mu2);font-size:13px;padding:10px 0">${d} — событий нет</div>`;return;}let html=`<div style="font-size:12px;font-weight:700;color:var(--mu2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">${d}</div>`;ws.forEach(w=>{const t=new Date(w.datetime).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});html+=`<div class="cal-event" style="border-left:3px solid var(--ac)"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">🏋️</span><div><div style="font-weight:600;font-size:13px">${esc(w.title)}</div><div style="font-size:12px;color:var(--mu2)">${t} · ${w.type==='group'?'👥 Группа':'👤 Личная'} · ${w.duration} мин</div></div></div></div>`;});payers.forEach(s=>{const sessColor=s.sessions<=0?'var(--red)':s.sessions<=2?'var(--yel)':'var(--ac)';html+=`<div class="cal-event" style="border-left:3px solid var(--yel);background:rgba(251,191,36,.06)"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">💳</span><div><div style="font-weight:600;font-size:13px">${esc(s.name)}</div><div style="font-size:12px;color:var(--mu2)">Дата оплаты · <span style="color:${sessColor};font-weight:600">${s.sessions} занятий</span></div></div></div></div>`;});evBox.innerHTML=html;}
 
-// ═══ ОТЗЫВЫ ═══
 let _reviewRating=0;
 function setReviewStar(n){_reviewRating=n;document.querySelectorAll('#reviewStarRow .star-btn').forEach((b,i)=>b.classList.toggle('active',i<n));}
 async function submitReview(){if(!_reviewRating){toast('Выберите оценку','e');return;}const text=document.getElementById('reviewText').value.trim();try{await api('/api/reviews','POST',{userId:ME.id,userName:ME.name,rating:_reviewRating,text});toast('⭐ Спасибо за отзыв!','s');closeMo('mReview');_reviewRating=0;setReviewStar(0);document.getElementById('reviewText').value='';}catch(e){toast(e.message,'e');}}
@@ -1991,21 +1933,15 @@ async function loadReviews(){const box=document.getElementById('reviewsList'),av
 async function delReview(id){if(!confirm('Удалить этот отзыв?'))return;try{await api('/api/reviews/'+id,'DELETE');toast('🗑 Отзыв удалён','w');loadReviews();}catch(e){toast(e.message,'e');}}
 async function testNotifications(){const chatId=prompt('Telegram ID для теста (оставьте пустым = отправить тренеру):');if(chatId===null)return;try{const r=await api('/api/notifications/test','POST',{chatId:chatId||null});if(r.success)toast('✅ Тест отправлен → '+r.sentTo,'s');else toast('❌ Уведомления не работают: '+r.reason,'e');}catch(e){toast(e.message,'e');}}
 
-// ═══ ЗАМЕТКИ ═══
 async function openNotes(userId,userName){document.getElementById('notesUserId').value=userId;document.getElementById('notesUserName').textContent='👤 '+userName;document.getElementById('noteText').value='';openMo('mNotes');loadNotes(userId);}
 async function loadNotes(userId){const box=document.getElementById('notesList');box.innerHTML='<div class="sp-ring" style="margin:10px auto"></div>';try{const notes=await api('/api/notes/'+userId);if(!notes.length){box.innerHTML='<div style="color:var(--mu2);font-size:13px">Заметок пока нет</div>';return;}box.innerHTML=notes.map(n=>`<div class="note-item"><div class="note-date">${new Date(n.createdAt).toLocaleDateString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div><div class="note-text">${esc(n.text)}</div><button class="note-del" onclick="deleteNote('${n.id}','${userId}')">✕</button></div>`).join('');}catch(e){box.innerHTML='<div style="color:var(--red)">'+e.message+'</div>';}}
 async function saveNote(){const userId=document.getElementById('notesUserId').value,text=document.getElementById('noteText').value.trim();if(!text){toast('Введите текст заметки','e');return;}try{await api('/api/notes/'+userId,'POST',{text});document.getElementById('noteText').value='';toast('✅ Заметка сохранена','s');loadNotes(userId);}catch(e){toast(e.message,'e');}}
 async function deleteNote(noteId,userId){try{await api('/api/notes/'+userId+'/'+noteId,'DELETE');loadNotes(userId);}catch(e){toast(e.message,'e');}}
 
-// ═══ СБРОС ВЕСА ═══
 async function resetWeight(userId,userName){if(!confirm(`Удалить все записи веса «${userName}»?\n\nЭто действие нельзя отменить.`))return;try{const r=await api(`/api/progress/${userId}/weight`,'DELETE');toast(`⚖️ График веса «${userName}» очищен (${r.deleted} записей)`,'w');}catch(e){toast('Ошибка: '+e.message,'e');}}
 
-// ═══ ПРАВИЛА ═══
 function toggleRules(){document.querySelectorAll('.rules-card').forEach(card=>{card.classList.toggle('open');});}
 
-// ═══════════════════════════════════════════
-// ШАБЛОНЫ ПЛАНОВ (хранятся в localStorage)
-// ═══════════════════════════════════════════
 function tplSave(t){localStorage.setItem('cs_plan_templates',JSON.stringify(t));}
 function tplLoad(){try{return JSON.parse(localStorage.getItem('cs_plan_templates')||'[]');}catch{return[];}}
 
@@ -2080,9 +2016,6 @@ function deleteTemplate(idx){
   renderTemplatesList();
 }
 
-// ═══════════════════════════════════════════
-// КОПИРОВАНИЕ ПЛАНА МЕЖДУ УЧЕНИКАМИ
-// ═══════════════════════════════════════════
 let _pendingTplIdx=null;
 let _cpSourceType='student';
 
@@ -2208,9 +2141,6 @@ async function doCopyPlan(){
   }catch(e){toast(e.message,'e');}
 }
 
-// ═══════════════════════════════════════════
-// ВИДЕОТЕКА — ТРЕНЕР (admin)
-// ═══════════════════════════════════════════
 
 async function loadVideoLibrary(){
   const box=document.getElementById('vidCatList');
@@ -2281,7 +2211,6 @@ function openUploadVideoModal(catId,catName){
   if(desc)desc.value='';
   clearMVidPreview();
   openMo('mAddVideo');
-  // Populate exercise suggestions from student plans
   api('/api/users').then(users=>{
     const exSet=new Set();
     users.forEach(u=>{
@@ -2292,7 +2221,6 @@ function openUploadVideoModal(catId,catName){
     const dl=document.getElementById('mVidExSuggest');
     if(dl)dl.innerHTML=[...exSet].sort().map(x=>`<option value="${esc(x)}">`).join('');
   }).catch(()=>{});
-  // Drag & drop
   const zone=document.getElementById('mVidZone');
   if(zone&&!zone._ddBound){
     zone._ddBound=true;
@@ -2391,9 +2319,6 @@ async function deleteVideo(id,title){
   }catch(e){toast(e.message,'e');}
 }
 
-// ═══════════════════════════════════════════
-// ВИДЕОТЕКА — УЧЕНИК (user)
-// ═══════════════════════════════════════════
 
 async function loadUserVideoLibrary(){
   const box=document.getElementById('uVidContent');
@@ -2454,9 +2379,6 @@ function _openUVidCategory(catId,catName){
       </div>`).join('')}`;
 }
 
-// ═══════════════════════════════════════════
-// ВИДЕО ПЛЕЕР — общая модалка
-// ═══════════════════════════════════════════
 
 function openVideoModal(title,url){
   const titleEl=document.getElementById('videoModalTitle');
@@ -2475,7 +2397,6 @@ function closeVideoModal(){
   closeMo('mVideo');
 }
 
-// ═══ ПИТАНИЕ ═══
 function _todayLocal(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 let _nutDate=_todayLocal();
 let _anutDate=_todayLocal();
@@ -2547,7 +2468,6 @@ function renderUserNutrition(box,entries){
 
 function nutDateShift(d){const dt=new Date(_nutDate);dt.setDate(dt.getDate()+d);_nutDate=dt.toISOString().split('T')[0];loadUserNutrition();}
 
-// ═══ СОХРАНЕНИЕ ЗАПИСИ ПИТАНИЯ ═══
 async function saveNutEntry(){
   if(!_nutSelectedFood)return toast('Выберите продукт из поиска','e');
   const weight=parseFloat(document.getElementById('nutWeight').value)||100;
@@ -2644,7 +2564,6 @@ function anutSelectStudent(sid){
 }
 function anutDateShift(d){const dt=new Date(_anutDate);dt.setDate(dt.getDate()+d);_anutDate=dt.toISOString().split('T')[0];loadAdminNutrition();}
 
-// ═══ ВКЛАДКИ МОДАЛА ПИТАНИЯ ═══
 function switchNutTab(tab){
   _nutActiveTab=tab;
   ['search','build','fav','recent','own','shared'].forEach(t=>{
@@ -2656,8 +2575,7 @@ function switchNutTab(tab){
   if(tab==='shared')loadSharedFoods();
 }
 
-// ═══ ПОИСК ПРОДУКТОВ ═══
-let _nutSelectedFood=null; // { name, per100:{kcal,protein,fat,carbs} }
+let _nutSelectedFood=null;
 let _nutCustomFoodsCache=[];
 let _localFoods=[];
 async function loadLocalFoods(){
@@ -2668,12 +2586,10 @@ async function loadLocalFoods(){
 async function loadCustomFoods(){
   if(!ME)return;
   try{
-    // Грузим свои продукты и общие (от всех пользователей) в единый кеш
     const [myFoods, sharedFoods] = await Promise.all([
       authFetch(`/api/custom-foods/${ME.id}`).then(r=>r.ok?r.json():[]).catch(()=>[]),
       api('/api/shared-foods').catch(()=>[])
     ]);
-    // Объединяем: свои первыми, затем чужие общие (без дублей по имени)
     const myNames=new Set(myFoods.map(f=>f.name.toLowerCase()));
     const uniqueShared=sharedFoods.filter(f=>!myNames.has(f.name.toLowerCase()));
     _nutCustomFoodsCache=[...myFoods,...uniqueShared];
@@ -2709,9 +2625,7 @@ function buildSetupAutocomplete(){
 function doNutSearch(q,ddId,selectFn){
   const dd=document.getElementById(ddId);if(!dd)return;
   const ql=q.toLowerCase();
-  // Кастомные блюда (свои + общие от других)
   const custom=_nutCustomFoodsCache.filter(f=>f.name.toLowerCase().includes(ql)).slice(0,5);
-  // Локальная база продуктов
   const startsWith=_localFoods.filter(f=>f.name.toLowerCase().startsWith(ql));
   const includes=_localFoods.filter(f=>!f.name.toLowerCase().startsWith(ql)&&f.name.toLowerCase().includes(ql));
   const locals=[...startsWith,...includes].slice(0,10);
@@ -2739,20 +2653,17 @@ function doNutSearch(q,ddId,selectFn){
 function hideDropdown(id){const dd=document.getElementById(id);if(dd)dd.style.display='none';}
 function hideNutDropdown(){hideDropdown('nutDropdown');}
 
-// Выбор продукта в поиске (вкладка Поиск)
 function selectNutFood(el){
   hideDropdown('nutDropdown');
   const name=el.dataset.name;
   let per100;
   if(el.dataset.custom==='1'||el.dataset.local==='1'){
-    // Кастомное блюдо или локальная база — значения на 100г
     per100={kcal:parseFloat(el.dataset.kcal)||0,protein:parseFloat(el.dataset.p)||0,fat:parseFloat(el.dataset.f)||0,carbs:parseFloat(el.dataset.c)||0};
   }else{
     per100=parseFoodDescription(el.dataset.desc||'');
     if(!per100)per100={kcal:0,protein:0,fat:0,carbs:0};
   }
   _nutSelectedFood={name,per100};
-  // Скрываем поиск, показываем карточку
   document.getElementById('nutSearchArea').style.display='none';
   document.getElementById('nutSelectedCard').style.display='block';
   document.getElementById('nutSelName').textContent=name;
@@ -2779,8 +2690,7 @@ function recalcNutByWeight(){
   document.getElementById('ncb-c').textContent=Math.round(k.carbs*m*10)/10+'г';
 }
 
-// ═══ КОНСТРУКТОР БЛЮДА ═══
-let _buildSelectedIng=null; // { name, per100:{kcal,protein,fat,carbs} }
+let _buildSelectedIng=null;
 let _buildIngredients=[];
 
 function selectBuildIng(el){
@@ -2855,14 +2765,11 @@ async function saveCustomDish(){
   const btn=document.getElementById('buildSaveBtn');
   btn.disabled=true;btn.textContent='...';
   try{
-    // Сохраняем как кастомное блюдо в базу
     await authFetch(`/api/custom-foods/${ME.id}`,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({name,ingredients:_buildIngredients,kcal:tot.k,protein:tot.p,fat:tot.f,carbs:tot.c})});
-    // Добавляем в дневник питания
     const r=await authFetch(`/api/nutrition/${ME.id}`,{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({name,type,kcal:tot.k,protein:tot.p,fat:tot.f,carbs:tot.c,date:_nutDate})});
     if(!r.ok){const d=await r.json();throw new Error(d.error||'Ошибка');}
-    // Обновляем кэш кастомных блюд
     await loadCustomFoods();
     closeMo('mAddNut');resetNutModal();
     toast('Блюдо сохранено и добавлено!','s');loadUserNutrition();
@@ -2870,7 +2777,6 @@ async function saveCustomDish(){
   btn.disabled=false;btn.textContent='Сохранить и добавить';
 }
 
-// ═══ ПАРСИНГ FATSECRET ═══
 function parseFoodDescription(desc){
   if(!desc)return null;
   const cal=desc.match(/Calories:\s*([\d.]+)/i);
@@ -2881,7 +2787,6 @@ function parseFoodDescription(desc){
   return{kcal:Math.round(parseFloat(cal[1])||0),fat:parseFloat(fat?.[1])||0,carbs:parseFloat(carb?.[1])||0,protein:parseFloat(prot?.[1])||0};
 }
 
-// ═══ ЗВЁЗДОЧКА / ИЗБРАННОЕ ═══
 function toggleNutStar(){
   _nutSaveFav=!_nutSaveFav;
   document.getElementById('nutStarToggle').classList.toggle('active',_nutSaveFav);
@@ -2904,7 +2809,6 @@ function resetNutModal(){
   hideDropdown('nutDropdown');hideDropdown('buildDropdown');
   const title=document.getElementById('nutModalTitle');
   if(title)title.textContent='🥗 Добавить приём пищи';
-  // Reset own product tab
   const ownFields=['ownNutName','ownNutKcal','ownNutProt','ownNutFat','ownNutCarb'];
   ownFields.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const ownGrams=document.getElementById('ownNutGrams');if(ownGrams)ownGrams.value='100';
@@ -2912,7 +2816,6 @@ function resetNutModal(){
   switchNutTab('search');
 }
 
-// ═══ ИЗБРАННОЕ ═══
 async function loadNutFavorites(){
   if(!ME)return;
   const list=document.getElementById('nutFavList');if(!list)return;
@@ -2937,7 +2840,6 @@ async function loadNutFavorites(){
 }
 function applyNutFavorite(id){
   const fav=_nutFavsCache.find(f=>f.id===id);if(!fav)return;
-  // Используем per100 если сохранено, иначе используем значения напрямую (100г порция)
   const per100=fav.per100||{kcal:fav.kcal||0,protein:fav.protein||0,fat:fav.fat||0,carbs:fav.carbs||0};
   _nutSelectedFood={name:fav.name,per100};
   document.getElementById('nutSearchArea').style.display='none';
@@ -2957,7 +2859,6 @@ async function deleteNutFavorite(id){
   }catch(e){toast('Ошибка','e');}
 }
 
-// ═══ НЕДАВНИЕ ═══
 async function loadNutRecent(){
   const list=document.getElementById('nutRecentList');if(!list||!ME)return;
   try{
@@ -2982,7 +2883,6 @@ async function loadNutRecent(){
 }
 function applyNutRecent(name){
   const e=_nutRecentCache.find(x=>x.name===name);if(!e)return;
-  // Показываем как выбранный продукт — значения за 100г (те же, что и сохранённые)
   const per100={kcal:e.kcal||0,protein:e.protein||0,fat:e.fat||0,carbs:e.carbs||0};
   _nutSelectedFood={name:e.name,per100};
   document.getElementById('nutSearchArea').style.display='none';
@@ -2996,7 +2896,6 @@ function applyNutRecent(name){
   switchNutTab('search');
 }
 
-// ═══ УТИЛИТЫ ═══
 function v(id){return document.getElementById(id).value.trim();}
 function clr(a){a.forEach(id=>document.getElementById(id).value='');}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -3039,7 +2938,6 @@ function closeLightbox(e){if(e&&e.target===document.getElementById('lightbox-img
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox();});
 function exportExcel(){toast('⏳ Подготовка файла...','w');const a=document.createElement('a');a.href='/api/export/students';a.download='';document.body.appendChild(a);a.click();document.body.removeChild(a);}
 
-// ═══ ИНИЦИАЛИЗАЦИЯ ═══
 (async function init(){
   const splash=document.getElementById('splash');
   const ok=await tryAutoLogin();
@@ -3048,7 +2946,6 @@ function exportExcel(){toast('⏳ Подготовка файла...','w');const
     setTimeout(()=>splash.style.display='none',400);
     if(ok){ startApp(); }
     else {
-      // Показываем лендинг (если не авторизован)
       document.getElementById('landingPage').classList.add('show');
     }
   },800);
@@ -3064,7 +2961,6 @@ function showLanding(){
   document.getElementById('landingPage').classList.add('show');
 }
 
-// Регистрация на забег
 async function submitCrossReg(){
   const name=(document.getElementById('cregName').value||'').trim();
   const phone=(document.getElementById('cregPhone').value||'').trim();
@@ -3078,27 +2974,23 @@ async function submitCrossReg(){
     await fetch('/api/cross-register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,telegram:tg})});
     document.getElementById('crossRegForm').style.display='none';
     document.getElementById('crossRegSuccess').style.display='block';
-    // сброс
     ['cregName','cregPhone','cregTg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});;
   }catch(e){err.style.display='block';err.textContent='Ошибка: '+e.message;}
   btn.disabled=false;btn.textContent='Записаться';
 }
 
-// При закрытии модалки регистрации — сброс формы к начальному состоянию
 function _resetCrossRegModal(){
   document.getElementById('crossRegForm').style.display='block';
   document.getElementById('crossRegSuccess').style.display='none';
   ['cregName','cregPhone','cregTg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});;
   const err=document.getElementById('cregErr');if(err)err.style.display='none';
 }
-// Переопределяем closeMo чтобы сбрасывать форму при закрытии
 var _origCloseMo = closeMo;
 closeMo = function(id){
   _origCloseMo(id);
   if(id==='mCrossReg') setTimeout(_resetCrossRegModal, 300);
 };
 
-// Переключение вкладок в панели тренера "Кросс"
 function switchAcrossTab(tab, btn){
   document.querySelectorAll('.across-tab').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.across-section').forEach(s=>s.classList.remove('active'));
@@ -3115,7 +3007,6 @@ function switchAcrossTab(tab, btn){
   }
 }
 
-// Загрузить список заявок на забег
 async function loadCrossRegistrants(){
   const list=document.getElementById('crossRegList');
   const cnt=document.getElementById('crossRegCount');
@@ -3146,7 +3037,6 @@ async function deleteCrossReg(id, btn){
   catch(e){toast('Ошибка: '+e.message,'e');btn.disabled=false;}
 }
 
-// Загрузить участников кросса
 async function loadAcrossStudents(){
   const list=document.getElementById('crossPartList');
   const cnt=document.getElementById('crossPartCount');
@@ -3168,9 +3058,9 @@ async function loadAcrossStudents(){
   }catch(e){list.innerHTML='<div class="empty" style="padding:16px 0">Ошибка загрузки</div>';}
 }
 
-let _crossPartMode = 'manual'; // 'manual' | 'fromcs'
-let _csMembers = [];           // кэш участников зала
-let _crossPartSelectedIds = new Set(); // выбранные участники
+let _crossPartMode = 'manual';
+let _csMembers = [];
+let _crossPartSelectedIds = new Set();
 
 function openAddCrossParticipant(){
   document.getElementById('addCrossPartForm').style.display='block';
@@ -3253,7 +3143,6 @@ async function saveCrossParticipant(){
       const login=document.getElementById('crossPartLogin').value.trim();
       const password=document.getElementById('crossPartPassword').value.trim();
       if(!name){toast('Введите имя','e');return;}
-      // Если указан логин+пароль — создаём аккаунт с ролью cross
       if(login && password){
         await api('/api/users','POST',{name,login,password,sessions:0,role:'cross'});
       }
@@ -3280,14 +3169,11 @@ async function deleteCrossPart(id,btn){
 
 document.getElementById('uPd').value=new Date(Date.now()+30*86400000).toISOString().split('T')[0];
 
-// ═══════════════════════════════════════════
-// КРОСС — GPS ТРЕНИРОВКА
-// ═══════════════════════════════════════════
-let _crossState = 'idle'; // idle | running | paused | finished
-let _crossWorker = null;   // Web Worker для таймера
-let _crossElapsed = 0;     // секунды (накопленное время)
-let _crossStartTime = 0;   // Date.now() anchor
-let _crossDistM = 0;       // метры
+let _crossState = 'idle';
+let _crossWorker = null;
+let _crossElapsed = 0;
+let _crossStartTime = 0;
+let _crossDistM = 0;
 let _crossLastPos = null;
 let _crossWatchId = null;
 let _crossResult = null;
@@ -3295,10 +3181,9 @@ let _crossMap = null;
 let _crossMyMarker = null;
 let _crossLiveInterval = null;
 let _crossOtherMarkers = {};
-let _crossWakeLock = null; // Wake Lock чтобы экран не гасил таймер
-let _crossNotifInterval = null; // интервал уведомлений
+let _crossWakeLock = null;
+let _crossNotifInterval = null;
 
-// --- Push-уведомления о пробежке ---
 async function _crossRequestNotifPerm() {
   if (!('Notification' in window)) return;
   if (Notification.permission === 'default') await Notification.requestPermission();
@@ -3306,13 +3191,13 @@ async function _crossRequestNotifPerm() {
 
 function _crossSendNotif() {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  if (document.visibilityState === 'visible') return; // не спамим когда приложение открыто
+  if (document.visibilityState === 'visible') return;
   const dist = (_crossDistM / 1000).toFixed(2);
   const time = fmtTime(_crossElapsed);
   new Notification('🏃 Coach Space — тренировка идёт', {
     body: `⏱ ${time}  •  📍 ${dist} км`,
     icon: '/icon-192.png',
-    tag: 'cross-run', // заменяет предыдущее — не спамит
+    tag: 'cross-run',
     renotify: true,
     silent: false
   });
@@ -3320,13 +3205,12 @@ function _crossSendNotif() {
 
 function _crossStartNotifInterval() {
   _crossStopNotifInterval();
-  _crossNotifInterval = setInterval(_crossSendNotif, 30000); // каждые 30 сек
+  _crossNotifInterval = setInterval(_crossSendNotif, 30000);
 }
 function _crossStopNotifInterval() {
   if (_crossNotifInterval) { clearInterval(_crossNotifInterval); _crossNotifInterval = null; }
 }
 
-// --- Web Worker таймер ---
 function _crossWorkerStart(startTime) {
   if (_crossWorker) { _crossWorker.terminate(); _crossWorker = null; }
   try {
@@ -3337,7 +3221,6 @@ function _crossWorkerStart(startTime) {
     };
     _crossWorker.postMessage({ cmd: 'start', startTime });
   } catch(err) {
-    // Fallback: обычный setInterval если Worker недоступен
     console.warn('Worker недоступен, используем setInterval');
     _crossWorker = { _iv: setInterval(() => {
       _crossElapsed = Math.floor((Date.now() - startTime) / 1000);
@@ -3350,7 +3233,6 @@ function _crossWorkerStop() {
   if (_crossWorker) { _crossWorker.terminate(); _crossWorker = null; }
 }
 
-// --- Wake Lock (не даём экрану гаснуть) ---
 async function _crossAcquireWakeLock() {
   try {
     if ('wakeLock' in navigator) {
@@ -3362,13 +3244,10 @@ function _crossReleaseWakeLock() {
   if (_crossWakeLock) { _crossWakeLock.release().catch(()=>{}); _crossWakeLock = null; }
 }
 
-// --- Page Visibility: когда возвращаемся из фона — синхронизируем время ---
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && _crossState === 'running') {
-    // Пересчитываем elapsed из системного времени — таймер не "уснул"
     _crossElapsed = Math.floor((Date.now() - _crossStartTime) / 1000);
     crossUpdateUI();
-    // Переотправляем позицию на сервер при возврате
     if (_crossLastPos && ME) {
       api('/api/runs/active','POST',{userId:ME.id,lat:_crossLastPos.lat,lon:_crossLastPos.lon,isActive:true}).catch(()=>{});
     }
@@ -3395,7 +3274,6 @@ async function crossUpdateLiveMap(lat, lon) {
     _crossMyMarker.setLatLng(latlng);
   }
   _crossMap.panTo(latlng);
-  // Send position to server
   if (ME) api('/api/runs/active','POST',{userId:ME.id,lat,lon,isActive:true}).catch(()=>{});
 }
 
@@ -3415,11 +3293,10 @@ async function crossPollOthers() {
           .addTo(_crossMap).bindPopup(esc(r.userId));
       }
     }
-    // Remove markers for runners no longer active
     for (const uid of Object.keys(_crossOtherMarkers)) {
       if (!seen.has(uid)) { _crossOtherMarkers[uid].remove(); delete _crossOtherMarkers[uid]; }
     }
-  } catch(e) { /* silent */ }
+  } catch(e) {}
 }
 
 function haversine(lat1, lon1, lat2, lon2) {
@@ -3450,7 +3327,6 @@ function fmtPace(distM, seconds) {
 
 function crossUpdateUI() {
   document.getElementById('crossTimer').textContent = fmtTime(_crossElapsed);
-  // Distance in meters with thousands separator
   const m = Math.round(_crossDistM);
   document.getElementById('crossDist').textContent = m >= 1000
     ? Math.floor(m/1000) + ' ' + String(m % 1000).padStart(3,'0')
@@ -3481,11 +3357,8 @@ function crossStart() {
   document.getElementById('crossCtrl').style.display = 'flex';
   document.getElementById('crossPauseBtn').textContent = '⏸ Пауза';
   document.getElementById('crossPauseBtn').onclick = crossPause;
-  // Web Worker таймер — работает даже при свёрнутом браузере
   _crossWorkerStart(_crossStartTime);
-  // Wake Lock — не даём экрану засыпать
   _crossAcquireWakeLock();
-  // Уведомления — запрашиваем разрешение и стартуем интервал
   _crossRequestNotifPerm().then(_crossStartNotifInterval);
   initCrossMap();
   _crossLiveInterval = setInterval(crossPollOthers, 4000);
@@ -3503,11 +3376,8 @@ function crossStart() {
       document.getElementById('crossGpsWarn').style.display = 'none';
       crossUpdateLiveMap(lat, lon);
     } else {
-      // Точность плохая — обновляем позицию без добавления метров,
-      // чтобы не накапливать большой прыжок при возврате сигнала
       _crossLastPos = {lat, lon};
     }
-    // Отправляем позицию не чаще раз в 5 сек
     const now = Date.now();
     if (now - _lastPosSentAt > 5000 && ME) {
       _lastPosSentAt = now;
@@ -3622,12 +3492,9 @@ function crossReset() {
   document.getElementById('crossStartBtn').onclick = crossToggleRun;
   document.getElementById('crossCtrl').style.display = 'none';
   document.getElementById('crossGpsWarn').style.display = 'none';
-  // Hide map
   const mapEl = document.getElementById('crossMap');
   if (mapEl) mapEl.style.display = 'none';
-  // Stop live polling
   if (_crossLiveInterval) { clearInterval(_crossLiveInterval); _crossLiveInterval = null; }
-  // Mark inactive
   if (ME) api('/api/runs/active','POST',{userId:ME.id,isActive:false}).catch(()=>{});
 }
 
@@ -3694,7 +3561,6 @@ function loadUserCross() {
 }
 
 function loadAdminCross() {
-  // Загружаем активную вкладку
   const activeSec = document.querySelector('#p-across .across-section.active');
   if (!activeSec || activeSec.id === 'acrossLeaderboardSection') {
     loadAdminLeaderboard('week', document.querySelector('#acrossLeaderboardSection .lb-btn.active'));
@@ -3705,9 +3571,6 @@ function loadAdminCross() {
   }
 }
 
-// ═══════════════════════════════════════════
-// ПИТАНИЕ — СВОЙ ПРОДУКТ
-// ═══════════════════════════════════════════
 function ownNutCalc() {
   const grams = parseFloat(document.getElementById('ownNutGrams').value) || 100;
   const k100 = parseFloat(document.getElementById('ownNutKcal').value) || 0;
@@ -3730,15 +3593,12 @@ async function saveOwnNutEntry() {
   const mul = grams / 100;
   const mealType = document.getElementById('nutType')?.value || 'snack';
   try {
-    // Сохраняем в общую базу продуктов (доступна всем при поиске)
     await api(`/api/custom-foods/${ME.id}`, 'POST', {
       name, kcal: Math.round(k100), protein: parseFloat(p100.toFixed(1)),
       fat: parseFloat(f100.toFixed(1)), carbs: parseFloat(c100.toFixed(1)),
       isShared: true, userName: ME.name
     });
-    // Обновляем кеш продуктов сразу
     loadCustomFoods();
-    // Добавляем в дневник питания за сегодня
     await api(`/api/nutrition/${ME.id}`, 'POST', {
       name: `${name} (${grams}г)`, type: mealType,
       kcal: Math.round(k100 * mul),
@@ -3774,7 +3634,6 @@ async function loadSharedFoods() {
 }
 
 function selectSharedFood(food) {
-  // Переключаем на свой продукт и заполняем поля
   switchNutTab('own');
   document.getElementById('ownNutName').value = food.name;
   document.getElementById('ownNutKcal').value = food.kcal;
@@ -3785,7 +3644,6 @@ function selectSharedFood(food) {
   ownNutCalc();
 }
 
-// ── PWA Install ──────────────────────────────────────────────
 let _installPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
@@ -3815,7 +3673,6 @@ function showInstallPrompt() {
     return;
   }
 
-  // Fallback if prompt not available (already installed or browser doesn't support)
   toast('Откройте меню браузера и выберите «Добавить на главный экран»');
 }
 
@@ -3823,13 +3680,11 @@ function closeIOSModal() {
   document.getElementById('iosInstallModal').style.display = 'none';
 }
 
-// Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
 }
 </script>
 
-<!-- iOS Install Modal -->
 <div id="iosInstallModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeIOSModal()">
   <div style="background:#1a1f2e;border-radius:20px 20px 0 0;padding:28px 24px 40px;width:100%;max-width:480px;box-sizing:border-box">
     <div style="text-align:center;margin-bottom:20px">
