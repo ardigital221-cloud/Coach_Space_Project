@@ -700,6 +700,9 @@
     .nt-meal-type-btn:hover{border-color:var(--ba);background:rgba(139,92,246,.1);}
     .nt-meal-type-icon{font-size:36px;margin-bottom:8px;}
     .nt-meal-type-name{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+    .nt-add-btn{width:34px;height:34px;border-radius:50%;background:var(--ac);border:none;color:#fff;font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s,background .15s;}
+    .nt-add-btn:hover{transform:scale(1.12);background:#6d28d9;}
+    .nt-add-btn:active{transform:scale(.95);}
   </style>
 </head>
 <body>
@@ -4231,11 +4234,14 @@ function openNutMealType(mealType) {
   };
   document.getElementById('ntList').innerHTML = items.map((t,i) => `
     <div class="nt-item" onclick="openNutDetail(${i})">
-      <div>
+      <div style="flex:1;min-width:0">
         <div class="nt-item-name">${t.name}</div>
         <div class="nt-item-macros">Б: ${t.protein}г &nbsp;Ж: ${t.fat}г &nbsp;У: ${t.carbs}г</div>
       </div>
-      <div class="nt-item-kcal">${t.kcal} <span style="font-size:10px;color:var(--mu2)">ккал</span></div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <div class="nt-item-kcal">${t.kcal} <span style="font-size:10px;color:var(--mu2)">ккал</span></div>
+        <button class="nt-add-btn" onclick="addNutFromTemplate(${i},event)" title="Добавить в ${mealType}">+</button>
+      </div>
     </div>
   `).join('');
 }
@@ -4267,6 +4273,27 @@ function openNutDetail(idx) {
   `;
   document.getElementById('ntListView').style.display = 'none';
   document.getElementById('ntDetailView').classList.add('show');
+}
+
+async function addNutFromTemplate(idx, event) {
+  event.stopPropagation();
+  if (!ME) return toast('Войдите в систему', 'e');
+  const t = NUT_TEMPLATES[_ntCurrentCat].meals[_ntCurrentMealType][idx];
+  const typeMap = {'Завтрак':'breakfast','Обед':'lunch','Ужин':'dinner','Перекус':'snack'};
+  const type = typeMap[_ntCurrentMealType] || 'breakfast';
+  const btn = event.currentTarget;
+  btn.disabled = true;
+  try {
+    const r = await authFetch(`/api/nutrition/${ME.id}`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({name:t.name, type, kcal:t.kcal, protein:t.protein, fat:t.fat, carbs:t.carbs, date:_nutDate})
+    });
+    if (!r.ok) { const d = await r.json(); throw new Error(d.error || 'Ошибка'); }
+    toast('✅ Добавлено в ' + _ntCurrentMealType.toLowerCase(), 's');
+    loadUserNutrition();
+  } catch(e) { toast('Ошибка: ' + e.message, 'e'); }
+  btn.disabled = false;
 }
 
 function closeNutTemplates() {
