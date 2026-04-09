@@ -703,6 +703,17 @@
     .nt-add-btn{width:34px;height:34px;border-radius:50%;background:var(--ac);border:none;color:#fff;font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s,background .15s;}
     .nt-add-btn:hover{transform:scale(1.12);background:#6d28d9;}
     .nt-add-btn:active{transform:scale(.95);}
+    .subst-groups{display:flex;flex-direction:column;gap:8px;}
+    .subst-group{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:var(--r);overflow:hidden;}
+    .subst-group-hd{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none;}
+    .subst-group-icon{font-size:22px;}
+    .subst-group-name{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;flex:1;}
+    .subst-group-arr{font-size:18px;color:var(--mu2);transition:transform .25s;}
+    .subst-group.open .subst-group-arr{transform:rotate(90deg);}
+    .subst-group-body{display:none;padding:0 14px 14px;}
+    .subst-group.open .subst-group-body{display:block;}
+    .subst-tags{display:flex;flex-wrap:wrap;gap:6px;}
+    .subst-tag{background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--tx);}
   </style>
 </head>
 <body>
@@ -997,6 +1008,62 @@
           </div>
         </div>
       </div>
+
+      <div style="margin-top:20px">
+        <div class="sh" style="margin-bottom:10px"><div class="st">🔄 Группы замены продуктов</div></div>
+        <div style="font-size:12px;color:var(--mu2);margin-bottom:12px;padding:0 2px">Заменяйте продукты только <strong style="color:var(--ac)">внутри одной группы</strong> — это золотое правило сохранения баланса рациона.</div>
+        <div class="subst-groups">
+          <div class="subst-group">
+            <div class="subst-group-hd" onclick="this.parentElement.classList.toggle('open')">
+              <span class="subst-group-icon">🌾</span>
+              <span class="subst-group-name">УГЛЕВОДЫ</span>
+              <span class="subst-group-arr">›</span>
+            </div>
+            <div class="subst-group-body">
+              <div class="subst-tags">
+                <span class="subst-tag">Рис</span><span class="subst-tag">Гречка</span><span class="subst-tag">Паста</span><span class="subst-tag">Булгур</span><span class="subst-tag">Киноа</span><span class="subst-tag">Перловка</span><span class="subst-tag">Пшено</span><span class="subst-tag">Овсянка</span><span class="subst-tag">Картофель</span><span class="subst-tag">Батат</span><span class="subst-tag">Хлеб цельнозерновой</span><span class="subst-tag">Тортилья цз</span>
+              </div>
+            </div>
+          </div>
+          <div class="subst-group">
+            <div class="subst-group-hd" onclick="this.parentElement.classList.toggle('open')">
+              <span class="subst-group-icon">🥩</span>
+              <span class="subst-group-name">БЕЛОК</span>
+              <span class="subst-group-arr">›</span>
+            </div>
+            <div class="subst-group-body">
+              <div class="subst-tags">
+                <span class="subst-tag">Индейка</span><span class="subst-tag">Говядина</span><span class="subst-tag">Кролик</span><span class="subst-tag">Белая рыба</span><span class="subst-tag">Морепродукты</span><span class="subst-tag">Тунец в с/с</span><span class="subst-tag">Яйца</span><span class="subst-tag">Творог</span><span class="subst-tag">Печень</span><span class="subst-tag">Курица</span><span class="subst-tag">Греческий йогурт</span>
+              </div>
+            </div>
+          </div>
+          <div class="subst-group">
+            <div class="subst-group-hd" onclick="this.parentElement.classList.toggle('open')">
+              <span class="subst-group-icon">🥑</span>
+              <span class="subst-group-name">ЖИРЫ</span>
+              <span class="subst-group-arr">›</span>
+            </div>
+            <div class="subst-group-body">
+              <div class="subst-tags">
+                <span class="subst-tag">Растительные масла</span><span class="subst-tag">Орехи</span><span class="subst-tag">Семечки</span><span class="subst-tag">Авокадо</span><span class="subst-tag">Маслины/оливки</span><span class="subst-tag">Сливочное масло</span><span class="subst-tag">Сыр</span>
+              </div>
+            </div>
+          </div>
+          <div class="subst-group">
+            <div class="subst-group-hd" onclick="this.parentElement.classList.toggle('open')">
+              <span class="subst-group-icon">🥦</span>
+              <span class="subst-group-name">КЛЕТЧАТКА</span>
+              <span class="subst-group-arr">›</span>
+            </div>
+            <div class="subst-group-body">
+              <div class="subst-tags">
+                <span class="subst-tag">Томаты</span><span class="subst-tag">Кабачок</span><span class="subst-tag">Белокочанная капуста</span><span class="subst-tag">Брокколи</span><span class="subst-tag">Цветная капуста</span><span class="subst-tag">Пекинская капуста</span><span class="subst-tag">Болгарский перец</span><span class="subst-tag">Стручковая фасоль</span><span class="subst-tag">Баклажан</span><span class="subst-tag">Редис</span><span class="subst-tag">Зелень</span><span class="subst-tag">Тыква</span><span class="subst-tag">Морковь</span><span class="subst-tag">Огурец</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="uNutContent"><div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div></div>
     </div>
 
@@ -1715,7 +1782,7 @@ function startApp(){
   document.getElementById('loginPage').classList.remove('show');
   document.getElementById('app').classList.add('show');
   document.getElementById('bnav').style.display='flex';
-  document.getElementById('hName').textContent=ME.name;
+  document.getElementById('hName').textContent=(ME.name==='Tect'?'🔥 ':'')+ME.name;
   const r=document.getElementById('hRole');
   ME.role==='admin'?(r.textContent='Тренер',r.className='t-role ra'):(r.textContent='Ученик',r.className='t-role rs');
   loadLocalFoods();
@@ -3379,7 +3446,7 @@ async function crossUpdateLiveMap(lat, lon) {
   if (!_crossMap) return;
   const latlng = [lat, lon];
   if (!_crossMyMarker) {
-    _crossMyMarker = L.circleMarker(latlng, {radius:9,color:'#38bdf8',fillColor:'#38bdf8',fillOpacity:.9,weight:2}).addTo(_crossMap).bindPopup('Вы');
+    _crossMyMarker = L.circleMarker(latlng, {radius:9,color:'#38bdf8',fillColor:'#38bdf8',fillOpacity:.9,weight:2}).addTo(_crossMap).bindPopup(esc(ME?.name || 'Вы'));
   } else {
     _crossMyMarker.setLatLng(latlng);
   }
@@ -3400,7 +3467,7 @@ async function crossPollOthers() {
         _crossOtherMarkers[r.userId].setLatLng(latlng);
       } else {
         _crossOtherMarkers[r.userId] = L.circleMarker(latlng, {radius:7,color:'#a78bfa',fillColor:'#a78bfa',fillOpacity:.8,weight:2})
-          .addTo(_crossMap).bindPopup(esc(r.userId));
+          .addTo(_crossMap).bindPopup(esc(r.userName || r.userId));
       }
     }
     for (const uid of Object.keys(_crossOtherMarkers)) {
@@ -3477,10 +3544,10 @@ function crossStart() {
     if (_crossState !== 'running') return;
     const acc = pos.coords.accuracy;
     const {latitude: lat, longitude: lon} = pos.coords;
-    if (acc <= 150) {
+    if (acc <= 30) {
       if (_crossLastPos) {
         const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
-        if (d >= 2 && d < 500) _crossDistM += d;
+        if (d >= 8 && d < 300) _crossDistM += d;
       }
       _crossLastPos = {lat, lon};
       document.getElementById('crossGpsWarn').style.display = 'none';
@@ -3536,10 +3603,10 @@ function crossResume() {
     if (_crossState !== 'running') return;
     const acc = pos.coords.accuracy;
     const {latitude: lat, longitude: lon} = pos.coords;
-    if (acc <= 150) {
+    if (acc <= 30) {
       if (_crossLastPos) {
         const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
-        if (d >= 2 && d < 500) _crossDistM += d;
+        if (d >= 8 && d < 300) _crossDistM += d;
       }
       _crossLastPos = {lat, lon};
       crossUpdateLiveMap(lat, lon);
