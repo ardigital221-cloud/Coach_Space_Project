@@ -718,6 +718,15 @@
     .subst-group.open .subst-group-body{display:block;}
     .subst-tags{display:flex;flex-wrap:wrap;gap:6px;}
     .subst-tag{background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--tx);}
+    .rules50-list{display:flex;flex-direction:column;gap:8px;}
+    .rules50-section{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:var(--r);overflow:hidden;}
+    .rules50-section-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;font-family:'Unbounded',sans-serif;font-size:11px;font-weight:700;letter-spacing:.5px;user-select:none;}
+    .rules50-section-body{display:none;padding:0 14px 14px;border-top:1px solid rgba(255,255,255,.05);}
+    .rules50-section.open .rules50-section-body{display:block;}
+    .rules50-section.open .subst-group-arr{transform:rotate(90deg);}
+    .rules50-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;line-height:1.5;}
+    .rules50-item:last-child{border-bottom:none;}
+    .rules50-n{flex-shrink:0;width:24px;height:24px;background:rgba(139,92,246,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--ac);margin-top:1px;}
   </style>
 </head>
 <body>
@@ -985,7 +994,9 @@
     </div>
 
     <div class="panel" id="p-unut">
-      <div class="sh" style="margin-bottom:10px"><div class="st">📚 Шаблоны питания</div></div>
+      <div id="uNutContent"><div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div></div>
+
+      <div class="sh" style="margin:20px 0 10px"><div class="st">📚 Шаблоны питания</div></div>
       <div class="nt-cats">
         <div class="nt-cat" onclick="openNutTemplates('gain')">
           <div class="nt-cat-bg" style="background-image:url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80')"></div>
@@ -1073,7 +1084,86 @@
         </div>
       </div>
 
-      <div id="uNutContent"><div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div></div>
+      <div style="margin-top:20px">
+        <div class="sh" style="margin-bottom:10px"><div class="st">🏆 50 Золотых Правил Твоего Результата</div></div>
+        <div class="rules50-list">
+          <div class="rules50-section" onclick="this.classList.toggle('open')">
+            <div class="rules50-section-hd"><span>🧊 База и Дисциплина</span><span class="subst-group-arr">›</span></div>
+            <div class="rules50-section-body">
+              <div class="rules50-item"><span class="rules50-n">1</span><div><b>Весы — это закон.</b> Любая еда сначала кладется на кухонные весы, затем в тарелку.</div></div>
+              <div class="rules50-item"><span class="rules50-n">2</span><div><b>Приложение — твой бортовой самописец.</b> Нет записи в приложении — приема пищи не существовало.</div></div>
+              <div class="rules50-item"><span class="rules50-n">3</span><div><b>Граммовка — только цифры.</b> Забудь слова «на глаз», «жменя», «чуть-чуть». Только граммы.</div></div>
+              <div class="rules50-item"><span class="rules50-n">4</span><div><b>Взвешивай до готовки.</b> Крупы, макароны и мясо взвешиваются в сухом/сыром виде.</div></div>
+              <div class="rules50-item"><span class="rules50-n">5</span><div><b>Порядок действий:</b> Взвесил → Записал → Съел. Не наоборот.</div></div>
+              <div class="rules50-item"><span class="rules50-n">6</span><div><b>Никакого воровства у самого себя.</b> Попробовал кусочек при готовке? Запиши его.</div></div>
+              <div class="rules50-item"><span class="rules50-n">7</span><div><b>Честность.</b> Приложение не осудит, а тело — покажет правду на весах.</div></div>
+              <div class="rules50-item"><span class="rules50-n">8</span><div><b>Вода — это не еда.</b> Пей чистую воду, она не требует записи, если в ней нет добавок.</div></div>
+              <div class="rules50-item"><span class="rules50-n">9</span><div><b>Чай и кофе — без сахара.</b> Сахар в напитках — это скрытый саботаж.</div></div>
+              <div class="rules50-item"><span class="rules50-n">10</span><div><b>Молоко в кофе — это еда.</b> Взвешивай и записывай каждое добавление молока или сливок.</div></div>
+            </div>
+          </div>
+          <div class="rules50-section" onclick="this.classList.toggle('open')">
+            <div class="rules50-section-hd"><span>🍽 Правила приема пищи</span><span class="subst-group-arr">›</span></div>
+            <div class="rules50-section-body">
+              <div class="rules50-item"><span class="rules50-n">11</span><div><b>Ешь медленно.</b> Сигнал о сытости идет до мозга 20 минут.</div></div>
+              <div class="rules50-item"><span class="rules50-n">12</span><div><b>Фокус на еде.</b> Убери телефон и выключи телевизор во время еды.</div></div>
+              <div class="rules50-item"><span class="rules50-n">13</span><div><b>Белок в каждом приеме.</b> Мясо, рыба, яйца или творог должны быть всегда.</div></div>
+              <div class="rules50-item"><span class="rules50-n">14</span><div><b>Овощи — твой объем.</b> Хочешь наесться? Увеличь порцию зеленых овощей в два раза.</div></div>
+              <div class="rules50-item"><span class="rules50-n">15</span><div><b>Не доедай через силу.</b> Если в тарелке осталось 20г по плану, но ты сыт — отложи.</div></div>
+              <div class="rules50-item"><span class="rules50-n">16</span><div><b>Завтрак — это не обязательно.</b> Если утром нет голода, не пихай в себя еду.</div></div>
+              <div class="rules50-item"><span class="rules50-n">17</span><div><b>Ужин после 18:00 разрешен.</b> Важен итог калорий за день, а не время на часах.</div></div>
+              <div class="rules50-item"><span class="rules50-n">18</span><div><b>Последний прием пищи — за 2-3 часа до сна.</b> Дай организму время на отдых, а не на стройку.</div></div>
+              <div class="rules50-item"><span class="rules50-n">19</span><div><b>Тщательно жуй.</b> Помоги своему ЖКТ усвоить все нутриенты.</div></div>
+              <div class="rules50-item"><span class="rules50-n">20</span><div><b>Жидкая еда — это не выход.</b> Твердая пища дает больше сытости, чем смузи.</div></div>
+            </div>
+          </div>
+          <div class="rules50-section" onclick="this.classList.toggle('open')">
+            <div class="rules50-section-hd"><span>🚫 Стоп-продукты и ловушки</span><span class="subst-group-arr">›</span></div>
+            <div class="rules50-section-body">
+              <div class="rules50-item"><span class="rules50-n">21</span><div><b>Соусы — это жир.</b> Майонез, кетчуп и готовые заправки взвешивай до грамма.</div></div>
+              <div class="rules50-item"><span class="rules50-n">22</span><div><b>Масло — самый калорийный продукт.</b> Одна лишняя ложка масла может остановить похудение.</div></div>
+              <div class="rules50-item"><span class="rules50-n">23</span><div><b>Скрытый сахар.</b> Читай составы: он есть в консервах, колбасах и йогуртах.</div></div>
+              <div class="rules50-item"><span class="rules50-n">24</span><div><b>Алкоголь на стопе.</b> Он отключает контроль и задерживает воду на неделю.</div></div>
+              <div class="rules50-item"><span class="rules50-n">25</span><div><b>Жидкие калории — под запрет.</b> Соки и газировки не дают сытости, только пустой сахар.</div></div>
+              <div class="rules50-item"><span class="rules50-n">26</span><div><b>«ПП-сладости» — это тоже калории.</b> Часто в них калорий больше, чем в обычном шоколаде.</div></div>
+              <div class="rules50-item"><span class="rules50-n">27</span><div><b>Соль — в меру.</b> Избыток соли задерживает воду и дает «плюс» на весах.</div></div>
+              <div class="rules50-item"><span class="rules50-n">28</span><div><b>Фастфуд — это крайний случай.</b> Если пришлось съесть, найди его в базе и запиши.</div></div>
+              <div class="rules50-item"><span class="rules50-n">29</span><div><b>Полуфабрикаты — зона риска.</b> Там часто больше жира, чем указано на упаковке.</div></div>
+              <div class="rules50-item"><span class="rules50-n">30</span><div><b>Перекусы «на бегу» — враги.</b> Чаще всего они не записываются и рушат дефицит.</div></div>
+            </div>
+          </div>
+          <div class="rules50-section" onclick="this.classList.toggle('open')">
+            <div class="rules50-section-hd"><span>🧠 Психология и привычки</span><span class="subst-group-arr">›</span></div>
+            <div class="rules50-section-body">
+              <div class="rules50-item"><span class="rules50-n">31</span><div><b>Сон 7-8 часов.</b> Недосып равен перееданию на следующий день.</div></div>
+              <div class="rules50-item"><span class="rules50-n">32</span><div><b>Сорвался? Продолжай.</b> Один срыв не портит всё. Портит всё решение «гулять так гулять».</div></div>
+              <div class="rules50-item"><span class="rules50-n">33</span><div><b>Не отрабатывай еду.</b> Спорт — для здоровья, дефицит — для похудения.</div></div>
+              <div class="rules50-item"><span class="rules50-n">34</span><div><b>Не ищи мотивацию, ищи дисциплину.</b> Мотивация проходит через неделю.</div></div>
+              <div class="rules50-item"><span class="rules50-n">35</span><div><b>Планируй еду заранее.</b> Записывай рацион в приложение с вечера.</div></div>
+              <div class="rules50-item"><span class="rules50-n">36</span><div><b>Магазин — только со списком.</b> И только на сытый желудок.</div></div>
+              <div class="rules50-item"><span class="rules50-n">37</span><div><b>Не жди быстрых чудес.</b> Жир не копился за неделю, и не уйдет за неделю.</div></div>
+              <div class="rules50-item"><span class="rules50-n">38</span><div><b>Замеры важнее весов.</b> Объемы могут уходить, даже если вес стоит из-за воды.</div></div>
+              <div class="rules50-item"><span class="rules50-n">39</span><div><b>Не сравнивай себя с другими.</b> У каждого своя скорость метаболизма.</div></div>
+              <div class="rules50-item"><span class="rules50-n">40</span><div><b>Окружение важно.</b> Объясни близким, что твои весы — это серьезно.</div></div>
+            </div>
+          </div>
+          <div class="rules50-section" onclick="this.classList.toggle('open')">
+            <div class="rules50-section-hd"><span>🏃 Физиология и лайфхаки</span><span class="subst-group-arr">›</span></div>
+            <div class="rules50-section-body">
+              <div class="rules50-item"><span class="rules50-n">41</span><div><b>Больше движения.</b> 10 000 шагов — это не миф, а минимальная активность.</div></div>
+              <div class="rules50-item"><span class="rules50-n">42</span><div><b>Специи — твои друзья.</b> Они делают диетическую еду вкусной без лишних калорий.</div></div>
+              <div class="rules50-item"><span class="rules50-n">43</span><div><b>Пей стакан воды перед едой.</b> Это поможет лучше контролировать аппетит.</div></div>
+              <div class="rules50-item"><span class="rules50-n">44</span><div><b>Не путай жажду с голодом.</b> Хочешь есть вне плана? Сначала выпей воды.</div></div>
+              <div class="rules50-item"><span class="rules50-n">45</span><div><b>Клетчатка — наше всё.</b> Овощи и отруби помогают пищеварению.</div></div>
+              <div class="rules50-item"><span class="rules50-n">46</span><div><b>Холодная вода.</b> Организм тратит калории на её согрев (немного, но всё же).</div></div>
+              <div class="rules50-item"><span class="rules50-n">47</span><div><b>Отеки — это не жир.</b> Если на весах +1кг после соленого, просто подожди 2 дня.</div></div>
+              <div class="rules50-item"><span class="rules50-n">48</span><div><b>Ешь из маленьких тарелок.</b> Чисто визуально порция будет казаться больше.</div></div>
+              <div class="rules50-item"><span class="rules50-n">49</span><div><b>Праздники — это не повод.</b> В гостях выбирай белок и овощи.</div></div>
+              <div class="rules50-item"><span class="rules50-n">50</span><div><b>Твое тело — твой проект.</b> Никто не сделает эту работу за тебя.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="panel" id="p-anut">
