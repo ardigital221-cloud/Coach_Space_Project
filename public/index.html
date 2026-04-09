@@ -662,6 +662,39 @@
     .creg-del{background:rgba(251,113,133,.1);color:var(--red);border:1px solid rgba(251,113,133,.2);border-radius:var(--r3);padding:6px 10px;font-size:12px;cursor:pointer;transition:all .2s;font-weight:600;}
     .creg-del:hover{background:rgba(251,113,133,.2);}
     .creg-count{font-size:11px;color:var(--mu2);margin-bottom:10px;}
+    .nt-cats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+    .nt-cat{position:relative;border-radius:var(--r);overflow:hidden;height:110px;cursor:pointer;border:1px solid rgba(255,255,255,.07);transition:transform .2s,box-shadow .2s;}
+    .nt-cat:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.4);}
+    .nt-cat-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.45);}
+    .nt-cat-body{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px;}
+    .nt-cat-icon{font-size:24px;}
+    .nt-cat-label{font-family:'Unbounded',sans-serif;font-size:9px;font-weight:700;text-align:center;color:#fff;text-transform:uppercase;letter-spacing:.5px;line-height:1.3;}
+    .nt-cat-kcal{font-size:10px;color:rgba(255,255,255,.65);}
+    .mo-nt{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);overflow-y:auto;}
+    .mo-nt.show{display:block;}
+    .nt-modal{background:var(--bg2);border:1px solid var(--ba);border-radius:var(--r) var(--r) 0 0;max-width:680px;margin:60px auto 0;min-height:calc(100vh - 60px);padding:20px 16px 40px;}
+    .nt-modal-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+    .nt-modal-back{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:var(--r3);padding:7px 12px;color:var(--tx);font-size:13px;cursor:pointer;}
+    .nt-modal-title{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;}
+    .nt-list{display:flex;flex-direction:column;gap:8px;}
+    .nt-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:var(--r2);padding:14px;cursor:pointer;transition:all .2s;display:flex;justify-content:space-between;align-items:center;}
+    .nt-item:hover{border-color:var(--ba);background:rgba(139,92,246,.06);}
+    .nt-item-name{font-size:13px;font-weight:600;margin-bottom:4px;}
+    .nt-item-macros{font-size:11px;color:var(--mu2);}
+    .nt-item-kcal{font-family:'Unbounded',sans-serif;font-size:16px;font-weight:700;color:var(--ac);white-space:nowrap;margin-left:12px;}
+    .nt-detail{display:none;}
+    .nt-detail.show{display:block;}
+    .nt-detail-hero{background:rgba(139,92,246,.08);border:1px solid var(--ba);border-radius:var(--r);padding:16px;margin-bottom:14px;}
+    .nt-detail-name{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;margin-bottom:10px;}
+    .nt-macros-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:0;}
+    .nt-macro{background:rgba(255,255,255,.04);border-radius:var(--r3);padding:10px 8px;text-align:center;}
+    .nt-macro-val{font-family:'Unbounded',sans-serif;font-size:16px;font-weight:700;}
+    .nt-macro-lbl{font-size:10px;color:var(--mu2);margin-top:2px;}
+    .nt-meals{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+    .nt-meal{background:rgba(255,255,255,.03);border-radius:var(--r2);padding:12px 14px;border-left:3px solid var(--ac);}
+    .nt-meal-time{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ac);margin-bottom:4px;}
+    .nt-meal-foods{font-size:13px;color:var(--tx);line-height:1.5;}
+    @media(max-width:400px){.nt-cats{grid-template-columns:1fr;}.nt-cat{height:80px;}}
   </style>
 </head>
 <body>
@@ -712,8 +745,9 @@
   <div id="crossRegForm">
     <div class="mt">🏃 Записаться на кросс</div>
     <div class="fg"><label class="fl">Имя и фамилия *</label><input class="fi" id="cregName" placeholder="Иван Иванов"/></div>
-    <div class="fg"><label class="fl">Телефон</label><input class="fi" id="cregPhone" type="tel" placeholder="+7 700 000 00 00"/></div>
+    <div class="fg"><label class="fl">Телефон *</label><input class="fi" id="cregPhone" type="tel" placeholder="+7 700 000 00 00"/></div>
     <div class="fg"><label class="fl">Telegram (username или @)</label><input class="fi" id="cregTg" placeholder="@username"/></div>
+    <div style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true"><input tabindex="-1" id="cregWebsite" autocomplete="off"/></div>
     <div class="ferr" id="cregErr"></div>
     <div class="mf">
       <button class="btn btn-g" onclick="closeMo('mCrossReg')">Отмена</button>
@@ -928,6 +962,33 @@
     </div>
 
     <div class="panel" id="p-unut">
+      <div class="sh" style="margin-bottom:10px"><div class="st">📚 Шаблоны питания</div></div>
+      <div class="nt-cats">
+        <div class="nt-cat" onclick="openNutTemplates('gain')">
+          <div class="nt-cat-bg" style="background-image:url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80')"></div>
+          <div class="nt-cat-body">
+            <div class="nt-cat-icon">💪</div>
+            <div class="nt-cat-label">Набор массы</div>
+            <div class="nt-cat-kcal">2800–4000 ккал</div>
+          </div>
+        </div>
+        <div class="nt-cat" onclick="openNutTemplates('cut')">
+          <div class="nt-cat-bg" style="background-image:url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80')"></div>
+          <div class="nt-cat-body">
+            <div class="nt-cat-icon">🔥</div>
+            <div class="nt-cat-label">Похудение</div>
+            <div class="nt-cat-kcal">1200–1850 ккал</div>
+          </div>
+        </div>
+        <div class="nt-cat" onclick="openNutTemplates('femcut')">
+          <div class="nt-cat-bg" style="background-image:url('https://images.unsplash.com/photo-1547592180-85f173990554?w=600&q=80')"></div>
+          <div class="nt-cat-body">
+            <div class="nt-cat-icon">🌸</div>
+            <div class="nt-cat-label">Похудение для женщин</div>
+            <div class="nt-cat-kcal">1200–1550 ккал</div>
+          </div>
+        </div>
+      </div>
       <div id="uNutContent"><div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div></div>
     </div>
 
@@ -1074,6 +1135,30 @@
 </div>
 
 <nav class="bnav" id="bnav" style="display:none"></nav>
+
+<div class="mo-nt" id="moNutTemplates">
+  <div class="nt-modal">
+    <div class="nt-modal-head">
+      <button class="nt-modal-back" id="ntBackBtn" onclick="ntBack()">← Назад</button>
+      <div class="nt-modal-title" id="ntModalTitle">Шаблоны питания</div>
+    </div>
+    <div id="ntListView">
+      <div class="nt-list" id="ntList"></div>
+    </div>
+    <div id="ntDetailView" class="nt-detail">
+      <div class="nt-detail-hero">
+        <div class="nt-detail-name" id="ntDetailName"></div>
+        <div class="nt-macros-row">
+          <div class="nt-macro"><div class="nt-macro-val" id="ntDKcal" style="color:var(--ac)"></div><div class="nt-macro-lbl">ккал</div></div>
+          <div class="nt-macro"><div class="nt-macro-val" id="ntDProt" style="color:#34d399"></div><div class="nt-macro-lbl">белки г</div></div>
+          <div class="nt-macro"><div class="nt-macro-val" id="ntDFat" style="color:var(--yel)"></div><div class="nt-macro-lbl">жиры г</div></div>
+          <div class="nt-macro"><div class="nt-macro-val" id="ntDCarb" style="color:var(--blu)"></div><div class="nt-macro-lbl">углев г</div></div>
+        </div>
+      </div>
+      <div class="nt-meals" id="ntDetailMeals"></div>
+    </div>
+  </div>
+</div>
 
 <div class="mo" id="mAddU"><div class="modal">
   <div class="mh"></div><div class="mt">➕ Новый ученик</div>
@@ -2961,20 +3046,34 @@ function showLanding(){
   document.getElementById('landingPage').classList.add('show');
 }
 
+let _cregCooldown=0;
 async function submitCrossReg(){
   const name=(document.getElementById('cregName').value||'').trim();
   const phone=(document.getElementById('cregPhone').value||'').trim();
   const tg=(document.getElementById('cregTg').value||'').trim();
+  const honeypot=(document.getElementById('cregWebsite').value||'').trim();
   const err=document.getElementById('cregErr');
   err.style.display='none';
+  if(honeypot) return;
   if(!name){err.style.display='block';err.textContent='Введите имя';return;}
+  if(!phone){err.style.display='block';err.textContent='Введите номер телефона';return;}
+  const digits=phone.replace(/\D/g,'');
+  if(digits.length<7){err.style.display='block';err.textContent='Введите корректный номер телефона';return;}
+  const now=Date.now();
+  if(now<_cregCooldown){
+    const sec=Math.ceil((_cregCooldown-now)/1000);
+    err.style.display='block';err.textContent=`Подождите ${sec} сек. перед повторной отправкой`;return;
+  }
   const btn=document.getElementById('cregBtn');
   btn.disabled=true;btn.textContent='...';
   try{
-    await fetch('/api/cross-register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,telegram:tg})});
+    const res=await fetch('/api/cross-register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,telegram:tg})});
+    const data=await res.json();
+    if(!res.ok){err.style.display='block';err.textContent=data.error||'Ошибка';btn.disabled=false;btn.textContent='Записаться';return;}
+    _cregCooldown=Date.now()+30000;
     document.getElementById('crossRegForm').style.display='none';
     document.getElementById('crossRegSuccess').style.display='block';
-    ['cregName','cregPhone','cregTg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});;
+    ['cregName','cregPhone','cregTg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   }catch(e){err.style.display='block';err.textContent='Ошибка: '+e.message;}
   btn.disabled=false;btn.textContent='Записаться';
 }
@@ -3682,6 +3781,145 @@ function closeIOSModal() {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}
+
+const NUT_TEMPLATES = {
+  gain: {
+    label: 'Набор массы',
+    icon: '💪',
+    bg: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',
+    kcalRange: '2800–4000 ккал',
+    templates: [
+      {name:'Классический набор',kcal:3200,protein:180,fat:90,carbs:360,meals:[{time:'Завтрак',foods:'Овсянка на молоке 150г, 3 яйца, банан, мёд 1 ч.л.'},{time:'2-й завтрак',foods:'Творог 5% 200г, грецкие орехи 30г, ягоды'},{time:'Обед',foods:'Куриная грудка 250г, рис 200г, огурец, помидор'},{time:'Перекус',foods:'Гречка 150г, говядина тушёная 150г'},{time:'Ужин',foods:'Лосось 200г, картофель варёный 200г, брокколи'}]},
+      {name:'Силовой набор',kcal:3500,protein:200,fat:100,carbs:400,meals:[{time:'Завтрак',foods:'Овсянка 180г, 4 яйца, банан, арахисовая паста 2 ст.л.'},{time:'2-й завтрак',foods:'Творог 250г, банан, мёд'},{time:'Обед',foods:'Говядина 300г, рис 250г, овощной салат с маслом'},{time:'Перекус',foods:'Протеиновый коктейль, яблоко, хлебцы 50г'},{time:'Ужин',foods:'Куриная грудка 250г, гречка 200г, тушёные овощи'}]},
+      {name:'Чистый набор',kcal:3000,protein:190,fat:80,carbs:340,meals:[{time:'Завтрак',foods:'Яичница из 4 яиц, цельнозерновой хлеб 2 ломтя, авокадо'},{time:'2-й завтрак',foods:'Греческий йогурт 250г, овсянка 50г, ягоды'},{time:'Обед',foods:'Куриная грудка 280г, гречка 180г, салат из свежих овощей'},{time:'Перекус',foods:'Творог 200г, банан, миндаль 20г'},{time:'Ужин',foods:'Тунец в собственном соку 200г, рис 150г, огурец'}]},
+      {name:'Набор для эктоморфа',kcal:3800,protein:180,fat:110,carbs:480,meals:[{time:'Завтрак',foods:'Овсянка 200г, 4 яйца, банан 2шт, молоко 300мл'},{time:'2-й завтрак',foods:'Рис 200г, куриная грудка 200г, авокадо'},{time:'Обед',foods:'Паста 250г, говяжий фарш 200г, томатный соус'},{time:'Перекус',foods:'Творог 250г, орехи 40г, банан'},{time:'Ужин',foods:'Лосось 250г, картофель 250г, овощи на пару'},{time:'На ночь',foods:'Казеиновый протеин или творог 200г'}]},
+      {name:'Умеренный набор',kcal:2800,protein:160,fat:85,carbs:320,meals:[{time:'Завтрак',foods:'Овсянка 120г, 2 яйца, яблоко, орехи 20г'},{time:'2-й завтрак',foods:'Творог 150г, банан'},{time:'Обед',foods:'Куриная грудка 200г, рис 170г, помидор'},{time:'Перекус',foods:'Кефир 250мл, хлебцы 4шт'},{time:'Ужин',foods:'Говядина 200г, гречка 150г, брокколи'}]},
+      {name:'Высокобелковый набор',kcal:3200,protein:220,fat:90,carbs:330,meals:[{time:'Завтрак',foods:'4 яйца, куриная грудка 150г, цельнозерновой хлеб 2 ломтя'},{time:'2-й завтрак',foods:'Творог 0% 300г, протеин 1 порция, банан'},{time:'Обед',foods:'Говядина 300г, рис 150г, овощной салат'},{time:'Перекус',foods:'Куриная грудка 200г, кефир 250мл'},{time:'Ужин',foods:'Лосось 200г, гречка 120г, тушёная спаржа'}]},
+      {name:'Углеводный набор',kcal:3400,protein:170,fat:80,carbs:430,meals:[{time:'Завтрак',foods:'Овсянка 200г, банан 2шт, мёд, молоко'},{time:'2-й завтрак',foods:'Рис 200г, куриная грудка 180г'},{time:'Обед',foods:'Паста 300г, говядина 200г, соус'},{time:'Перекус',foods:'Гречка 200г, яйца 3шт'},{time:'Ужин',foods:'Рис 200г, рыба 200г, овощи'}]},
+      {name:'Куриный набор',kcal:3000,protein:200,fat:75,carbs:360,meals:[{time:'Завтрак',foods:'Куриная грудка 150г, овсянка 150г, яйца 2шт'},{time:'2-й завтрак',foods:'Куриная грудка 200г, рис 150г, огурец'},{time:'Обед',foods:'Куриное бедро без кожи 300г, гречка 200г, салат'},{time:'Перекус',foods:'Куриная грудка 150г, кефир 200мл'},{time:'Ужин',foods:'Куриная грудка 200г, картофель запечённый 200г, брокколи'}]},
+      {name:'Говяжий набор',kcal:3300,protein:190,fat:110,carbs:350,meals:[{time:'Завтрак',foods:'Яичница 4 яйца, цельнозерновой хлеб, томат'},{time:'2-й завтрак',foods:'Творог 200г, орехи 30г'},{time:'Обед',foods:'Говядина тушёная 300г, рис 200г, тушёные овощи'},{time:'Перекус',foods:'Говядина 150г, гречка 100г'},{time:'Ужин',foods:'Говяжий стейк 250г, картофель 200г, зелёный салат'}]},
+      {name:'Рыбный набор',kcal:3000,protein:195,fat:85,carbs:345,meals:[{time:'Завтрак',foods:'Лосось 150г, яйца 3шт, цельнозерновой хлеб, авокадо'},{time:'2-й завтрак',foods:'Творог 200г, банан, орехи'},{time:'Обед',foods:'Тунец 250г, рис 200г, овощной салат с оливковым маслом'},{time:'Перекус',foods:'Скумбрия 150г, гречка 120г'},{time:'Ужин',foods:'Лосось запечённый 250г, картофель 200г, брокколи'}]},
+      {name:'Вегетарианский набор',kcal:3100,protein:160,fat:90,carbs:390,meals:[{time:'Завтрак',foods:'Овсянка 150г, 4 яйца, банан, орехи 30г'},{time:'2-й завтрак',foods:'Творог 250г, мёд, грецкие орехи'},{time:'Обед',foods:'Чечевица 250г, рис 150г, тушёные овощи, сыр 50г'},{time:'Перекус',foods:'Греческий йогурт 250г, банан, семена льна'},{time:'Ужин',foods:'Фасоль 200г, гречка 150г, яйца 3шт, овощной салат'}]},
+      {name:'Бюджетный набор',kcal:3200,protein:175,fat:95,carbs:365,meals:[{time:'Завтрак',foods:'Овсянка 150г на воде, 3 яйца жареных, хлеб'},{time:'2-й завтрак',foods:'Творог 200г, банан'},{time:'Обед',foods:'Куриные бёдра 300г, гречка 200г, капустный салат'},{time:'Перекус',foods:'Кефир 300мл, хлеб 2 ломтя, яйцо'},{time:'Ужин',foods:'Рыба мороженая 250г, рис 170г, тушёная морковь'}]},
+      {name:'Набор для спортсмена',kcal:3600,protein:200,fat:95,carbs:430,meals:[{time:'До тренировки',foods:'Овсянка 150г, банан, кофе'},{time:'После тренировки',foods:'Протеин 2 мерных, банан, рис 150г'},{time:'Обед',foods:'Говядина 300г, рис 250г, овощи'},{time:'Перекус',foods:'Творог 250г, орехи 40г'},{time:'Ужин',foods:'Куриная грудка 250г, гречка 200г, тушёные овощи'},{time:'На ночь',foods:'Творог 200г, молоко 200мл'}]},
+      {name:'5-разовый набор',kcal:3200,protein:185,fat:90,carbs:360,meals:[{time:'Завтрак 8:00',foods:'Овсянка 140г, 3 яйца, банан'},{time:'Перекус 11:00',foods:'Творог 200г, орехи 25г'},{time:'Обед 14:00',foods:'Куриная грудка 250г, рис 200г, огурец'},{time:'Перекус 17:00',foods:'Кефир 300мл, хлебцы, яблоко'},{time:'Ужин 20:00',foods:'Говядина 200г, гречка 180г, помидор'}]},
+      {name:'6-разовый набор',kcal:3400,protein:195,fat:95,carbs:385,meals:[{time:'7:00',foods:'Овсянка 130г, 2 яйца, банан'},{time:'10:00',foods:'Куриная грудка 150г, рис 100г'},{time:'13:00',foods:'Говядина 200г, гречка 150г, салат'},{time:'16:00',foods:'Творог 200г, орехи 30г'},{time:'19:00',foods:'Лосось 200г, рис 150г, брокколи'},{time:'21:30',foods:'Казеин или творог 200г, молоко'}]},
+      {name:'Гречневый набор',kcal:3100,protein:180,fat:85,carbs:360,meals:[{time:'Завтрак',foods:'Гречка 150г, яйца 4шт, молоко 200мл'},{time:'2-й завтрак',foods:'Творог 200г, банан, мёд'},{time:'Обед',foods:'Куриная грудка 250г, гречка 200г, огурец'},{time:'Перекус',foods:'Гречка 100г, говядина 150г'},{time:'Ужин',foods:'Лосось 200г, гречка 150г, тушёная капуста'}]},
+      {name:'Рисовый набор',kcal:3300,protein:185,fat:90,carbs:390,meals:[{time:'Завтрак',foods:'Рис 150г, 3 яйца, банан'},{time:'2-й завтрак',foods:'Рис 100г, куриная грудка 150г'},{time:'Обед',foods:'Говядина 250г, рис 250г, тушёные овощи'},{time:'Перекус',foods:'Творог 200г, банан, кефир'},{time:'Ужин',foods:'Куриная грудка 200г, рис 200г, огурец, помидор'}]},
+      {name:'Овсяный набор',kcal:3000,protein:175,fat:80,carbs:360,meals:[{time:'Завтрак',foods:'Овсянка 200г на молоке, 3 яйца, банан, мёд'},{time:'2-й завтрак',foods:'Овсянка 100г, творог 150г, ягоды'},{time:'Обед',foods:'Куриная грудка 250г, рис 150г, салат'},{time:'Перекус',foods:'Овсяные хлопья 60г, кефир 250мл'},{time:'Ужин',foods:'Говядина 200г, гречка 150г, тушёная морковь'}]},
+      {name:'Углеводная загрузка',kcal:3500,protein:160,fat:75,carbs:470,meals:[{time:'Завтрак',foods:'Овсянка 200г, банан 2шт, сок апельсиновый 200мл'},{time:'2-й завтрак',foods:'Рис 200г, куриная грудка 150г'},{time:'Обед',foods:'Паста 300г, говядина 200г, хлеб'},{time:'Перекус',foods:'Гречка 200г, творог 150г, мёд'},{time:'Ужин',foods:'Рис 200г, рыба 200г, хлебцы'}]},
+      {name:'Максимальный набор',kcal:4000,protein:220,fat:120,carbs:480,meals:[{time:'Завтрак',foods:'Овсянка 200г, 5 яиц, банан 2шт, молоко 300мл, орехи 40г'},{time:'2-й завтрак',foods:'Рис 200г, куриная грудка 250г, авокадо'},{time:'Обед',foods:'Говядина 350г, рис 300г, хлеб 2 ломтя, масло'},{time:'Перекус',foods:'Творог 300г, банан, арахисовая паста 2 ст.л.'},{time:'Ужин',foods:'Лосось 300г, картофель 250г, тушёные овощи'},{time:'На ночь',foods:'Творог 250г, молоко 300мл'}]}
+    ]
+  },
+  cut: {
+    label: 'Похудение',
+    icon: '🔥',
+    bg: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',
+    kcalRange: '1200–1850 ккал',
+    templates: [
+      {name:'Классическое похудение',kcal:1600,protein:140,fat:50,carbs:160,meals:[{time:'Завтрак',foods:'Овсянка на воде 80г, 2 яйца варёных, огурец'},{time:'Перекус',foods:'Творог 0% 150г, яблоко'},{time:'Обед',foods:'Куриная грудка 200г, гречка 100г, салат из свежих овощей'},{time:'Перекус',foods:'Кефир 200мл, морковь'},{time:'Ужин',foods:'Куриная грудка 180г, тушёные овощи 200г'}]},
+      {name:'Белковая диета',kcal:1500,protein:170,fat:45,carbs:120,meals:[{time:'Завтрак',foods:'4 яичных белка + 1 желток, творог 100г'},{time:'Перекус',foods:'Куриная грудка 150г, огурец'},{time:'Обед',foods:'Говядина варёная 200г, гречка 80г, зелень'},{time:'Перекус',foods:'Творог 0% 200г'},{time:'Ужин',foods:'Тунец 200г, листья салата, помидор'}]},
+      {name:'Умеренный дефицит',kcal:1800,protein:130,fat:60,carbs:180,meals:[{time:'Завтрак',foods:'Овсянка 100г, 2 яйца, банан'},{time:'Перекус',foods:'Греческий йогурт 150г, ягоды'},{time:'Обед',foods:'Куриная грудка 200г, рис 100г, овощной салат'},{time:'Полдник',foods:'Творог 150г, яблоко'},{time:'Ужин',foods:'Рыба 200г, тушёные овощи 250г'}]},
+      {name:'Активное похудение',kcal:1300,protein:150,fat:40,carbs:100,meals:[{time:'Завтрак',foods:'2 яйца варёных, творог 100г, огурец'},{time:'Перекус',foods:'Кефир 200мл'},{time:'Обед',foods:'Куриная грудка 200г, гречка 60г, зелёный салат'},{time:'Перекус',foods:'Творог 0% 150г'},{time:'Ужин',foods:'Куриная грудка 150г, тушёные кабачки'}]},
+      {name:'Низкоуглеводное',kcal:1600,protein:160,fat:70,carbs:90,meals:[{time:'Завтрак',foods:'3 яйца, авокадо половина, огурец'},{time:'Перекус',foods:'Сыр твёрдый 40г, орехи 15г'},{time:'Обед',foods:'Говядина 200г, листья салата, помидор, оливковое масло'},{time:'Перекус',foods:'Творог 0% 200г'},{time:'Ужин',foods:'Лосось 200г, брокколи 200г на пару'}]},
+      {name:'Рыбная диета',kcal:1550,protein:155,fat:55,carbs:145,meals:[{time:'Завтрак',foods:'Овсянка 80г, 2 яйца, огурец'},{time:'Перекус',foods:'Творог 150г, яблоко'},{time:'Обед',foods:'Тунец 200г, рис 80г, салат из свежих овощей'},{time:'Перекус',foods:'Кефир 200мл'},{time:'Ужин',foods:'Лосось 200г, тушёные овощи 200г'}]},
+      {name:'Куриная диета',kcal:1500,protein:165,fat:45,carbs:150,meals:[{time:'Завтрак',foods:'Куриная грудка 150г, овсянка 80г, огурец'},{time:'Перекус',foods:'Творог 0% 150г'},{time:'Обед',foods:'Куриная грудка 200г, гречка 100г, зелёный салат'},{time:'Перекус',foods:'Кефир 200мл, яблоко'},{time:'Ужин',foods:'Куриная грудка 200г, тушёные кабачки, помидор'}]},
+      {name:'Дробное 4-разовое',kcal:1600,protein:140,fat:52,carbs:165,meals:[{time:'Завтрак',foods:'Овсянка 100г, 2 яйца, фрукт'},{time:'Обед',foods:'Куриная грудка 200г, рис 100г, свежий салат'},{time:'Полдник',foods:'Творог 200г, кефир 200мл'},{time:'Ужин',foods:'Рыба 200г, тушёные овощи 250г, зелень'}]},
+      {name:'Сушка тела',kcal:1700,protein:180,fat:50,carbs:140,meals:[{time:'Завтрак',foods:'5 яичных белков, овсянка 80г'},{time:'Перекус',foods:'Куриная грудка 150г, огурец'},{time:'Обед',foods:'Говядина 200г, гречка 80г, зелёные овощи'},{time:'Перекус до тренировки',foods:'Банан, протеин 1 мерная'},{time:'Ужин',foods:'Куриная грудка 200г, спаржа, брокколи'}]},
+      {name:'Гречневая диета',kcal:1550,protein:135,fat:48,carbs:165,meals:[{time:'Завтрак',foods:'Гречка 100г, 2 яйца, огурец'},{time:'Перекус',foods:'Творог 150г, кефир 150мл'},{time:'Обед',foods:'Куриная грудка 180г, гречка 100г, помидор'},{time:'Перекус',foods:'Яблоко, кефир 200мл'},{time:'Ужин',foods:'Гречка 100г, рыба 180г, зелёный салат'}]},
+      {name:'Овощная диета',kcal:1400,protein:120,fat:45,carbs:150,meals:[{time:'Завтрак',foods:'2 яйца, помидор, огурец, зелень'},{time:'Перекус',foods:'Творог 150г, сельдерей'},{time:'Обед',foods:'Куриная грудка 200г, тушёные овощи 300г'},{time:'Перекус',foods:'Кефир 200мл, морковь, яблоко'},{time:'Ужин',foods:'Рыба 180г, салат из свежих овощей 300г'}]},
+      {name:'Творожная диета',kcal:1450,protein:175,fat:40,carbs:120,meals:[{time:'Завтрак',foods:'Творог 0% 200г, ягоды, кефир 100мл'},{time:'Перекус',foods:'Творог 150г, яблоко'},{time:'Обед',foods:'Куриная грудка 200г, гречка 80г, салат'},{time:'Перекус',foods:'Творог 200г с зеленью'},{time:'Ужин',foods:'Творог 200г, огурец, зелень'}]},
+      {name:'Средиземноморская',kcal:1700,protein:130,fat:65,carbs:175,meals:[{time:'Завтрак',foods:'Омлет 2 яйца, хлеб цельнозерновой, томат, оливки'},{time:'Перекус',foods:'Греческий йогурт 150г, орехи 15г'},{time:'Обед',foods:'Лосось 200г, рис 80г, тушёные овощи с оливковым маслом'},{time:'Перекус',foods:'Хумус 80г, морковь'},{time:'Ужин',foods:'Тунец 180г, зелёный салат, оливковое масло, лимон'}]},
+      {name:'Питание без сахара',kcal:1550,protein:145,fat:55,carbs:140,meals:[{time:'Завтрак',foods:'Овсянка на воде 80г, 2 яйца, ягоды свежие'},{time:'Перекус',foods:'Творог 150г, орехи 10г'},{time:'Обед',foods:'Куриная грудка 200г, гречка 100г, листовой салат'},{time:'Перекус',foods:'Кефир 200мл, яблоко без сахара'},{time:'Ужин',foods:'Рыба 200г, тушёные кабачки, зелень'}]},
+      {name:'Дробное 5-разовое',kcal:1600,protein:140,fat:52,carbs:162,meals:[{time:'8:00',foods:'Овсянка 80г, яйцо 2шт'},{time:'11:00',foods:'Творог 150г, яблоко'},{time:'14:00',foods:'Куриная грудка 180г, гречка 90г, салат'},{time:'17:00',foods:'Кефир 200мл, морковь'},{time:'20:00',foods:'Рыба 180г, тушёные овощи 200г'}]},
+      {name:'Чередование БУ',kcal:1700,protein:160,fat:50,carbs:160,meals:[{time:'Завтрак',foods:'Овсянка 100г, 3 яйца, огурец'},{time:'Перекус',foods:'Творог 150г'},{time:'Обед',foods:'Говядина 200г, рис 100г, салат'},{time:'Перекус',foods:'Куриная грудка 100г, кефир 200мл'},{time:'Ужин',foods:'Куриная грудка 180г, тушёные овощи'}]},
+      {name:'Салатная диета',kcal:1400,protein:130,fat:48,carbs:145,meals:[{time:'Завтрак',foods:'2 яйца, большой салат из свежих овощей, кефир'},{time:'Перекус',foods:'Творог 150г, огурец'},{time:'Обед',foods:'Куриная грудка 200г, салат греческий'},{time:'Перекус',foods:'Кефир 200мл, сельдерей'},{time:'Ужин',foods:'Тунец, листья салата, помидор, лимон'}]},
+      {name:'Экспресс-похудение',kcal:1200,protein:140,fat:38,carbs:95,meals:[{time:'Завтрак',foods:'2 яичных белка + 1 желток, огурец'},{time:'Перекус',foods:'Творог 0% 100г'},{time:'Обед',foods:'Куриная грудка 180г, тушёные кабачки'},{time:'Перекус',foods:'Кефир 150мл'},{time:'Ужин',foods:'Тунец 150г, листья салата, огурец'}]},
+      {name:'Яичная диета',kcal:1500,protein:155,fat:55,carbs:130,meals:[{time:'Завтрак',foods:'3 яйца варёных, цельнозерновой хлеб, огурец'},{time:'Перекус',foods:'2 яйца, кефир 200мл'},{time:'Обед',foods:'Куриная грудка 200г, гречка 80г, зелень'},{time:'Перекус',foods:'Творог 150г'},{time:'Ужин',foods:'3 яичных белка, тушёные овощи 200г'}]},
+      {name:'Мягкий дефицит',kcal:1850,protein:125,fat:62,carbs:195,meals:[{time:'Завтрак',foods:'Овсянка 100г, 2 яйца, банан, кофе'},{time:'Перекус',foods:'Греческий йогурт 200г, ягоды'},{time:'Обед',foods:'Куриная грудка 200г, рис 120г, свежий салат'},{time:'Полдник',foods:'Творог 150г, яблоко, орехи 10г'},{time:'Ужин',foods:'Рыба 200г, тушёные овощи, зелень'}]}
+    ]
+  },
+  femcut: {
+    label: 'Похудение\nдля женщин',
+    icon: '🌸',
+    bg: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&q=80',
+    kcalRange: '1200–1550 ккал',
+    templates: [
+      {name:'Женский ПП рацион',kcal:1350,protein:110,fat:47,carbs:145,meals:[{time:'Завтрак',foods:'Овсянка 70г на воде, 2 яйца, ягоды свежие'},{time:'Перекус',foods:'Греческий йогурт 150г, банан'},{time:'Обед',foods:'Куриная грудка 180г, гречка 80г, свежий салат'},{time:'Перекус',foods:'Творог 0% 100г, яблоко'},{time:'Ужин',foods:'Рыба нежирная 150г, тушёные овощи 200г'}]},
+      {name:'Йогуртовая диета',kcal:1250,protein:100,fat:42,carbs:135,meals:[{time:'Завтрак',foods:'Греческий йогурт 200г, мюсли без сахара 40г, ягоды'},{time:'Перекус',foods:'Яблоко, греческий йогурт 100г'},{time:'Обед',foods:'Куриная грудка 150г, рис 70г, огурец'},{time:'Перекус',foods:'Йогурт питьевой 150мл'},{time:'Ужин',foods:'Рыба 150г, тушёные кабачки, зелень'}]},
+      {name:'Гормональный баланс',kcal:1400,protein:115,fat:52,carbs:140,meals:[{time:'Завтрак',foods:'Овсянка 80г, 2 яйца, авокадо ¼, ягоды'},{time:'Перекус',foods:'Орехи 20г, яблоко'},{time:'Обед',foods:'Лосось 180г, киноа 80г, листовой салат'},{time:'Перекус',foods:'Творог 120г, семена льна 1 ч.л.'},{time:'Ужин',foods:'Куриная грудка 160г, тушёные брокколи и морковь'}]},
+      {name:'Мягкая сушка',kcal:1450,protein:130,fat:48,carbs:140,meals:[{time:'Завтрак',foods:'Белковый омлет 3 белка + 1 желток, овсянка 60г'},{time:'Перекус',foods:'Творог 0% 150г, огурец'},{time:'Обед',foods:'Куриная грудка 200г, гречка 80г, зелёный салат'},{time:'Перекус',foods:'Кефир 200мл'},{time:'Ужин',foods:'Тунец 150г, свежие овощи, листья салата'}]},
+      {name:'Женский классик',kcal:1300,protein:110,fat:45,carbs:130,meals:[{time:'Завтрак',foods:'Овсянка 70г, 1 яйцо, фрукт'},{time:'Перекус',foods:'Творог 100г, ягоды'},{time:'Обед',foods:'Куриная грудка 160г, рис 70г, помидор'},{time:'Перекус',foods:'Кефир 150мл, яблоко'},{time:'Ужин',foods:'Рыба 150г, тушёные овощи 200г'}]},
+      {name:'После родов',kcal:1500,protein:120,fat:52,carbs:155,meals:[{time:'Завтрак',foods:'Овсянка 90г на молоке, яйцо 2шт, ягоды'},{time:'2-й завтрак',foods:'Творог 150г, банан'},{time:'Обед',foods:'Куриная грудка 180г, гречка 100г, тушёные овощи'},{time:'Перекус',foods:'Греческий йогурт 150г, яблоко'},{time:'Ужин',foods:'Рыба 180г, картофель варёный 100г, зелень'}]},
+      {name:'Антицеллюлитное',kcal:1300,protein:115,fat:44,carbs:130,meals:[{time:'Завтрак',foods:'Гречка 80г, 2 яйца, зелень, огурец'},{time:'Перекус',foods:'Кефир 200мл, яблоко'},{time:'Обед',foods:'Куриная грудка 170г, бурый рис 70г, свежие овощи'},{time:'Перекус',foods:'Творог 0% 100г'},{time:'Ужин',foods:'Рыба 150г, тушёные кабачки и морковь, зелень'}]},
+      {name:'Женская белковая',kcal:1400,protein:140,fat:45,carbs:120,meals:[{time:'Завтрак',foods:'3 яичных белка + 1 желток, творог 100г, огурец'},{time:'Перекус',foods:'Куриная грудка 100г, кефир 150мл'},{time:'Обед',foods:'Говядина 180г, гречка 70г, листовой салат'},{time:'Перекус',foods:'Творог 0% 150г, зелень'},{time:'Ужин',foods:'Тунец 150г, свежие овощи, лимон'}]},
+      {name:'Детокс-рацион',kcal:1200,protein:100,fat:40,carbs:130,meals:[{time:'Утро',foods:'Стакан тёплой воды с лимоном, овсянка 60г, ягоды'},{time:'Перекус',foods:'Зелёное яблоко, сельдерей, огурец'},{time:'Обед',foods:'Куриная грудка 160г, тушёные овощи 250г без масла'},{time:'Перекус',foods:'Кефир 150мл, морковь'},{time:'Ужин',foods:'Рыба на пару 150г, тушёные кабачки с зеленью'}]},
+      {name:'Женщинам 40+',kcal:1350,protein:115,fat:50,carbs:135,meals:[{time:'Завтрак',foods:'Овсянка 70г, 2 яйца, орехи 15г, ягоды'},{time:'Перекус',foods:'Творог 120г, семена чиа 1 ч.л.'},{time:'Обед',foods:'Лосось 180г, киноа 80г, тушёные овощи'},{time:'Перекус',foods:'Греческий йогурт 150г'},{time:'Ужин',foods:'Куриная грудка 160г, брокколи и цветная капуста на пару'}]},
+      {name:'При ПМС',kcal:1400,protein:110,fat:52,carbs:148,meals:[{time:'Завтрак',foods:'Овсянка 80г, горький шоколад 15г, банан'},{time:'Перекус',foods:'Орехи 20г, сухофрукты 20г'},{time:'Обед',foods:'Куриная грудка 180г, гречка 90г, шпинат'},{time:'Перекус',foods:'Творог 130г, ягоды, мёд ½ ч.л.'},{time:'Ужин',foods:'Рыба 160г, тушёные овощи, зелень'}]},
+      {name:'Вегетарианский женский',kcal:1350,protein:95,fat:50,carbs:160,meals:[{time:'Завтрак',foods:'Овсянка 80г на молоке, ягоды, орехи 15г'},{time:'Перекус',foods:'Греческий йогурт 150г, фрукт'},{time:'Обед',foods:'Чечевица 150г, рис 70г, тушёные овощи, сыр 30г'},{time:'Перекус',foods:'Творог 100г, семена льна'},{time:'Ужин',foods:'Яичница 2 яйца, тушёные кабачки, листовой салат'}]},
+      {name:'При тренировках',kcal:1550,protein:130,fat:52,carbs:165,meals:[{time:'До тренировки',foods:'Банан, овсянка 60г'},{time:'После тренировки',foods:'Куриная грудка 150г, рис 80г'},{time:'Обед',foods:'Говядина 180г, гречка 90г, свежий салат'},{time:'Перекус',foods:'Творог 150г, ягоды'},{time:'Ужин',foods:'Рыба 160г, тушёные овощи, зелень'}]},
+      {name:'Безглютеновый',kcal:1300,protein:110,fat:48,carbs:128,meals:[{time:'Завтрак',foods:'Гречка 80г, 2 яйца, овощи свежие'},{time:'Перекус',foods:'Творог 120г, рисовые хлебцы 2шт'},{time:'Обед',foods:'Куриная грудка 180г, бурый рис 80г, салат'},{time:'Перекус',foods:'Кефир 150мл, яблоко'},{time:'Ужин',foods:'Рыба 160г, тушёные овощи без соусов'}]},
+      {name:'Молочно-белковый',kcal:1300,protein:125,fat:44,carbs:115,meals:[{time:'Завтрак',foods:'Творог 0% 200г, ягоды, кефир 100мл'},{time:'Перекус',foods:'Сыр нежирный 40г, яблоко'},{time:'Обед',foods:'Куриная грудка 170г, гречка 70г, помидор'},{time:'Перекус',foods:'Творог 120г'},{time:'Ужин',foods:'Рыба 150г, тушёные кабачки'}]},
+      {name:'Рыбный женский',kcal:1350,protein:120,fat:50,carbs:130,meals:[{time:'Завтрак',foods:'2 яйца, цельнозерновой хлеб, огурец'},{time:'Перекус',foods:'Творог 120г, ягоды'},{time:'Обед',foods:'Лосось 180г, гречка 80г, листовой салат'},{time:'Перекус',foods:'Кефир 150мл, яблоко'},{time:'Ужин',foods:'Тунец 160г, свежие овощи, зелень, лимон'}]},
+      {name:'Тонкая талия',kcal:1250,protein:105,fat:44,carbs:128,meals:[{time:'Завтрак',foods:'Овсянка 60г, 1 яйцо, ягоды, зелёный чай'},{time:'Перекус',foods:'Яблоко, кефир 150мл'},{time:'Обед',foods:'Куриная грудка 160г, рис 70г, сельдерей, огурец'},{time:'Перекус',foods:'Творог 0% 100г'},{time:'Ужин',foods:'Рыба 150г, листья салата, помидор, зелень'}]},
+      {name:'При СПКЯ',kcal:1400,protein:115,fat:55,carbs:125,meals:[{time:'Завтрак',foods:'Яйца 2шт, авокадо ¼, цельнозерновой хлеб'},{time:'Перекус',foods:'Орехи 20г, яблоко'},{time:'Обед',foods:'Лосось 180г, киноа 80г, зелёные овощи'},{time:'Перекус',foods:'Творог 120г, семена льна 1 ч.л.'},{time:'Ужин',foods:'Куриная грудка 160г, тушёные кабачки, шпинат'}]},
+      {name:'Безлактозный',kcal:1300,protein:108,fat:46,carbs:135,meals:[{time:'Завтрак',foods:'Овсянка на воде 70г, 2 яйца, ягоды'},{time:'Перекус',foods:'Кокосовый йогурт 120г, банан'},{time:'Обед',foods:'Куриная грудка 170г, рис 80г, свежий салат'},{time:'Перекус',foods:'Орехи 15г, яблоко'},{time:'Ужин',foods:'Рыба 160г, тушёные овощи без сливочного масла'}]},
+      {name:'Лёгкое похудение',kcal:1450,protein:118,fat:50,carbs:150,meals:[{time:'Завтрак',foods:'Овсянка 80г, 2 яйца, фрукт'},{time:'Перекус',foods:'Греческий йогурт 150г'},{time:'Обед',foods:'Куриная грудка 180г, гречка 90г, свежий салат'},{time:'Перекус',foods:'Кефир 200мл, яблоко'},{time:'Ужин',foods:'Рыба 160г, тушёные овощи, зелень'}]}
+    ]
+  }
+};
+
+let _ntCurrentCat = null;
+
+function openNutTemplates(cat) {
+  _ntCurrentCat = cat;
+  const c = NUT_TEMPLATES[cat];
+  document.getElementById('ntModalTitle').textContent = c.label.replace('\n',' ');
+  document.getElementById('ntDetailView').classList.remove('show');
+  document.getElementById('ntListView').style.display = 'block';
+  document.getElementById('ntBackBtn').onclick = () => closeNutTemplates();
+  const list = document.getElementById('ntList');
+  list.innerHTML = c.templates.map((t,i) => `
+    <div class="nt-item" onclick="openNutDetail(${i})">
+      <div>
+        <div class="nt-item-name">${t.name}</div>
+        <div class="nt-item-macros">Б: ${t.protein}г &nbsp;Ж: ${t.fat}г &nbsp;У: ${t.carbs}г</div>
+      </div>
+      <div class="nt-kcal">${t.kcal} <span style="font-size:10px;color:var(--mu2)">ккал</span></div>
+    </div>
+  `).join('');
+  document.getElementById('moNutTemplates').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function openNutDetail(idx) {
+  const t = NUT_TEMPLATES[_ntCurrentCat].templates[idx];
+  document.getElementById('ntModalTitle').textContent = t.name;
+  document.getElementById('ntBackBtn').onclick = () => {
+    document.getElementById('ntDetailView').classList.remove('show');
+    document.getElementById('ntListView').style.display = 'block';
+    document.getElementById('ntModalTitle').textContent = NUT_TEMPLATES[_ntCurrentCat].label.replace('\n',' ');
+    document.getElementById('ntBackBtn').onclick = () => closeNutTemplates();
+  };
+  document.getElementById('ntDetailName').textContent = t.name;
+  document.getElementById('ntDKcal').textContent = t.kcal;
+  document.getElementById('ntDProt').textContent = t.protein;
+  document.getElementById('ntDFat').textContent = t.fat;
+  document.getElementById('ntDCarb').textContent = t.carbs;
+  document.getElementById('ntDetailMeals').innerHTML = t.meals.map(m => `
+    <div class="nt-meal">
+      <div class="nt-meal-time">${m.time}</div>
+      <div class="nt-meal-foods">${m.foods}</div>
+    </div>
+  `).join('');
+  document.getElementById('ntListView').style.display = 'none';
+  document.getElementById('ntDetailView').classList.add('show');
+}
+
+function closeNutTemplates() {
+  document.getElementById('moNutTemplates').classList.remove('show');
+  document.body.style.overflow = '';
 }
 </script>
 
