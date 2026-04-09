@@ -703,6 +703,10 @@
     .nt-add-btn{width:34px;height:34px;border-radius:50%;background:var(--ac);border:none;color:#fff;font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s,background .15s;}
     .nt-add-btn:hover{transform:scale(1.12);background:#6d28d9;}
     .nt-add-btn:active{transform:scale(.95);}
+    .subst-rule{background:linear-gradient(135deg,rgba(139,92,246,.18),rgba(109,40,217,.1));border:1px solid rgba(139,92,246,.4);border-radius:var(--r);padding:14px 16px;margin-bottom:14px;}
+    .subst-rule-title{font-size:13px;font-weight:700;color:var(--ac);margin-bottom:6px;}
+    .subst-rule-main{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:900;color:#fff;margin-bottom:10px;letter-spacing:.3px;}
+    .subst-rule-ex{font-size:12px;color:var(--mu2);margin-top:4px;line-height:1.5;}
     .subst-groups{display:flex;flex-direction:column;gap:8px;}
     .subst-group{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:var(--r);overflow:hidden;}
     .subst-group-hd{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none;}
@@ -1011,7 +1015,12 @@
 
       <div style="margin-top:20px">
         <div class="sh" style="margin-bottom:10px"><div class="st">🔄 Группы замены продуктов</div></div>
-        <div style="font-size:12px;color:var(--mu2);margin-bottom:12px;padding:0 2px">Заменяйте продукты только <strong style="color:var(--ac)">внутри одной группы</strong> — это золотое правило сохранения баланса рациона.</div>
+        <div class="subst-rule">
+          <div class="subst-rule-title">🔥 Золотое правило замены:</div>
+          <div class="subst-rule-main">МЕНЯЕМ ТОЛЬКО ВНУТРИ ГРУППЫ.</div>
+          <div class="subst-rule-ex">❌ Нельзя заменить <b>Макароны</b> (углевод) на <b>Курицу</b> (белок).</div>
+          <div class="subst-rule-ex">❌ Нельзя заменить <b>Оливковое масло</b> (жир) на <b>Огурец</b> (клетчатка).</div>
+        </div>
         <div class="subst-groups">
           <div class="subst-group">
             <div class="subst-group-hd" onclick="this.parentElement.classList.toggle('open')">
