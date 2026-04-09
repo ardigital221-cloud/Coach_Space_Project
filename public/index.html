@@ -1139,7 +1139,7 @@
 <div class="mo-nt" id="moNutTemplates">
   <div class="nt-modal">
     <div class="nt-modal-head">
-      <button class="nt-modal-back" id="ntBackBtn" onclick="ntBack()">← Назад</button>
+      <button class="nt-modal-back" id="ntBackBtn" onclick="closeNutTemplates()">← Назад</button>
       <div class="nt-modal-title" id="ntModalTitle">Шаблоны питания</div>
     </div>
     <div id="ntListView">
@@ -3886,7 +3886,7 @@ function openNutTemplates(cat) {
         <div class="nt-item-name">${t.name}</div>
         <div class="nt-item-macros">Б: ${t.protein}г &nbsp;Ж: ${t.fat}г &nbsp;У: ${t.carbs}г</div>
       </div>
-      <div class="nt-kcal">${t.kcal} <span style="font-size:10px;color:var(--mu2)">ккал</span></div>
+      <div class="nt-item-kcal">${t.kcal} <span style="font-size:10px;color:var(--mu2)">ккал</span></div>
     </div>
   `).join('');
   document.getElementById('moNutTemplates').classList.add('show');
