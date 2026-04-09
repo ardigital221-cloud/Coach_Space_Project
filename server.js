@@ -26,8 +26,9 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Кеш токенов в памяти (снижает количество запросов к Firestore)
 const _tokenCache = new Map();
+
+const _crossRegIp = new Map();
 const TOKEN_CACHE_TTL = 5 * 60 * 1000; // 5 минут
 
 function generateToken() {
@@ -1228,15 +1229,35 @@ app.post('/api/notifications/test', requireAdmin, async (req, res) => {
 // Записаться на забег (без авторизации)
 app.post('/api/cross-register', async (req, res) => {
   try {
-    const { name, phone, telegram, city } = req.body;
+    const { name, phone, telegram, city, website } = req.body;
+
+    if (website && website.trim()) return res.status(400).json({ error: 'Ошибка регистрации' });
+
     if (!name || !name.trim()) return res.status(400).json({ error: 'Имя обязательно' });
+
+    if (!phone || !phone.trim()) return res.status(400).json({ error: 'Телефон обязателен' });
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 7) return res.status(400).json({ error: 'Введите корректный номер телефона' });
+
+    const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress || 'unknown';
+    const today = new Date().toISOString().slice(0, 10);
+    const ipKey = `${ip}:${today}`;
+    const ipCount = _crossRegIp.get(ipKey) || 0;
+    if (ipCount >= 2) return res.status(429).json({ error: 'С вашего IP уже подано 2 заявки сегодня' });
+
+    const phoneDup = await db.collection('crossRegistrants').where('phone', '==', digits).limit(1).get();
+    if (!phoneDup.empty) return res.status(400).json({ error: 'Этот номер телефона уже зарегистрирован' });
+
     const ref = await db.collection('crossRegistrants').add({
       name: name.trim(),
-      phone: (phone || '').trim(),
+      phone: digits,
       telegram: (telegram || '').trim(),
       city: (city || '').trim(),
       registeredAt: new Date().toISOString()
     });
+
+    _crossRegIp.set(ipKey, ipCount + 1);
+
     await tgSend(COACH_TG, `🏃 <b>Новая заявка на кросс!</b>\n👤 ${name.trim()}${phone ? '\n📞 ' + phone : ''}${telegram ? '\n✈️ ' + telegram : ''}${city ? '\n📍 ' + city : ''}`);
     res.json({ id: ref.id });
   } catch (e) { res.status(500).json({ error: e.message }); }
