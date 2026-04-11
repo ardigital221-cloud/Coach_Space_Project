@@ -2782,7 +2782,7 @@ async function aiSend(){
     aiAddMsg('bot',reply);
   }catch(e){
     typingRow.style.display='none';
-    aiAddMsg('bot','Упс, что-то пошло не так. Попробуй ещё раз 🙏');
+    aiAddMsg('bot','⚠️ Ошибка: '+e.message);
   }
   document.getElementById('aiSendBtn').disabled=false;
 }
