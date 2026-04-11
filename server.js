@@ -1433,7 +1433,7 @@ app.get('/api/runs/active', requireAuth, async (req, res) => {
 // AI — Coach Space Nutrition Assistant (Gemini)
 // ═══════════════════════════════════════════
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent';
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent';
 
 const AI_SYSTEM_PROMPT = `Ты — Coach Space AI, персональный ИИ-диетолог фитнес-проекта Coach Space.
 Твоя задача: помогать участникам с питанием — рассчитывать КБЖУ, составлять планы питания, давать советы по рациону, анализировать дневник питания.
