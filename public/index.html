@@ -3643,16 +3643,16 @@ function crossStart() {
     if (_crossState !== 'running') return;
     const acc = pos.coords.accuracy;
     const {latitude: lat, longitude: lon} = pos.coords;
-    if (acc <= 30) {
+    if (acc <= 20) {
       if (_crossLastPos) {
         const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
-        if (d >= 8 && d < 300) _crossDistM += d;
+        if (d >= 3 && d < 300) _crossDistM += d;
       }
       _crossLastPos = {lat, lon};
       document.getElementById('crossGpsWarn').style.display = 'none';
       crossUpdateLiveMap(lat, lon);
     } else {
-      _crossLastPos = {lat, lon};
+      document.getElementById('crossGpsWarn').style.display = 'block';
     }
     const now = Date.now();
     if (now - _lastPosSentAt > 5000 && ME) {
@@ -3702,15 +3702,13 @@ function crossResume() {
     if (_crossState !== 'running') return;
     const acc = pos.coords.accuracy;
     const {latitude: lat, longitude: lon} = pos.coords;
-    if (acc <= 30) {
+    if (acc <= 20) {
       if (_crossLastPos) {
         const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
-        if (d >= 8 && d < 300) _crossDistM += d;
+        if (d >= 3 && d < 300) _crossDistM += d;
       }
       _crossLastPos = {lat, lon};
       crossUpdateLiveMap(lat, lon);
-    } else {
-      _crossLastPos = {lat, lon};
     }
     const now = Date.now();
     if (now - _lastPosSentAt > 5000 && ME) {
