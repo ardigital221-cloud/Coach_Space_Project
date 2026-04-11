@@ -1432,8 +1432,7 @@ app.get('/api/runs/active', requireAuth, async (req, res) => {
 // ═══════════════════════════════════════════
 // AI — Coach Space Nutrition Assistant (Gemini)
 // ═══════════════════════════════════════════
-const GEMINI_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent';
+const GROQ_KEY = process.env.GROQ_API_KEY;
 
 const AI_SYSTEM_PROMPT = `Ты — Coach Space AI, персональный ИИ-диетолог фитнес-проекта Coach Space.
 Твоя задача: помогать участникам с питанием — рассчитывать КБЖУ, составлять планы питания, давать советы по рациону, анализировать дневник питания.
@@ -1442,39 +1441,40 @@ const AI_SYSTEM_PROMPT = `Ты — Coach Space AI, персональный ИИ
 Не давай медицинских советов — только по питанию и спорту.`;
 
 app.post('/api/ai/nutrition', requireAuth, async (req, res) => {
-  if (!GEMINI_KEY) return res.status(503).json({ error: 'AI не настроен' });
+  if (!GROQ_KEY) return res.status(503).json({ error: 'AI не настроен' });
   const { messages, todayLog } = req.body;
   if (!messages || !Array.isArray(messages)) return res.status(400).json({ error: 'messages required' });
 
   try {
-    const systemWithContext = AI_SYSTEM_PROMPT +
+    const systemContent = AI_SYSTEM_PROMPT +
       (todayLog ? `\n\nКонтекст питания пользователя сегодня:\n${todayLog}` : '');
 
-    const contents = [
-      { role: 'user', parts: [{ text: systemWithContext }] },
-      { role: 'model', parts: [{ text: 'Понял! Готов помогать.' }] },
-      ...messages.map(m => ({
-        role: m.role === 'user' ? 'user' : 'model',
-        parts: [{ text: m.content }]
-      }))
+    const groqMessages = [
+      { role: 'system', content: systemContent },
+      ...messages.map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.content }))
     ];
 
-    const response = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_KEY}`
+      },
       body: JSON.stringify({
-        contents,
-        generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+        model: 'llama-3.3-70b-versatile',
+        messages: groqMessages,
+        temperature: 0.7,
+        max_tokens: 1024
       })
     });
 
     if (!response.ok) {
       const err = await response.json();
-      throw new Error(err.error?.message || 'Gemini error');
+      throw new Error(err.error?.message || 'Groq error');
     }
 
     const data = await response.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Нет ответа';
+    const reply = data.choices?.[0]?.message?.content || 'Нет ответа';
     res.json({ reply });
   } catch (e) {
     console.error('AI error:', e.message);
