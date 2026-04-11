@@ -694,6 +694,40 @@
     .nt-add-btn{width:34px;height:34px;border-radius:50%;background:var(--ac);border:none;color:#fff;font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s,background .15s;}
     .nt-add-btn:hover{transform:scale(1.12);background:#6d28d9;}
     .nt-add-btn:active{transform:scale(.95);}
+    /* AI Chat */
+    .ai-chat-card{background:linear-gradient(145deg,rgba(139,92,246,.13),rgba(99,102,241,.07));border:1px solid rgba(139,92,246,.3);border-radius:22px;padding:20px;margin-bottom:20px;position:relative;overflow:hidden;}
+    .ai-chat-card::before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;background:radial-gradient(circle,rgba(139,92,246,.18),transparent 70%);pointer-events:none;}
+    .ai-chat-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+    .ai-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#6d28d9);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 4px 16px rgba(139,92,246,.4);}
+    .ai-title-block{flex:1;}
+    .ai-title{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;color:#fff;margin-bottom:2px;}
+    .ai-status{font-size:11px;color:var(--ac);display:flex;align-items:center;gap:5px;}
+    .ai-dot{width:6px;height:6px;border-radius:50%;background:var(--ac);animation:pulse 1.8s ease infinite;}
+    .ai-msgs{display:flex;flex-direction:column;gap:10px;max-height:320px;overflow-y:auto;margin-bottom:14px;padding-right:2px;}
+    .ai-msgs::-webkit-scrollbar{width:3px;}.ai-msgs::-webkit-scrollbar-track{background:transparent;}.ai-msgs::-webkit-scrollbar-thumb{background:rgba(139,92,246,.3);border-radius:4px;}
+    .ai-msg{display:flex;gap:8px;align-items:flex-end;}
+    .ai-msg.user{flex-direction:row-reverse;}
+    .ai-msg-bubble{max-width:82%;padding:10px 14px;border-radius:18px;font-size:13px;line-height:1.5;color:var(--tx);}
+    .ai-msg.bot .ai-msg-bubble{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-bottom-left-radius:4px;}
+    .ai-msg.user .ai-msg-bubble{background:linear-gradient(135deg,#8b5cf6,#6d28d9);border:none;border-bottom-right-radius:4px;color:#fff;}
+    .ai-msg-ava{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#6d28d9);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+    .ai-msg-ava.user-ava{background:rgba(255,255,255,.1);font-size:12px;font-weight:700;color:var(--ac);}
+    .ai-typing{display:none;align-items:center;gap:4px;padding:10px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:18px;border-bottom-left-radius:4px;width:fit-content;}
+    .ai-typing span{width:6px;height:6px;border-radius:50%;background:rgba(167,139,250,.6);animation:aiTyping 1.2s ease infinite;}
+    .ai-typing span:nth-child(2){animation-delay:.2s;}.ai-typing span:nth-child(3){animation-delay:.4s;}
+    @keyframes aiTyping{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-5px);}}
+    .ai-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;}
+    .ai-chip{font-size:11px;font-weight:600;padding:6px 12px;border-radius:20px;background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);color:var(--ac);cursor:pointer;transition:all .18s;white-space:nowrap;}
+    .ai-chip:hover{background:rgba(139,92,246,.3);border-color:var(--ac);transform:translateY(-1px);}
+    .ai-chip:active{transform:translateY(0);}
+    .ai-input-row{display:flex;gap:8px;align-items:flex-end;}
+    .ai-input{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;color:var(--tx);padding:10px 14px;font-size:13px;resize:none;max-height:100px;overflow-y:auto;line-height:1.4;transition:border .2s;}
+    .ai-input:focus{outline:none;border-color:rgba(139,92,246,.6);background:rgba(139,92,246,.06);}
+    .ai-input::placeholder{color:var(--mu);}
+    .ai-send-btn{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#6d28d9);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 14px rgba(139,92,246,.4);}
+    .ai-send-btn:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(139,92,246,.5);}
+    .ai-send-btn:active{transform:scale(.95);}
+    .ai-send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
     .subst-rule{background:linear-gradient(135deg,rgba(139,92,246,.18),rgba(109,40,217,.1));border:1px solid rgba(139,92,246,.4);border-radius:var(--r);padding:14px 16px;margin-bottom:14px;}
     .subst-rule-title{font-size:13px;font-weight:700;color:var(--ac);margin-bottom:6px;}
     .subst-rule-main{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:900;color:#fff;margin-bottom:10px;letter-spacing:.3px;}
@@ -979,6 +1013,45 @@
 
     <div class="panel" id="p-unut">
       <div id="uNutContent"><div class="empty"><div class="sp-ring" style="margin:20px auto"></div></div></div>
+
+      <!-- AI Nutrition Assistant -->
+      <div class="ai-chat-card" id="aiNutCard">
+        <div class="ai-chat-header">
+          <div class="ai-avatar">🤖</div>
+          <div class="ai-title-block">
+            <div class="ai-title">Coach Space AI</div>
+            <div class="ai-status"><span class="ai-dot"></span>Готов помочь</div>
+          </div>
+        </div>
+
+        <div class="ai-msgs" id="aiMsgs">
+          <div class="ai-msg bot">
+            <div class="ai-msg-ava">🤖</div>
+            <div class="ai-msg-bubble">Привет! Я Coach Space AI — твой персональный ИИ-диетолог. Помогу рассчитать КБЖУ, составить план питания или ответить на любой вопрос по диете 💪</div>
+          </div>
+        </div>
+
+        <div class="ai-msg bot" id="aiTypingRow" style="display:none;">
+          <div class="ai-msg-ava">🤖</div>
+          <div class="ai-typing" id="aiTyping">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <div class="ai-chips" id="aiChips">
+          <div class="ai-chip" onclick="aiSendChip('Рассчитай мой КБЖУ')">⚡ Рассчитай КБЖУ</div>
+          <div class="ai-chip" onclick="aiSendChip('Составь план питания на день')">📋 План на день</div>
+          <div class="ai-chip" onclick="aiSendChip('Что съесть до тренировки?')">🏋️ До тренировки</div>
+          <div class="ai-chip" onclick="aiSendChip('Что съесть после тренировки?')">🔄 После тренировки</div>
+          <div class="ai-chip" onclick="aiSendChip('Проанализируй моё питание сегодня')">📊 Анализ питания</div>
+          <div class="ai-chip" onclick="aiSendChip('Какой у меня дефицит калорий?')">🔥 Дефицит ккал</div>
+        </div>
+
+        <div class="ai-input-row">
+          <textarea class="ai-input" id="aiInput" rows="1" placeholder="Спросить Coach Space AI..." onkeydown="aiInputKeydown(event)" oninput="aiInputResize(this)"></textarea>
+          <button class="ai-send-btn" id="aiSendBtn" onclick="aiSend()" title="Отправить">➤</button>
+        </div>
+      </div>
 
       <div class="sh" style="margin:20px 0 10px"><div class="st">📚 Шаблоны питания</div></div>
       <div class="nt-cats">
@@ -2654,6 +2727,83 @@ let _nutRecentCache=[];
 let _nutActiveTab='search';
 const _NUT_EMOJI={breakfast:'🌅',lunch:'☀️',dinner:'🌙',snack:'🍎'};
 const _NUT_NAME={breakfast:'Завтрак',lunch:'Обед',dinner:'Ужин',snack:'Перекус'};
+
+// ── Coach Space AI Chat ──────────────────────────────────────────
+const _aiHistory = [];
+
+function aiInputResize(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,100)+'px';
+}
+
+function aiInputKeydown(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();aiSend();}
+}
+
+function aiSendChip(text){
+  document.getElementById('aiInput').value=text;
+  aiSend();
+}
+
+function aiAddMsg(role,text){
+  const box=document.getElementById('aiMsgs');
+  const isBot=role==='bot';
+  const ava=isBot?'<div class="ai-msg-ava">🤖</div>':'<div class="ai-msg-ava user-ava">'+(ME&&ME.name?ME.name[0].toUpperCase():'Я')+'</div>';
+  const bubble='<div class="ai-msg-bubble">'+text.replace(/\n/g,'<br>')+'</div>';
+  const div=document.createElement('div');
+  div.className='ai-msg '+(isBot?'bot':'user');
+  div.innerHTML=isBot?(ava+bubble):(bubble+ava);
+  box.appendChild(div);
+  box.scrollTop=box.scrollHeight;
+}
+
+async function aiSend(){
+  const input=document.getElementById('aiInput');
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';input.style.height='auto';
+  document.getElementById('aiSendBtn').disabled=true;
+
+  aiAddMsg('user',text);
+  _aiHistory.push({role:'user',content:text});
+
+  // показать typing
+  const typingRow=document.getElementById('aiTypingRow');
+  const typingAnim=document.getElementById('aiTyping');
+  typingRow.style.display='flex';
+  typingAnim.style.display='flex';
+  document.getElementById('aiMsgs').scrollTop=9999;
+
+  try{
+    const todayLog=await _aiGetTodayLog();
+    const reply=await _aiCallAPI(text,todayLog);
+    typingRow.style.display='none';
+    _aiHistory.push({role:'assistant',content:reply});
+    aiAddMsg('bot',reply);
+  }catch(e){
+    typingRow.style.display='none';
+    aiAddMsg('bot','Упс, что-то пошло не так. Попробуй ещё раз 🙏');
+  }
+  document.getElementById('aiSendBtn').disabled=false;
+}
+
+async function _aiGetTodayLog(){
+  try{
+    const r=await authFetch(`/api/nutrition/${ME.id}?date=${_nutDate}`);
+    if(!r.ok)return null;
+    const entries=await r.json();
+    if(!entries.length)return null;
+    const tot=entries.reduce((a,e)=>({k:a.k+(e.kcal||0),p:a.p+(e.protein||0),f:a.f+(e.fat||0),c:a.c+(e.carbs||0)}),{k:0,p:0,f:0,c:0});
+    const list=entries.map(e=>`- ${e.name} (${e.type}): ${e.kcal} ккал, Б${e.protein} Ж${e.fat} У${e.carbs}`).join('\n');
+    return `Сегодня съедено: ${tot.k} ккал, белки ${Math.round(tot.p)}г, жиры ${Math.round(tot.f)}г, углеводы ${Math.round(tot.c)}г.\nСписок приёмов:\n${list}`;
+  }catch{return null;}
+}
+
+async function _aiCallAPI(userMsg,todayLog){
+  // Placeholder — будет заменено на реальный API-вызов
+  return '⏳ ИИ ещё не подключён. Скоро будет доступен!';
+}
+// ────────────────────────────────────────────────────────────────
 
 async function loadUserNutrition(){
   const box=document.getElementById('uNutContent');
