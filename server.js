@@ -1430,6 +1430,59 @@ app.get('/api/runs/active', requireAuth, async (req, res) => {
 });
 
 // ═══════════════════════════════════════════
+// AI — Coach Space Nutrition Assistant (Gemini)
+// ═══════════════════════════════════════════
+const GEMINI_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+
+const AI_SYSTEM_PROMPT = `Ты — Coach Space AI, персональный ИИ-диетолог фитнес-проекта Coach Space.
+Твоя задача: помогать участникам с питанием — рассчитывать КБЖУ, составлять планы питания, давать советы по рациону, анализировать дневник питания.
+Отвечай кратко, по делу, на русском языке. Используй эмодзи умеренно.
+Если пользователь спрашивает о КБЖУ — уточняй вес, рост, возраст, цель (похудение/масса/поддержание), если не указаны.
+Не давай медицинских советов — только по питанию и спорту.`;
+
+app.post('/api/ai/nutrition', requireAuth, async (req, res) => {
+  if (!GEMINI_KEY) return res.status(503).json({ error: 'AI не настроен' });
+  const { messages, todayLog } = req.body;
+  if (!messages || !Array.isArray(messages)) return res.status(400).json({ error: 'messages required' });
+
+  try {
+    const systemWithContext = AI_SYSTEM_PROMPT +
+      (todayLog ? `\n\nКонтекст питания пользователя сегодня:\n${todayLog}` : '');
+
+    const contents = [
+      { role: 'user', parts: [{ text: systemWithContext }] },
+      { role: 'model', parts: [{ text: 'Понял! Готов помогать.' }] },
+      ...messages.map(m => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        parts: [{ text: m.content }]
+      }))
+    ];
+
+    const response = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents,
+        generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error?.message || 'Gemini error');
+    }
+
+    const data = await response.json();
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Нет ответа';
+    res.json({ reply });
+  } catch (e) {
+    console.error('AI error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ═══════════════════════════════════════════
 // CRON — напоминания об оплате (каждый день в 9:00)
 // ═══════════════════════════════════════════
 cron.schedule('0 9 * * *', async () => {

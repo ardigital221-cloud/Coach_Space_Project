@@ -2800,8 +2800,14 @@ async function _aiGetTodayLog(){
 }
 
 async function _aiCallAPI(userMsg,todayLog){
-  // Placeholder — будет заменено на реальный API-вызов
-  return '⏳ ИИ ещё не подключён. Скоро будет доступен!';
+  const r=await authFetch('/api/ai/nutrition',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({messages:_aiHistory,todayLog})
+  });
+  if(!r.ok){const d=await r.json();throw new Error(d.error||'Ошибка AI');}
+  const d=await r.json();
+  return d.reply;
 }
 // ────────────────────────────────────────────────────────────────
 
