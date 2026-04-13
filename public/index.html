@@ -752,6 +752,31 @@
     .rules50-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;line-height:1.5;}
     .rules50-item:last-child{border-bottom:none;}
     .rules50-n{flex-shrink:0;width:24px;height:24px;background:rgba(139,92,246,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--ac);margin-top:1px;}
+    /* ── ВИЗИТКА: слайдшоу ── */
+    .land-slideshow{width:100%;max-width:480px;position:relative;margin-bottom:10px;border-radius:20px;overflow:hidden;aspect-ratio:4/3;background:rgba(255,255,255,.04);}
+    .land-slides{display:flex;height:100%;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+    .land-slide{min-width:100%;height:100%;object-fit:cover;display:block;}
+    .land-slide-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);backdrop-filter:blur(4px);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;transition:background .2s;line-height:1;}
+    .land-slide-btn:hover{background:rgba(0,0,0,.7);}
+    .land-slide-prev{left:10px;}.land-slide-next{right:10px;}
+    .land-slide-dots{display:flex;gap:7px;justify-content:center;margin-bottom:24px;margin-top:10px;}
+    .land-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.22);cursor:pointer;transition:all .25s;}
+    .land-dot.active{background:var(--ac);transform:scale(1.3);}
+    /* ── ВИЗИТКА: услуги ── */
+    .land-services{width:100%;max-width:480px;margin-bottom:28px;}
+    .land-block-title{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;color:var(--tx);margin-bottom:14px;text-align:center;letter-spacing:.5px;}
+    .land-service-item{display:flex;align-items:center;gap:13px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px 16px;margin-bottom:8px;transition:border-color .2s;}
+    .land-service-item:hover{border-color:rgba(139,92,246,.25);}
+    .land-service-icon{font-size:22px;flex-shrink:0;}
+    .land-service-text{font-size:14px;font-weight:600;color:var(--tx);}
+    /* ── ВИЗИТКА: правила ── */
+    .land-rules{width:100%;max-width:480px;margin-bottom:40px;}
+    .land-rule{display:flex;align-items:flex-start;gap:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px 16px;margin-bottom:8px;}
+    .land-rule-num{font-family:'Unbounded',sans-serif;font-size:10px;font-weight:700;color:var(--mu);min-width:20px;padding-top:2px;}
+    .land-rule-icon{font-size:18px;flex-shrink:0;line-height:1.3;}
+    .land-rule-body{flex:1;}
+    .land-rule-title{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:3px;}
+    .land-rule-text{font-size:12px;color:var(--mu2);line-height:1.55;}
   </style>
 </head>
 <body>
@@ -760,40 +785,158 @@
 <div id="landingPage">
   <div class="land-bg"></div>
   <div class="land-inner">
+
     <div class="land-top">
       <div class="land-logo" onclick="showInstallPrompt()" style="cursor:pointer;user-select:none">⚡ Coach Space</div>
       <button class="land-login-link" onclick="showLogin()">Войти →</button>
     </div>
 
-    <div class="land-hero">
-      <span class="land-emoji">🏃</span>
-      <div class="land-tag">Открытый старт</div>
-      <div class="land-title">Городской кросс<br>Coach Space</div>
-      <div class="land-sub">Пробеги вместе с нами — независимо от уровня подготовки. Отслеживай дистанцию, скорость и соревнуйся в общем рейтинге.</div>
-      <button class="land-cta" onclick="openMo('mCrossReg')">Записаться на забег</button>
-      <br>
+    <div class="land-hero" style="padding-bottom:16px;">
+      <div class="land-tag">Спортивное комьюнити</div>
+      <div class="land-title">Coach Space</div>
+      <div class="land-sub">Тренируйся. Развивайся.<br>Будь частью команды.</div>
+    </div>
+
+    <!-- Слайдшоу -->
+    <div class="land-slideshow">
+      <div class="land-slides" id="landSlides">
+        <img class="land-slide" src="/photos/photo1.jpg" alt="Coach Space">
+        <img class="land-slide" src="/photos/photo2.jpg" alt="Coach Space">
+        <img class="land-slide" src="/photos/photo3.jpg" alt="Coach Space">
+        <img class="land-slide" src="/photos/photo4.jpg" alt="Coach Space">
+        <img class="land-slide" src="/photos/photo5.jpg" alt="Coach Space">
+      </div>
+      <button class="land-slide-btn land-slide-prev" onclick="landSlideMove(-1)">‹</button>
+      <button class="land-slide-btn land-slide-next" onclick="landSlideMove(1)">›</button>
+    </div>
+    <div class="land-slide-dots" id="landDots">
+      <div class="land-dot active" onclick="landSlideTo(0)"></div>
+      <div class="land-dot" onclick="landSlideTo(1)"></div>
+      <div class="land-dot" onclick="landSlideTo(2)"></div>
+      <div class="land-dot" onclick="landSlideTo(3)"></div>
+      <div class="land-dot" onclick="landSlideTo(4)"></div>
+    </div>
+
+    <!-- CTA -->
+    <div style="width:100%;max-width:480px;display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:28px;">
+      <button class="land-cta" onclick="openMo('mCrossReg')">Записаться на кросс</button>
       <button class="land-secondary" onclick="showLogin()">Войти в Coach Space</button>
     </div>
 
-    <div class="land-cards">
-      <div class="land-card">
-        <div class="land-card-icon">📍</div>
-        <div class="land-card-val">GPS</div>
-        <div class="land-card-lbl">Трекинг маршрута</div>
+    <!-- Что мы предоставляем -->
+    <div class="land-services">
+      <div class="land-block-title">Что мы предоставляем</div>
+      <div class="land-service-item"><div class="land-service-icon">🏅</div><div class="land-service-text">Наставничество</div></div>
+      <div class="land-service-item"><div class="land-service-icon">🥗</div><div class="land-service-text">Рекомендация по питанию</div></div>
+      <div class="land-service-item"><div class="land-service-icon">💪</div><div class="land-service-text">Сильное комьюнити</div></div>
+      <div class="land-service-item"><div class="land-service-icon">🎯</div><div class="land-service-text">Постановка техники</div></div>
+      <div class="land-service-item"><div class="land-service-icon">📱</div><div class="land-service-text">Полный доступ к приложению</div></div>
+    </div>
+
+    <!-- 11 правил -->
+    <div class="land-rules">
+      <div class="land-block-title">11 правил Coach Space</div>
+
+      <div class="land-rule">
+        <span class="land-rule-num">01</span>
+        <span class="land-rule-icon">🏋️</span>
+        <div class="land-rule-body">
+          <div class="land-rule-title">Посещение тренировок</div>
+          <div class="land-rule-text">Пропуск без уважительной причины — 100 берпи на следующей тренировке.</div>
+        </div>
       </div>
-      <div class="land-card">
-        <div class="land-card-icon">🏆</div>
-        <div class="land-card-val">Топ</div>
-        <div class="land-card-lbl">Общий рейтинг</div>
+
+      <div class="land-rule">
+        <span class="land-rule-num">02</span>
+        <span class="land-rule-icon">⚠️</span>
+        <div class="land-rule-body">
+          <div class="land-rule-title">Предупреждение</div>
+          <div class="land-rule-text">Если не можешь прийти — предупреди заранее. Игнорирование — отработка.</div>
+        </div>
       </div>
-      <div class="land-card">
-        <div class="land-card-icon">⚡</div>
-        <div class="land-card-val">Live</div>
-        <div class="land-card-lbl">Скорость онлайн</div>
+
+      <div class="land-rule">
+        <span class="land-rule-num">03</span>
+        <span class="land-rule-icon">🤝</span>
+        <div class="land-rule-body">
+          <div class="land-rule-title">Командные активности</div>
+          <div class="land-rule-text">Съёмки, совместные тренировки — часть проекта. Неучастие — отработка.</div>
+        </div>
+      </div>
+
+      <div class="land-rule">
+        <span class="land-rule-num">04</span>
+        <span class="land-rule-icon">📱</span>
+        <div class="land-rule-body">
+          <div class="land-rule-title">Социальные сети</div>
+          <div class="land-rule-text">После тренировки — сторис или пост с отметкой тренера.</div>
+        </div>
+      </div>
+
+      <div class="land-rule">
+        <span class="land-rule-num">05</span>
+        <span class="land-rule-icon">📸</span>
+        <div class="land-rule-body">
+          <div class="land-rule-title">Фото и видео</div>
+          <div class="land-rule-text">Фото и видео могут использоваться в соцсетях Coach Space. Отказ от съёмок не предусмотрен.</div>
+        </div>
+      </div>
+
+      <div class="land-rule">
+        <span class="land-rule-num">06</span>
+        <span class="land-rule-icon">🤜</span>
+        <div class="land-rule-body">
+          <div class="land-rule-title">Субординация и поведение</div>
+          <div class="land-rule-text">Крики, оскорбления и агрессия — основание для исключения.</div>
+        </div>
+      </div>
+
+      <div class="land-rule">
+        <span class="land-rule-num">07</span>
+        <span class="land-rule-icon">🎯</span>
+        <div class="land-rule-body">
+          <div class="land-rule-title">Формат тренировок</div>
+          <div class="land-rule-text">Coach Space — это не персональные тренировки. Тренер даёт систему, но не бегает за участниками.</div>
+        </div>
+      </div>
+
+      <div class="land-rule">
+        <span class="land-rule-num">08</span>
+        <span class="land-rule-icon">📈</span>
+        <div class="land-rule-body">
+          <div class="land-rule-title">Работа на результат</div>
+          <div class="land-rule-text">Отсутствие результата из-за недисциплинированности — основание для исключения.</div>
+        </div>
+      </div>
+
+      <div class="land-rule">
+        <span class="land-rule-num">09</span>
+        <span class="land-rule-icon">💳</span>
+        <div class="land-rule-body">
+          <div class="land-rule-title">Оплата</div>
+          <div class="land-rule-text">Раз в месяц. Отсутствие без предупреждения — исключение.</div>
+        </div>
+      </div>
+
+      <div class="land-rule">
+        <span class="land-rule-num">10</span>
+        <span class="land-rule-icon">👕</span>
+        <div class="land-rule-body">
+          <div class="land-rule-title">Форма проекта</div>
+          <div class="land-rule-text">Брендированная футболка — 4 500 ₸. Своя + нанесение — 2 500 ₸.</div>
+        </div>
+      </div>
+
+      <div class="land-rule">
+        <span class="land-rule-num">11</span>
+        <span class="land-rule-icon">🚫</span>
+        <div class="land-rule-body">
+          <div class="land-rule-title">Исключение из проекта</div>
+          <div class="land-rule-text">Без перерасчёта и возврата денежных средств.</div>
+        </div>
       </div>
     </div>
 
-    <button class="land-cta" onclick="openMo('mCrossReg')" style="max-width:480px">Хочу участвовать</button>
   </div>
 </div>
 
@@ -1229,137 +1372,22 @@
     </div>
 
     <div class="panel" id="p-ucross">
-      <div class="cross-gps-warn" id="crossGpsWarn">GPS недоступен. Проверьте разрешения геолокации в браузере.</div>
-
-      <div id="crossTrainScreen">
-        <div class="cross-hero">
-          <div class="cross-state-lbl" id="crossStateLbl">Готов к старту</div>
-          <div class="cross-timer" id="crossTimer">00:00</div>
-          <div class="cross-metrics">
-            <div class="cross-metric">
-              <div class="cross-metric-val" id="crossDist">0</div>
-              <div class="cross-metric-lbl">м</div>
-            </div>
-            <div class="cross-metric">
-              <div class="cross-metric-val" id="crossTime">00:00</div>
-              <div class="cross-metric-lbl">время</div>
-            </div>
-          </div>
-          <button class="cross-start-btn" id="crossStartBtn" onclick="crossToggleRun()">▶</button>
-          <div id="crossCtrl" style="display:none" class="cross-ctrl">
-            <button class="cross-pause-btn" id="crossPauseBtn" onclick="crossPause()">⏸ Пауза</button>
-            <button class="cross-stop-btn" onclick="crossFinish()">⏹ Завершить</button>
-          </div>
-          <div id="crossMap" style="width:100%;height:280px;border-radius:14px;margin-top:16px;display:none"></div>
-        </div>
-      </div>
-
-      <div id="crossResultScreen" style="display:none">
-        <div class="cross-result-card">
-          <div class="cross-result-title">🏁 Пробежка завершена!</div>
-          <div class="cross-result-grid">
-            <div class="cross-result-item">
-              <div class="cross-result-val" id="resTime">—</div>
-              <div class="cross-result-lbl">Время</div>
-            </div>
-            <div class="cross-result-item">
-              <div class="cross-result-val" id="resDist">—</div>
-              <div class="cross-result-lbl">Дистанция</div>
-            </div>
-          </div>
-          <div style="display:flex;gap:10px;justify-content:center">
-            <button class="btn btn-p" onclick="crossSaveRun()">💾 Сохранить</button>
-            <button class="btn btn-g" onclick="crossReset()">🔄 Новая</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="sh"><div class="st">🏆 Рейтинг</div></div>
-        <div class="lb-filter">
-          <button class="lb-btn" onclick="loadLeaderboard('today',this)">Сегодня</button>
-          <button class="lb-btn active" onclick="loadLeaderboard('week',this)">Неделя</button>
-          <button class="lb-btn" onclick="loadLeaderboard('all',this)">Всё время</button>
-        </div>
-        <div id="crossLeaderboard"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
-      </div>
-
-      <div class="card">
-        <div class="sh"><div class="st">📋 Мои пробежки</div></div>
-        <div id="crossHistory"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
+      <div class="card" style="text-align:center;padding:32px 20px;">
+        <div style="font-size:48px;margin-bottom:16px;">🏃</div>
+        <div class="st" style="margin-bottom:10px;font-size:16px;">Городской кросс Coach Space</div>
+        <div style="font-size:14px;color:var(--mu2);line-height:1.6;margin-bottom:24px;">Следующий старт — скоро.<br>Записывайся заранее!</div>
+        <button class="btn btn-p btn-full" onclick="openMo('mCrossReg')">🏁 Записаться на кросс</button>
       </div>
     </div>
 
     <div class="panel" id="p-across">
-      <div class="across-tabs">
-        <button class="across-tab active" onclick="switchAcrossTab('leaderboard',this)">🏆 Рейтинг забега</button>
-        <button class="across-tab" onclick="switchAcrossTab('registrants',this)">📋 Заявки на забег</button>
-        <button class="across-tab" onclick="switchAcrossTab('students',this)">🏃 Участники кросса</button>
-      </div>
-
-      <div class="across-section active" id="acrossLeaderboardSection">
-        <div class="card">
-          <div class="sh"><div class="st">🏆 Рейтинг участников</div></div>
-          <div class="lb-filter">
-            <button class="lb-btn" onclick="loadAdminLeaderboard('today',this)">Сегодня</button>
-            <button class="lb-btn active" onclick="loadAdminLeaderboard('week',this)">Неделя</button>
-            <button class="lb-btn" onclick="loadAdminLeaderboard('all',this)">Всё время</button>
-          </div>
-          <div id="adminLeaderboard"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
+      <div class="card">
+        <div class="sh">
+          <div class="st">📋 Заявки на кросс</div>
+          <button class="btn btn-g sm" onclick="loadCrossRegistrants()">↻ Обновить</button>
         </div>
-      </div>
-
-      <div class="across-section" id="acrossRegistrantsSection">
-        <div class="card">
-          <div class="sh">
-            <div class="st">📋 Записавшиеся на забег</div>
-            <button class="btn btn-g sm" onclick="loadCrossRegistrants()">↻</button>
-          </div>
-          <div id="crossRegCount" class="creg-count"></div>
-          <div id="crossRegList"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
-        </div>
-      </div>
-
-      <div class="across-section" id="acrossStudentsSection">
-        <div class="card">
-          <div class="sh">
-            <div class="st">🏃 Участники кросса</div>
-            <button class="btn btn-p sm" onclick="openAddCrossParticipant()">+ Добавить</button>
-          </div>
-          <div id="crossPartCount" class="creg-count"></div>
-          <div id="crossPartList"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
-        </div>
-
-        <div id="addCrossPartForm" style="display:none;margin-top:12px" class="card">
-          <div class="st" style="margin-bottom:12px">➕ Добавить участника кросса</div>
-
-          <div style="display:flex;gap:8px;margin-bottom:14px">
-            <button id="crossPartModeManual" class="btn btn-p sm" style="flex:1" onclick="switchCrossPartMode('manual')">✏️ Вручную</button>
-            <button id="crossPartModeFromCS" class="btn btn-g sm" style="flex:1" onclick="switchCrossPartMode('fromcs')">👥 Из зала</button>
-          </div>
-
-          <div id="crossPartManualBlock">
-            <div class="fg"><label class="fl">Имя участника</label><input class="fi" id="crossPartName" placeholder="Иван Иванов"/></div>
-            <div class="fg"><label class="fl">Заметка (необязательно)</label><input class="fi" id="crossPartNote" placeholder="Команда, клуб..."/></div>
-            <div style="margin:10px 0 6px;font-size:12px;font-weight:700;color:var(--mu2);text-transform:uppercase;letter-spacing:.6px">Аккаунт в приложении (необязательно)</div>
-            <div style="font-size:12px;color:var(--mu2);margin-bottom:10px">Если указать логин и пароль — участник сможет войти в приложение и видеть только раздел Кросс</div>
-            <div class="g2">
-              <div class="fg"><label class="fl">Логин</label><input class="fi" id="crossPartLogin" placeholder="ivan_cross" autocomplete="off"/></div>
-              <div class="fg"><label class="fl">Пароль</label><input class="fi" id="crossPartPassword" placeholder="Пароль" type="password"/></div>
-            </div>
-          </div>
-
-          <div id="crossPartFromCSBlock" style="display:none">
-            <div class="fg"><label class="fl">Поиск по имени</label><input class="fi" id="crossPartSearch" placeholder="Начните вводить имя..." oninput="filterCSMembers()"/></div>
-            <div id="crossPartCSList" style="max-height:220px;overflow-y:auto;margin-top:4px"></div>
-            <div id="crossPartSelected" style="margin-top:10px;font-size:13px;color:var(--mu2)">Выбрано: <span id="crossPartSelectedNames" style="color:#a78bfa">никого</span></div>
-          </div>
-
-          <div class="mf" style="margin-top:14px">
-            <button class="btn btn-g" onclick="closeAddCrossParticipant()">Отмена</button>
-            <button class="btn btn-p" id="crossPartSaveBtn" onclick="saveCrossParticipant()">Сохранить</button>
-          </div>
-        </div>
+        <div id="crossRegCount" class="creg-count"></div>
+        <div id="crossRegList"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
       </div>
     </div>
   </div>
@@ -1947,7 +1975,7 @@ function startApp(){
 
 const TABS={
   admin:[{id:'ah',icon:'🏠',lbl:'Главная'},{id:'aprog',icon:'📈',lbl:'Прогресс'},{id:'avid',icon:'🎬',lbl:'Видео'},{id:'ashop',icon:'🛒',lbl:'Магазин'},{id:'anut',icon:'🥗',lbl:'Питание'},{id:'across',icon:'🏃',lbl:'Кросс'}],
-  user: [{id:'uh',icon:'🏠',lbl:'Главная'},{id:'uplan',icon:'📋',lbl:'План'},{id:'uprog',icon:'📈',lbl:'Прогресс'},{id:'ushop',icon:'🛒',lbl:'Магазин'},{id:'unut',icon:'🥗',lbl:'Питание'},{id:'ucross',icon:'🏃',lbl:'Кросс'}],
+  user: [{id:'uh',icon:'🏠',lbl:'Главная'},{id:'uplan',icon:'📋',lbl:'План'},{id:'uprog',icon:'📈',lbl:'Прогресс'},{id:'ushop',icon:'🛒',lbl:'Магазин'},{id:'unut',icon:'🥗',lbl:'Питание'}],
   cross:[{id:'ucross',icon:'🏃',lbl:'Кросс'}]
 };
 function buildNav(){
@@ -3363,6 +3391,43 @@ function showLanding(){
   document.getElementById('landingPage').classList.add('show');
 }
 
+// ── Слайдшоу визитки ──
+let _slideIdx = 0;
+let _slideTimer = null;
+const SLIDE_COUNT = 5;
+
+function landSlideTo(idx) {
+  _slideIdx = (idx + SLIDE_COUNT) % SLIDE_COUNT;
+  const slides = document.getElementById('landSlides');
+  if (slides) slides.style.transform = `translateX(-${_slideIdx * 100}%)`;
+  document.querySelectorAll('.land-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === _slideIdx);
+  });
+}
+
+function landSlideMove(dir) {
+  landSlideTo(_slideIdx + dir);
+  landSlideRestart();
+}
+
+function landSlideRestart() {
+  clearInterval(_slideTimer);
+  _slideTimer = setInterval(() => landSlideTo(_slideIdx + 1), 4000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  landSlideRestart();
+  // свайп на мобиле
+  const el = document.getElementById('landSlides');
+  if (!el) return;
+  let startX = 0;
+  el.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive:true});
+  el.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 40) { landSlideMove(dx < 0 ? 1 : -1); }
+  }, {passive:true});
+});
+
 let _cregCooldown=0;
 async function submitCrossReg(){
   const name=(document.getElementById('cregName').value||'').trim();
@@ -3629,11 +3694,13 @@ function _crossStopNotifInterval() {
 
 function _crossWorkerStart(startTime) {
   if (_crossWorker) { _crossWorker.terminate(); _crossWorker = null; }
+  let _saveTick = 0;
   try {
     _crossWorker = new Worker('/timer-worker.js');
     _crossWorker.onmessage = e => {
       _crossElapsed = e.data.elapsed;
       crossUpdateUI();
+      if (++_saveTick % 10 === 0) _crossSaveState(); // каждые 10 сек
     };
     _crossWorker.postMessage({ cmd: 'start', startTime });
   } catch(err) {
@@ -3641,8 +3708,38 @@ function _crossWorkerStart(startTime) {
     _crossWorker = { _iv: setInterval(() => {
       _crossElapsed = Math.floor((Date.now() - startTime) / 1000);
       crossUpdateUI();
+      if (++_saveTick % 10 === 0) _crossSaveState();
     }, 1000), terminate() { clearInterval(this._iv); } };
   }
+}
+
+function _crossRestartGPS() {
+  if (_crossWatchId !== null) { navigator.geolocation.clearWatch(_crossWatchId); _crossWatchId = null; }
+  let _lastPosSentAt = 0;
+  _crossWatchId = navigator.geolocation.watchPosition(pos => {
+    if (_crossState !== 'running') return;
+    const acc = pos.coords.accuracy;
+    const {latitude: lat, longitude: lon} = pos.coords;
+    if (acc <= 20) {
+      if (_crossLastPos) {
+        const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
+        if (d >= 3 && d < 300) { _crossDistM += d; _crossSaveState(); }
+      }
+      _crossLastPos = {lat, lon};
+      document.getElementById('crossGpsWarn').style.display = 'none';
+      crossUpdateLiveMap(lat, lon);
+    } else {
+      document.getElementById('crossGpsWarn').style.display = 'block';
+    }
+    const now = Date.now();
+    if (now - _lastPosSentAt > 5000 && ME) {
+      _lastPosSentAt = now;
+      api('/api/runs/active','POST',{userId:ME.id,userName:ME.name,lat,lon,isActive:true}).catch(()=>{});
+    }
+  }, err => {
+    console.warn('GPS:', err.message);
+    document.getElementById('crossGpsWarn').style.display = 'block';
+  }, {enableHighAccuracy: true, maximumAge: 0, timeout: 15000});
 }
 
 function _crossWorkerStop() {
@@ -3660,13 +3757,53 @@ function _crossReleaseWakeLock() {
   if (_crossWakeLock) { _crossWakeLock.release().catch(()=>{}); _crossWakeLock = null; }
 }
 
+// ── Сохранение состояния кросса в localStorage ──────────────────
+function _crossSaveState() {
+  if (_crossState !== 'running' && _crossState !== 'paused') return;
+  localStorage.setItem('crossState', JSON.stringify({
+    state: _crossState,
+    startTime: _crossStartTime,
+    elapsed: _crossElapsed,
+    distM: _crossDistM,
+    lastPos: _crossLastPos,
+    savedAt: Date.now()
+  }));
+}
+
+function _crossClearState() {
+  localStorage.removeItem('crossState');
+}
+
+function _crossRestoreState() {
+  try {
+    const raw = localStorage.getItem('crossState');
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    // если сохранено более 2 часов назад — игнорируем
+    if (Date.now() - s.savedAt > 2 * 60 * 60 * 1000) { _crossClearState(); return false; }
+    _crossState = s.state;
+    _crossStartTime = s.startTime;
+    _crossElapsed = s.elapsed;
+    _crossDistM = s.distM;
+    _crossLastPos = s.lastPos;
+    return true;
+  } catch { return false; }
+}
+
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && _crossState === 'running') {
+    // пересчитать время с момента ухода
     _crossElapsed = Math.floor((Date.now() - _crossStartTime) / 1000);
     crossUpdateUI();
-    if (_crossLastPos && ME) {
-      api('/api/runs/active','POST',{userId:ME.id,lat:_crossLastPos.lat,lon:_crossLastPos.lon,isActive:true}).catch(()=>{});
+    // переподключить WakeLock — iOS его сбрасывает
+    _crossAcquireWakeLock();
+    // перезапустить GPS если он умер в фоне
+    if (_crossWatchId === null) {
+      _crossRestartGPS();
     }
+  }
+  if (document.visibilityState === 'hidden' && _crossState === 'running') {
+    _crossSaveState();
   }
 });
 
@@ -3778,31 +3915,7 @@ function crossStart() {
   _crossRequestNotifPerm().then(_crossStartNotifInterval);
   initCrossMap();
   _crossLiveInterval = setInterval(crossPollOthers, 4000);
-  let _lastPosSentAt = 0;
-  _crossWatchId = navigator.geolocation.watchPosition(pos => {
-    if (_crossState !== 'running') return;
-    const acc = pos.coords.accuracy;
-    const {latitude: lat, longitude: lon} = pos.coords;
-    if (acc <= 20) {
-      if (_crossLastPos) {
-        const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
-        if (d >= 3 && d < 300) _crossDistM += d;
-      }
-      _crossLastPos = {lat, lon};
-      document.getElementById('crossGpsWarn').style.display = 'none';
-      crossUpdateLiveMap(lat, lon);
-    } else {
-      document.getElementById('crossGpsWarn').style.display = 'block';
-    }
-    const now = Date.now();
-    if (now - _lastPosSentAt > 5000 && ME) {
-      _lastPosSentAt = now;
-      api('/api/runs/active','POST',{userId:ME.id,userName:ME.name,lat,lon,isActive:true}).catch(()=>{});
-    }
-  }, err => {
-    console.warn('GPS:', err.message);
-    document.getElementById('crossGpsWarn').style.display = 'block';
-  }, {enableHighAccuracy: true, maximumAge: 0, timeout: 15000});
+  _crossRestartGPS();
 }
 
 function crossPause() {
@@ -3837,31 +3950,14 @@ function crossResume() {
   _crossAcquireWakeLock();
   _crossStartNotifInterval();
   _crossLiveInterval = setInterval(crossPollOthers, 4000);
-  let _lastPosSentAt = 0;
-  _crossWatchId = navigator.geolocation.watchPosition(pos => {
-    if (_crossState !== 'running') return;
-    const acc = pos.coords.accuracy;
-    const {latitude: lat, longitude: lon} = pos.coords;
-    if (acc <= 20) {
-      if (_crossLastPos) {
-        const d = haversine(_crossLastPos.lat, _crossLastPos.lon, lat, lon);
-        if (d >= 3 && d < 300) _crossDistM += d;
-      }
-      _crossLastPos = {lat, lon};
-      crossUpdateLiveMap(lat, lon);
-    }
-    const now = Date.now();
-    if (now - _lastPosSentAt > 5000 && ME) {
-      _lastPosSentAt = now;
-      api('/api/runs/active','POST',{userId:ME.id,userName:ME.name,lat,lon,isActive:true}).catch(()=>{});
-    }
-  }, err => console.warn('GPS:', err.message), {enableHighAccuracy: true, maximumAge: 0, timeout: 15000});
+  _crossRestartGPS();
 }
 
 function crossFinish() {
   _crossWorkerStop();
   _crossReleaseWakeLock();
   _crossStopNotifInterval();
+  _crossClearState();
   if (_crossWatchId !== null) { navigator.geolocation.clearWatch(_crossWatchId); _crossWatchId = null; }
   if (_crossLiveInterval) { clearInterval(_crossLiveInterval); _crossLiveInterval = null; }
   if (ME) api('/api/runs/active','POST',{userId:ME.id,isActive:false}).catch(()=>{});
