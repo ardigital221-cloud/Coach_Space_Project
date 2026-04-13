@@ -141,6 +141,17 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 
 // ═══════════════════════════════════════════
+// ФОТО КОМЬЮНИТИ (photo1–5.jpg из public/)
+// ═══════════════════════════════════════════
+app.get('/api/community-photo/:n', (req, res) => {
+  const n = parseInt(req.params.n);
+  if (isNaN(n) || n < 1 || n > 5) return res.status(404).end();
+  res.sendFile(path.join(__dirname, 'public', `photo${n}.jpg`), err => {
+    if (err) res.status(404).end();
+  });
+});
+
+// ═══════════════════════════════════════════
 // ПРОКСИ ДЛЯ ИЗОБРАЖЕНИЙ Firebase Storage
 // ═══════════════════════════════════════════
 app.get('/api/img/:filePath(*)', async (req, res) => {
