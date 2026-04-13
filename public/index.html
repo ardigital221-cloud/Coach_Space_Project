@@ -753,9 +753,9 @@
     .rules50-item:last-child{border-bottom:none;}
     .rules50-n{flex-shrink:0;width:24px;height:24px;background:rgba(139,92,246,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--ac);margin-top:1px;}
     /* ── ВИЗИТКА: слайдшоу ── */
-    .land-slideshow{width:100%;max-width:480px;position:relative;margin-bottom:10px;border-radius:20px;overflow:hidden;aspect-ratio:4/3;background:rgba(255,255,255,.04);}
-    .land-slides{display:flex;height:100%;transition:transform .45s cubic-bezier(.4,0,.2,1);}
-    .land-slide{min-width:100%;height:100%;object-fit:cover;display:block;}
+    .land-slideshow{width:100%;max-width:480px;position:relative;margin-bottom:10px;border-radius:20px;overflow:hidden;height:260px;background:rgba(255,255,255,.04);}
+    .land-slides{display:flex;width:100%;height:100%;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+    .land-slide{flex:0 0 100%;width:100%;height:100%;object-fit:cover;display:block;}
     .land-slide-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);backdrop-filter:blur(4px);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;transition:background .2s;line-height:1;}
     .land-slide-btn:hover{background:rgba(0,0,0,.7);}
     .land-slide-prev{left:10px;}.land-slide-next{right:10px;}
@@ -3399,7 +3399,10 @@ const SLIDE_COUNT = 5;
 function landSlideTo(idx) {
   _slideIdx = (idx + SLIDE_COUNT) % SLIDE_COUNT;
   const slides = document.getElementById('landSlides');
-  if (slides) slides.style.transform = `translateX(-${_slideIdx * 100}%)`;
+  if (slides) {
+    const w = slides.parentElement.offsetWidth;
+    slides.style.transform = `translateX(-${_slideIdx * w}px)`;
+  }
   document.querySelectorAll('.land-dot').forEach((d, i) => {
     d.classList.toggle('active', i === _slideIdx);
   });
