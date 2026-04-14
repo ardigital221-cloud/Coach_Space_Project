@@ -1,5 +1,5 @@
 // Coach Space Service Worker
-const CACHE = 'cs-v1';
+const CACHE = 'cs-v2';
 const STATIC = ['/', '/manifest.json', '/icon-192.png', '/icon-512.png', '/icon-180.png', '/timer-worker.js'];
 
 self.addEventListener('install', e => {
