@@ -1600,12 +1600,32 @@ cron.schedule('0 9 * * *', async () => {
 });
 
 // ═══════════════════════════════════════════
+// СИНХРОНИЗАЦИЯ ФОТО В FIREBASE STORAGE
+// ═══════════════════════════════════════════
+async function syncCommunityPhotos() {
+  const fs = require('fs');
+  for (let i = 1; i <= 5; i++) {
+    const localPath = path.join(__dirname, 'public', `photo${i}.jpg`);
+    const storagePath = `community/photo${i}.jpg`;
+    try {
+      if (!fs.existsSync(localPath)) { console.log(`[photos] photo${i}.jpg не найден локально, пропускаем`); continue; }
+      const file = bucket.file(storagePath);
+      const [exists] = await file.exists();
+      if (exists) { console.log(`[photos] community/photo${i}.jpg уже есть в Storage`); continue; }
+      await bucket.upload(localPath, { destination: storagePath, metadata: { contentType: 'image/jpeg', cacheControl: 'public, max-age=2592000' } });
+      console.log(`[photos] ✅ photo${i}.jpg → Firebase Storage`);
+    } catch (e) { console.error(`[photos] ❌ photo${i}.jpg: ${e.message}`); }
+  }
+}
+
+// ═══════════════════════════════════════════
 // ЗАПУСК
 // ═══════════════════════════════════════════
 app.listen(PORT, () => {
   console.log(`\n🚀 Coach Space → http://localhost:${PORT}`);
   console.log(`📋 Telegram уведомления: ${bot ? '✅ включены' : '❌ отключены (нет TELEGRAM_BOT_TOKEN)'}`);
   console.log(`📣 ID тренера (COACH_TG): ${COACH_TG}\n`);
+  syncCommunityPhotos().catch(e => console.error('[photos] sync error:', e.message));
 });
 
 // SPA fallback — СТРОГО ПОСЛЕДНЕЙ!
