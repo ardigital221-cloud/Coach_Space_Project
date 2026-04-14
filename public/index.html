@@ -3547,13 +3547,14 @@ function showLanding(){
 
 // ── Карточка события кросса на лендинге ──
 async function loadCrossEvent() {
+  const card = document.getElementById('crossEventCard');
+  if (!card) return;
   try {
     const r = await fetch('/api/cross-event');
-    const ev = await r.json();
-    const card = document.getElementById('crossEventCard');
-    if (!card) return;
-    if (!ev.date && !ev.time && !ev.location) { card.classList.remove('visible'); return; }
-    // Форматируем дату
+    const text = await r.text();
+    let ev;
+    try { ev = JSON.parse(text); } catch(_) { card.style.display='none'; return; }
+    if (!ev || (!ev.date && !ev.time && !ev.location)) { card.style.display='none'; return; }
     let dtStr = '';
     if (ev.date) {
       const d = new Date(ev.date + 'T00:00:00');
@@ -3564,8 +3565,8 @@ async function loadCrossEvent() {
     }
     document.getElementById('ceDateTime').textContent = dtStr || '—';
     document.getElementById('ceLocation').textContent = ev.location || '—';
-    card.classList.add('visible');
-  } catch (e) { console.warn('cross-event load:', e.message); }
+    card.style.display = 'block';
+  } catch (e) { card.style.display='none'; }
 }
 
 // ── Сохранение события (тренер) ──
