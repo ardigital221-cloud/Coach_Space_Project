@@ -765,10 +765,12 @@
     /* ── ВИЗИТКА: услуги ── */
     .land-services{width:100%;max-width:480px;margin-bottom:28px;}
     .land-block-title{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;color:var(--tx);margin-bottom:14px;text-align:center;letter-spacing:.5px;}
-    .land-service-item{display:flex;align-items:center;gap:13px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px 16px;margin-bottom:8px;transition:border-color .2s;}
+    .land-service-item{display:flex;align-items:flex-start;gap:13px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px 16px;margin-bottom:8px;transition:border-color .2s;}
     .land-service-item:hover{border-color:rgba(139,92,246,.25);}
-    .land-service-icon{font-size:22px;flex-shrink:0;}
-    .land-service-text{font-size:14px;font-weight:600;color:var(--tx);}
+    .land-service-icon{font-size:22px;flex-shrink:0;padding-top:1px;}
+    .land-service-body{flex:1;}
+    .land-service-text{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:2px;}
+    .land-service-desc{font-size:12px;color:var(--mu2);line-height:1.5;}
     /* ── ВИЗИТКА: правила ── */
     .land-rules{width:100%;max-width:480px;margin-bottom:40px;}
     .land-rule{display:flex;align-items:flex-start;gap:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:14px 16px;margin-bottom:8px;}
@@ -819,18 +821,61 @@
 
     <!-- CTA -->
     <div style="width:100%;max-width:480px;display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:28px;">
-      <button class="land-cta" onclick="openMo('mCrossReg')">Записаться на кросс</button>
+      <button class="land-cta" onclick="openMo('mProjReg')">Записаться в проект</button>
+      <button class="land-cta" style="background:linear-gradient(135deg,#38bdf8,#6366f1);box-shadow:0 8px 30px rgba(56,189,248,.3)" onclick="openMo('mCrossReg')">Записаться на кросс</button>
       <button class="land-secondary" onclick="showLogin()">Войти в Coach Space</button>
     </div>
 
     <!-- Что мы предоставляем -->
     <div class="land-services">
       <div class="land-block-title">Что мы предоставляем</div>
-      <div class="land-service-item"><div class="land-service-icon">🏅</div><div class="land-service-text">Наставничество</div></div>
-      <div class="land-service-item"><div class="land-service-icon">🥗</div><div class="land-service-text">Рекомендация по питанию</div></div>
-      <div class="land-service-item"><div class="land-service-icon">💪</div><div class="land-service-text">Сильное комьюнити</div></div>
-      <div class="land-service-item"><div class="land-service-icon">🎯</div><div class="land-service-text">Постановка техники</div></div>
-      <div class="land-service-item"><div class="land-service-icon">📱</div><div class="land-service-text">Полный доступ к приложению</div></div>
+
+      <div class="land-service-item">
+        <div class="land-service-icon">🏋️</div>
+        <div class="land-service-body">
+          <div class="land-service-text">План тренировок</div>
+          <div class="land-service-desc">Индивидуальный план тренировок, подобранный для тебя</div>
+        </div>
+      </div>
+
+      <div class="land-service-item">
+        <div class="land-service-icon">🥗</div>
+        <div class="land-service-body">
+          <div class="land-service-text">План питания</div>
+          <div class="land-service-desc">Индивидуальный подобранный рацион для тебя</div>
+        </div>
+      </div>
+
+      <div class="land-service-item">
+        <div class="land-service-icon">💪</div>
+        <div class="land-service-body">
+          <div class="land-service-text">Сильное комьюнити</div>
+          <div class="land-service-desc">Спортивное комьюнити, направленное на развитие</div>
+        </div>
+      </div>
+
+      <div class="land-service-item">
+        <div class="land-service-icon">🎯</div>
+        <div class="land-service-body">
+          <div class="land-service-text">Постановка техники</div>
+          <div class="land-service-desc">Тренер ставит технику и наблюдает в процессе тренировки</div>
+        </div>
+      </div>
+
+      <div class="land-service-item">
+        <div class="land-service-icon">📱</div>
+        <div class="land-service-body">
+          <div class="land-service-text">Полный доступ к приложению</div>
+        </div>
+      </div>
+
+      <div class="land-service-item">
+        <div class="land-service-icon">🏆</div>
+        <div class="land-service-body">
+          <div class="land-service-text">Гарантированный результат</div>
+          <div class="land-service-desc">При условии соблюдения дисциплины и рекомендаций</div>
+        </div>
+      </div>
     </div>
 
     <!-- 11 правил -->
@@ -959,6 +1004,28 @@
     <div class="reg-success-title">Ты в списке!</div>
     <div class="reg-success-sub">Мы получили твою заявку.<br>Следи за новостями Coach Space.</div>
     <div style="margin-top:16px"><button class="btn btn-g btn-full" onclick="closeMo('mCrossReg')">Закрыть</button></div>
+  </div>
+</div></div>
+
+<div class="mo" id="mProjReg"><div class="modal">
+  <div class="mh"></div>
+  <div id="projRegForm">
+    <div class="mt">💪 Записаться в проект</div>
+    <div class="fg"><label class="fl">Имя и фамилия *</label><input class="fi" id="pregName" placeholder="Иван Иванов"/></div>
+    <div class="fg"><label class="fl">Телефон *</label><input class="fi" id="pregPhone" type="tel" placeholder="+7 700 000 00 00"/></div>
+    <div class="fg"><label class="fl">Telegram (username или @)</label><input class="fi" id="pregTg" placeholder="@username"/></div>
+    <div style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true"><input tabindex="-1" id="pregWebsite" autocomplete="off"/></div>
+    <div class="ferr" id="pregErr"></div>
+    <div class="mf">
+      <button class="btn btn-g" onclick="closeMo('mProjReg')">Отмена</button>
+      <button class="btn btn-p" onclick="submitProjReg()" id="pregBtn">Записаться</button>
+    </div>
+  </div>
+  <div class="reg-success" id="projRegSuccess" style="display:none">
+    <div class="reg-success-icon">✅</div>
+    <div class="reg-success-title">Заявка принята!</div>
+    <div class="reg-success-sub">Мы получили твою заявку.<br>Скоро свяжемся с тобой.</div>
+    <div style="margin-top:16px"><button class="btn btn-g btn-full" onclick="closeMo('mProjReg')">Закрыть</button></div>
   </div>
 </div></div>
 
@@ -1382,13 +1449,31 @@
     </div>
 
     <div class="panel" id="p-across">
-      <div class="card">
-        <div class="sh">
-          <div class="st">📋 Заявки на кросс</div>
-          <button class="btn btn-g sm" onclick="loadCrossRegistrants()">↻ Обновить</button>
+      <div class="across-tabs">
+        <button class="across-tab active" onclick="switchAcrossTab('cross',this)">🏃 Кросс</button>
+        <button class="across-tab" onclick="switchAcrossTab('project',this)">💪 Проект</button>
+      </div>
+
+      <div class="across-section active" id="acrossCrossSection">
+        <div class="card">
+          <div class="sh">
+            <div class="st">📋 Заявки на кросс</div>
+            <button class="btn btn-g sm" onclick="loadCrossRegistrants()">↻</button>
+          </div>
+          <div id="crossRegCount" class="creg-count"></div>
+          <div id="crossRegList"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
         </div>
-        <div id="crossRegCount" class="creg-count"></div>
-        <div id="crossRegList"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
+      </div>
+
+      <div class="across-section" id="acrossProjectSection">
+        <div class="card">
+          <div class="sh">
+            <div class="st">📋 Заявки на проект</div>
+            <button class="btn btn-g sm" onclick="loadProjRegistrants()">↻</button>
+          </div>
+          <div id="projRegCount" class="creg-count"></div>
+          <div id="projRegList"><div class="empty"><div class="sp-ring" style="margin:16px auto"></div></div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1975,7 +2060,7 @@ function startApp(){
 }
 
 const TABS={
-  admin:[{id:'ah',icon:'🏠',lbl:'Главная'},{id:'aprog',icon:'📈',lbl:'Прогресс'},{id:'avid',icon:'🎬',lbl:'Видео'},{id:'ashop',icon:'🛒',lbl:'Магазин'},{id:'anut',icon:'🥗',lbl:'Питание'},{id:'across',icon:'🏃',lbl:'Кросс'}],
+  admin:[{id:'ah',icon:'🏠',lbl:'Главная'},{id:'aprog',icon:'📈',lbl:'Прогресс'},{id:'avid',icon:'🎬',lbl:'Видео'},{id:'ashop',icon:'🛒',lbl:'Магазин'},{id:'anut',icon:'🥗',lbl:'Питание'},{id:'across',icon:'📋',lbl:'Записи'}],
   user: [{id:'uh',icon:'🏠',lbl:'Главная'},{id:'uplan',icon:'📋',lbl:'План'},{id:'uprog',icon:'📈',lbl:'Прогресс'},{id:'ushop',icon:'🛒',lbl:'Магазин'},{id:'unut',icon:'🥗',lbl:'Питание'}],
   cross:[{id:'ucross',icon:'🏃',lbl:'Кросс'}]
 };
@@ -3492,21 +3577,89 @@ var _origCloseMo = closeMo;
 closeMo = function(id){
   _origCloseMo(id);
   if(id==='mCrossReg') setTimeout(_resetCrossRegModal, 300);
+  if(id==='mProjReg') setTimeout(_resetProjRegModal, 300);
 };
 
+function _resetProjRegModal(){
+  document.getElementById('projRegForm').style.display='block';
+  document.getElementById('projRegSuccess').style.display='none';
+  ['pregName','pregPhone','pregTg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const err=document.getElementById('pregErr');if(err)err.style.display='none';
+}
+
+let _pregCooldown=0;
+async function submitProjReg(){
+  const name=(document.getElementById('pregName').value||'').trim();
+  const phone=(document.getElementById('pregPhone').value||'').trim();
+  const tg=(document.getElementById('pregTg').value||'').trim();
+  const honeypot=(document.getElementById('pregWebsite').value||'').trim();
+  const err=document.getElementById('pregErr');
+  err.style.display='none';
+  if(honeypot) return;
+  if(!name){err.style.display='block';err.textContent='Введите имя';return;}
+  if(!phone){err.style.display='block';err.textContent='Введите номер телефона';return;}
+  const digits=phone.replace(/\D/g,'');
+  if(digits.length<7){err.style.display='block';err.textContent='Введите корректный номер телефона';return;}
+  const now=Date.now();
+  if(now<_pregCooldown){
+    const sec=Math.ceil((_pregCooldown-now)/1000);
+    err.style.display='block';err.textContent=`Подождите ${sec} сек.`;return;
+  }
+  const btn=document.getElementById('pregBtn');
+  btn.disabled=true;btn.textContent='...';
+  try{
+    const res=await fetch('/api/project-register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,telegram:tg})});
+    const data=await res.json();
+    if(!res.ok){err.style.display='block';err.textContent=data.error||'Ошибка';btn.disabled=false;btn.textContent='Записаться';return;}
+    _pregCooldown=Date.now()+30000;
+    document.getElementById('projRegForm').style.display='none';
+    document.getElementById('projRegSuccess').style.display='block';
+    ['pregName','pregPhone','pregTg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  }catch(e){err.style.display='block';err.textContent='Ошибка: '+e.message;}
+  btn.disabled=false;btn.textContent='Записаться';
+}
+
+async function loadProjRegistrants(){
+  const list=document.getElementById('projRegList');
+  const cnt=document.getElementById('projRegCount');
+  if(!list)return;
+  try{
+    const data=await api('/api/project-register');
+    if(cnt) cnt.textContent=`Всего заявок: ${data.length}`;
+    if(!data.length){list.innerHTML='<div class="empty" style="padding:16px 0"><div class="ei">💪</div>Пока нет заявок</div>';return;}
+    list.innerHTML=data.map(r=>{
+      const d=new Date(r.registeredAt);
+      const dateStr=d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+      const meta=[r.phone,r.telegram].filter(Boolean).join(' · ');
+      return`<div class="creg-row">
+        <div class="creg-ava">💪</div>
+        <div class="creg-info">
+          <div class="creg-name">${esc(r.name)}</div>
+          <div class="creg-meta">${meta?esc(meta)+'<br>':''}<span style="opacity:.6">${dateStr}</span></div>
+        </div>
+        <button class="creg-del" onclick="deleteProjReg('${r.id}',this)">✕</button>
+      </div>`;
+    }).join('');
+  }catch(e){list.innerHTML='<div class="empty" style="padding:16px 0">Ошибка загрузки</div>';}
+}
+
+async function deleteProjReg(id, btn){
+  if(!confirm('Удалить заявку?'))return;
+  btn.disabled=true;
+  try{await api('/api/project-register/'+id,'DELETE');loadProjRegistrants();}
+  catch(e){toast('Ошибка: '+e.message,'e');btn.disabled=false;}
+}
+
 function switchAcrossTab(tab, btn){
-  document.querySelectorAll('.across-tab').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.across-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('#p-across .across-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#p-across .across-section').forEach(s=>s.classList.remove('active'));
   btn.classList.add('active');
-  if(tab==='leaderboard'){
-    document.getElementById('acrossLeaderboardSection').classList.add('active');
-    loadAdminLeaderboard('week', document.querySelector('#acrossLeaderboardSection .lb-btn.active'));
-  } else if(tab==='registrants'){
-    document.getElementById('acrossRegistrantsSection').classList.add('active');
+  if(tab==='cross'){
+    document.getElementById('acrossCrossSection').classList.add('active');
     loadCrossRegistrants();
-  } else if(tab==='students'){
-    document.getElementById('acrossStudentsSection').classList.add('active');
-    loadAcrossStudents();
+  } else if(tab==='project'){
+    document.getElementById('acrossProjectSection').classList.add('active');
+    loadProjRegistrants();
   }
 }
 
@@ -4094,12 +4247,10 @@ function loadUserCross() {
 
 function loadAdminCross() {
   const activeSec = document.querySelector('#p-across .across-section.active');
-  if (!activeSec || activeSec.id === 'acrossLeaderboardSection') {
-    loadAdminLeaderboard('week', document.querySelector('#acrossLeaderboardSection .lb-btn.active'));
-  } else if (activeSec.id === 'acrossRegistrantsSection') {
+  if (!activeSec || activeSec.id === 'acrossCrossSection') {
     loadCrossRegistrants();
-  } else if (activeSec.id === 'acrossStudentsSection') {
-    loadAcrossStudents();
+  } else if (activeSec.id === 'acrossProjectSection') {
+    loadProjRegistrants();
   }
 }
 

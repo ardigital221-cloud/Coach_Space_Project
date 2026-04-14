@@ -1237,6 +1237,59 @@ app.post('/api/notifications/test', requireAdmin, async (req, res) => {
 // КРОСС — РЕГИСТРАЦИЯ НА ЗАБЕГ (публичная)
 // ═══════════════════════════════════════════
 
+// ═══════════════════════════════════════════
+// ЗАПИСИ НА ПРОЕКТ (зал)
+// ═══════════════════════════════════════════
+const _projRegIp = new Map();
+
+app.post('/api/project-register', async (req, res) => {
+  try {
+    const { name, phone, telegram, website } = req.body;
+    if (website && website.trim()) return res.status(400).json({ error: 'Ошибка регистрации' });
+    if (!name || !name.trim()) return res.status(400).json({ error: 'Имя обязательно' });
+    if (!phone || !phone.trim()) return res.status(400).json({ error: 'Телефон обязателен' });
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 7) return res.status(400).json({ error: 'Введите корректный номер телефона' });
+
+    const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress || 'unknown';
+    const today = new Date().toISOString().slice(0, 10);
+    const ipKey = `${ip}:${today}`;
+    const ipCount = _projRegIp.get(ipKey) || 0;
+    if (ipCount >= 2) return res.status(429).json({ error: 'С вашего IP уже подано 2 заявки сегодня' });
+
+    const phoneDup = await db.collection('projectRegistrants').where('phone', '==', digits).limit(1).get();
+    if (!phoneDup.empty) return res.status(400).json({ error: 'Этот номер телефона уже зарегистрирован' });
+
+    const ref = await db.collection('projectRegistrants').add({
+      name: name.trim(),
+      phone: digits,
+      telegram: (telegram || '').trim(),
+      registeredAt: new Date().toISOString()
+    });
+
+    _projRegIp.set(ipKey, ipCount + 1);
+    await tgSend(COACH_TG, `💪 <b>Новая заявка в проект!</b>\n👤 ${name.trim()}${phone ? '\n📞 ' + phone : ''}${telegram ? '\n✈️ ' + telegram : ''}`);
+    res.json({ id: ref.id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/project-register', requireAdmin, async (_req, res) => {
+  try {
+    const snap = await db.collection('projectRegistrants').get();
+    const list = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (b.registeredAt || '').localeCompare(a.registeredAt || ''));
+    res.json(list);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/project-register/:id', requireAdmin, async (req, res) => {
+  try {
+    await db.collection('projectRegistrants').doc(req.params.id).delete();
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // Записаться на забег (без авторизации)
 app.post('/api/cross-register', async (req, res) => {
   try {
