@@ -762,6 +762,26 @@
     .land-slide-dots{display:flex;gap:7px;justify-content:center;margin-bottom:24px;margin-top:10px;}
     .land-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.22);cursor:pointer;transition:all .25s;}
     .land-dot.active{background:var(--ac);transform:scale(1.3);}
+    /* ── ВИЗИТКА: карточка события кросса ── */
+    .cross-event-card{display:none;width:100%;max-width:480px;margin-bottom:24px;position:relative;border-radius:22px;overflow:hidden;background:linear-gradient(135deg,rgba(56,189,248,.1),rgba(99,102,241,.08));border:1px solid rgba(56,189,248,.35);box-shadow:0 0 32px rgba(56,189,248,.12),0 8px 32px rgba(0,0,0,.3);}
+    .cross-event-card.visible{display:block;animation:fadeUp .4s ease;}
+    .cross-event-card::before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;background:radial-gradient(circle,rgba(56,189,248,.18),transparent 65%);pointer-events:none;}
+    .ce-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--blu);background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.25);border-radius:20px;padding:4px 12px;margin-bottom:16px;}
+    .ce-badge::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--blu);box-shadow:0 0 8px var(--blu);animation:pulse 2s ease infinite;}
+    .ce-body{padding:20px 20px 0;}
+    .ce-title{font-family:'Unbounded',sans-serif;font-size:16px;font-weight:700;color:var(--tx);margin-bottom:18px;line-height:1.3;}
+    .ce-rows{display:flex;flex-direction:column;gap:12px;margin-bottom:20px;}
+    .ce-row{display:flex;align-items:center;gap:13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:13px 15px;}
+    .ce-row-icon{font-size:20px;flex-shrink:0;}
+    .ce-row-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--mu2);margin-bottom:3px;}
+    .ce-row-val{font-size:15px;font-weight:700;color:var(--tx);}
+    .ce-foot{padding:0 20px 20px;}
+    /* ── ADMIN: редактор события кросса ── */
+    .ce-editor{background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.2);border-radius:16px;padding:16px;margin-bottom:16px;}
+    .ce-editor-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--blu);margin-bottom:12px;}
+    .ce-editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+    .ce-editor-full{margin-bottom:10px;}
+    .ce-editor-btns{display:flex;gap:8px;}
     /* ── ВИЗИТКА: услуги ── */
     .land-services{width:100%;max-width:480px;margin-bottom:28px;}
     .land-block-title{font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;color:var(--tx);margin-bottom:14px;text-align:center;letter-spacing:.5px;}
@@ -817,6 +837,33 @@
       <div class="land-dot" onclick="landSlideTo(2)"></div>
       <div class="land-dot" onclick="landSlideTo(3)"></div>
       <div class="land-dot" onclick="landSlideTo(4)"></div>
+    </div>
+
+    <!-- Карточка ближайшего кросса -->
+    <div class="cross-event-card" id="crossEventCard">
+      <div class="ce-body">
+        <div class="ce-badge">Ближайший старт</div>
+        <div class="ce-title">🏃 Городской кросс<br>Coach Space</div>
+        <div class="ce-rows">
+          <div class="ce-row">
+            <div class="ce-row-icon">🗓</div>
+            <div>
+              <div class="ce-row-label">Дата и время</div>
+              <div class="ce-row-val" id="ceDateTime">—</div>
+            </div>
+          </div>
+          <div class="ce-row">
+            <div class="ce-row-icon">📍</div>
+            <div>
+              <div class="ce-row-label">Место встречи</div>
+              <div class="ce-row-val" id="ceLocation">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ce-foot">
+        <button class="land-cta" style="margin-bottom:0" onclick="openMo('mCrossReg')">Записаться на кросс</button>
+      </div>
     </div>
 
     <!-- CTA -->
@@ -1455,6 +1502,36 @@
       </div>
 
       <div class="across-section active" id="acrossCrossSection">
+
+        <!-- Редактор события -->
+        <div class="card ce-editor-wrap">
+          <div class="ce-editor">
+            <div class="ce-editor-title">🗓 Параметры ближайшего кросса</div>
+            <div class="ce-editor-grid">
+              <div class="fg" style="margin-bottom:0">
+                <label class="fl">Дата</label>
+                <input class="fi" type="date" id="ceEditDate">
+              </div>
+              <div class="fg" style="margin-bottom:0">
+                <label class="fl">Время</label>
+                <input class="fi" type="time" id="ceEditTime">
+              </div>
+            </div>
+            <div class="ce-editor-full">
+              <div class="fg" style="margin-bottom:0">
+                <label class="fl">Место встречи</label>
+                <input class="fi" id="ceEditLocation" placeholder="Парк Горького, главный вход">
+              </div>
+            </div>
+            <div class="ce-editor-btns">
+              <button class="btn btn-p" style="flex:1" onclick="saveCrossEvent()">💾 Сохранить и опубликовать</button>
+              <button class="btn btn-d sm" id="ceClearBtn" onclick="clearCrossEvent()" style="display:none">✕ Убрать</button>
+            </div>
+            <div id="ceStatus" style="font-size:12px;color:var(--mu2);margin-top:8px;text-align:center"></div>
+          </div>
+        </div>
+
+        <!-- Список заявок -->
         <div class="card">
           <div class="sh">
             <div class="st">📋 Заявки на кросс</div>
@@ -2086,7 +2163,7 @@ function showTab(id,btn){
   if(id==='anut')  loadAdminNutrition();
   if(id==='unut')  loadUserNutrition();
   if(id==='ucross') loadUserCross();
-  if(id==='across') loadAdminCross();
+  if(id==='across') { loadAdminCross(); loadCrossEventAdmin(); }
 }
 
 const galleryState = {};
@@ -3481,6 +3558,7 @@ function exportExcel(){toast('⏳ Подготовка файла...','w');const
     if(ok){ startApp(); }
     else {
       document.getElementById('landingPage').classList.add('show');
+      loadCrossEvent();
     }
   },800);
 })();
@@ -3493,6 +3571,74 @@ function showLogin(){
 function showLanding(){
   document.getElementById('loginPage').classList.remove('show');
   document.getElementById('landingPage').classList.add('show');
+  loadCrossEvent();
+}
+
+// ── Карточка события кросса на лендинге ──
+async function loadCrossEvent() {
+  try {
+    const r = await fetch('/api/cross-event');
+    const ev = await r.json();
+    const card = document.getElementById('crossEventCard');
+    if (!card) return;
+    if (!ev.date && !ev.location) { card.classList.remove('visible'); return; }
+    // Форматируем дату
+    let dtStr = '';
+    if (ev.date) {
+      const d = new Date(ev.date + 'T00:00:00');
+      dtStr = d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+      if (ev.time) dtStr += ' · ' + ev.time;
+    } else if (ev.time) {
+      dtStr = ev.time;
+    }
+    document.getElementById('ceDateTime').textContent = dtStr || '—';
+    document.getElementById('ceLocation').textContent = ev.location || '—';
+    card.classList.add('visible');
+  } catch (e) { console.warn('cross-event load:', e.message); }
+}
+
+// ── Сохранение события (тренер) ──
+async function saveCrossEvent() {
+  const date = document.getElementById('ceEditDate')?.value || '';
+  const time = document.getElementById('ceEditTime')?.value || '';
+  const location = document.getElementById('ceEditLocation')?.value || '';
+  if (!date && !location) { toast('Укажите хотя бы дату или место','e'); return; }
+  const status = document.getElementById('ceStatus');
+  if (status) status.textContent = 'Сохранение...';
+  try {
+    await api('/api/cross-event', 'POST', { date, time, location });
+    toast('✅ Событие опубликовано', 's');
+    if (status) status.textContent = '✅ Опубликовано на визитке';
+    const clearBtn = document.getElementById('ceClearBtn');
+    if (clearBtn) clearBtn.style.display = '';
+  } catch (e) { toast('Ошибка: ' + e.message, 'e'); if (status) status.textContent = ''; }
+}
+
+async function clearCrossEvent() {
+  if (!confirm('Убрать событие с визитки?')) return;
+  try {
+    await api('/api/cross-event', 'DELETE');
+    toast('Событие убрано', 'w');
+    ['ceEditDate','ceEditTime','ceEditLocation'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    const status = document.getElementById('ceStatus');
+    if (status) status.textContent = '';
+    const clearBtn = document.getElementById('ceClearBtn');
+    if (clearBtn) clearBtn.style.display = 'none';
+  } catch (e) { toast('Ошибка: ' + e.message, 'e'); }
+}
+
+async function loadCrossEventAdmin() {
+  try {
+    const ev = await api('/api/cross-event');
+    if (ev.date) { const el = document.getElementById('ceEditDate'); if (el) el.value = ev.date; }
+    if (ev.time) { const el = document.getElementById('ceEditTime'); if (el) el.value = ev.time; }
+    if (ev.location) { const el = document.getElementById('ceEditLocation'); if (el) el.value = ev.location; }
+    const hasEvent = ev.date || ev.location;
+    const status = document.getElementById('ceStatus');
+    if (status) status.textContent = hasEvent ? '✅ Сейчас опубликовано на визитке' : '';
+    const clearBtn = document.getElementById('ceClearBtn');
+    if (clearBtn) clearBtn.style.display = hasEvent ? '' : 'none';
+  } catch (e) { console.warn(e); }
 }
 
 // ── Слайдшоу визитки ──

@@ -1238,6 +1238,36 @@ app.post('/api/notifications/test', requireAdmin, async (req, res) => {
 // ═══════════════════════════════════════════
 
 // ═══════════════════════════════════════════
+// СОБЫТИЕ КРОССА (дата, время, место)
+// ═══════════════════════════════════════════
+app.get('/api/cross-event', async (_req, res) => {
+  try {
+    const doc = await db.collection('config').doc('crossEvent').get();
+    res.json(doc.exists ? doc.data() : {});
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/cross-event', requireAdmin, async (req, res) => {
+  try {
+    const { date, time, location } = req.body;
+    await db.collection('config').doc('crossEvent').set({
+      date: date || '',
+      time: time || '',
+      location: (location || '').trim(),
+      updatedAt: new Date().toISOString()
+    });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/cross-event', requireAdmin, async (_req, res) => {
+  try {
+    await db.collection('config').doc('crossEvent').delete();
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ═══════════════════════════════════════════
 // ЗАПИСИ НА ПРОЕКТ (зал)
 // ═══════════════════════════════════════════
 const _projRegIp = new Map();
