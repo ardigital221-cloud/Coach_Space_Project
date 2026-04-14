@@ -1022,6 +1022,7 @@
         </div>
       </div>
       <div class="sh"><div class="st">👥 Ученики</div><div style="display:flex;gap:6px"><button class="btn btn-g sm" onclick="openTemplates()">📄 Шаблоны</button><button class="btn btn-p sm" onclick="openMo('mAddU')">+ Добавить</button></div></div>
+      <input class="fi" id="studentSearch" placeholder="🔍 Поиск по имени..." oninput="renderStudentCards()" style="margin-bottom:10px">
       <div id="aStudents"></div>
       <div class="div"></div>
       <div class="sh"><div class="st">📢 Новости</div><button class="btn btn-g sm" onclick="openMo('mPost')">+ Пост</button></div>
@@ -2099,37 +2100,46 @@ async function loadAdminStudents(){
   try{
     if(!allStudents.length){const s=await api('/api/users');allStudents=s;}
     if(!allStudents.length){box.innerHTML=`<div class="empty"><div class="ei">👥</div>Нет учеников</div>`;return;}
-    const today=new Date().toISOString().split('T')[0];
-    box.innerHTML=[...allStudents].sort((a,b)=>a.sessions-b.sessions).map(u=>{
-      let pillCls='pill-green',sessIcon='✅';
-      if(u.sessions<=0){pillCls='pill-red';sessIcon='❌';}
-      else if(u.sessions<=2){pillCls='pill-yel';sessIcon='⚠️';}
-      const pd=u.paymentDate?new Date(u.paymentDate).toLocaleDateString('ru-RU'):'—';
-      const ptCls=u.paymentDate===today?'pill-yel':'pill-gray';
-      const hasPlan=u.trainingPlan?true:false;
-      return `<div class="student-card">
-        <div class="sc-top">
-          <div class="sc-ava">${u.name.charAt(0).toUpperCase()}</div>
-          <div><div class="sc-name">${esc(u.name)}</div><div class="sc-login">🔑 ${esc(u.login)}</div></div>
-        </div>
-        <div class="sc-pills">
-          <span class="pill ${pillCls}">${sessIcon} ${u.sessions} занятий</span>
-          <span class="pill ${ptCls}">💳 Оплата: ${pd}${u.paymentDate===today?' ⚠️':''}</span>
-          ${u.telegramId?`<span class="pill pill-gray">✈️ TG</span>`:''}
-          ${hasPlan?`<span class="pill pill-green">📋 План готов</span>`:''}
-        </div>
-        <div class="sc-btns">
-          <button class="mark-btn" data-id="${u.id}" data-name="${esc(u.name)}" onclick="markAtt(this.dataset.id,this.dataset.name)">✓ Отметить тренировку</button>
-          <button class="btn btn-g sm" data-id="${u.id}" data-name="${esc(u.name)}" onclick="openUploadPlan(this.dataset.id,this.dataset.name)">📋 Редактировать план</button>
-          <button class="btn btn-g sm" data-id="${u.id}" onclick="openCopyPlanModal(this.dataset.id,'student')">📋 Скопировать план</button>
-          <button class="btn btn-g sm" data-id="${u.id}" data-name="${esc(u.name)}" onclick="openNotes(this.dataset.id,this.dataset.name)">💬 Заметки</button>
-          <button class="btn btn-w sm" data-id="${u.id}" data-name="${esc(u.name)}" onclick="resetWeight(this.dataset.id,this.dataset.name)">⚖️ Сбросить вес</button>
-          <button class="btn btn-g sm" data-id="${u.id}" onclick="openEditUser(this.dataset.id)">✏️ Изменить</button>
-          <button class="btn btn-d sm" data-id="${u.id}" onclick="delUser(this.dataset.id)">🗑</button>
-        </div>
-      </div>`;
-    }).join('');
+    renderStudentCards();
   }catch(e){box.innerHTML=`<div class="empty">${e.message}</div>`;}
+}
+
+function renderStudentCards(){
+  const box=document.getElementById('aStudents');
+  if(!box||!allStudents.length)return;
+  const q=(document.getElementById('studentSearch')?.value||'').trim().toLowerCase();
+  const list=q?allStudents.filter(u=>u.name.toLowerCase().includes(q)):allStudents;
+  if(!list.length){box.innerHTML=`<div class="empty" style="padding:20px 0">😔 Никого не найдено</div>`;return;}
+  const today=new Date().toISOString().split('T')[0];
+  box.innerHTML=[...list].sort((a,b)=>a.sessions-b.sessions).map(u=>{
+    let pillCls='pill-green',sessIcon='✅';
+    if(u.sessions<=0){pillCls='pill-red';sessIcon='❌';}
+    else if(u.sessions<=2){pillCls='pill-yel';sessIcon='⚠️';}
+    const pd=u.paymentDate?new Date(u.paymentDate).toLocaleDateString('ru-RU'):'—';
+    const ptCls=u.paymentDate===today?'pill-yel':'pill-gray';
+    const hasPlan=u.trainingPlan?true:false;
+    return `<div class="student-card">
+      <div class="sc-top">
+        <div class="sc-ava">${u.name.charAt(0).toUpperCase()}</div>
+        <div><div class="sc-name">${esc(u.name)}</div><div class="sc-login">🔑 ${esc(u.login)}</div></div>
+      </div>
+      <div class="sc-pills">
+        <span class="pill ${pillCls}">${sessIcon} ${u.sessions} занятий</span>
+        <span class="pill ${ptCls}">💳 Оплата: ${pd}${u.paymentDate===today?' ⚠️':''}</span>
+        ${u.telegramId?`<span class="pill pill-gray">✈️ TG</span>`:''}
+        ${hasPlan?`<span class="pill pill-green">📋 План готов</span>`:''}
+      </div>
+      <div class="sc-btns">
+        <button class="mark-btn" data-id="${u.id}" data-name="${esc(u.name)}" onclick="markAtt(this.dataset.id,this.dataset.name)">✓ Отметить тренировку</button>
+        <button class="btn btn-g sm" data-id="${u.id}" data-name="${esc(u.name)}" onclick="openUploadPlan(this.dataset.id,this.dataset.name)">📋 Редактировать план</button>
+        <button class="btn btn-g sm" data-id="${u.id}" onclick="openCopyPlanModal(this.dataset.id,'student')">📋 Скопировать план</button>
+        <button class="btn btn-g sm" data-id="${u.id}" data-name="${esc(u.name)}" onclick="openNotes(this.dataset.id,this.dataset.name)">💬 Заметки</button>
+        <button class="btn btn-w sm" data-id="${u.id}" data-name="${esc(u.name)}" onclick="resetWeight(this.dataset.id,this.dataset.name)">⚖️ Сбросить вес</button>
+        <button class="btn btn-g sm" data-id="${u.id}" onclick="openEditUser(this.dataset.id)">✏️ Изменить</button>
+        <button class="btn btn-d sm" data-id="${u.id}" onclick="delUser(this.dataset.id)">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 async function markAtt(id,name){if(!confirm(`Отметить тренировку ${name}? (-1 занятие)`))return;try{const r=await api(`/api/users/${id}/attendance`,'POST');toast(`✅ ${name}: осталось ${r.sessions} занятий`,'s');allStudents=[];loadAdminHome();}catch(e){toast(e.message,'e');}}
@@ -2941,13 +2951,15 @@ async function loadAdminNutrition(){
       const students=await authFetch('/api/users').then(r=>r.json());
       _nutStudents=students;
       if(!students.length){box.innerHTML='<div class="empty"><div class="ei">👥</div>Нет учеников</div>';return;}
-      box.innerHTML=`<div class="card"><div class="ct">Выберите ученика для просмотра питания</div><div class="nut-student-list">
-        ${students.map(s=>`<div class="nut-student-row" data-sid="${s.id}" onclick="anutSelectStudent(this.dataset.sid)">
-          <div class="sc-ava">${(s.name||'?')[0].toUpperCase()}</div>
-          <div><div style="font-weight:700;font-size:14px">${esc(s.name)}</div><div style="font-size:12px;color:var(--mu2)">@${esc(s.login)}</div></div>
-          <div style="margin-left:auto;color:var(--ac);font-size:20px;font-weight:300">›</div>
-        </div>`).join('')}
-      </div></div>`;
+      box.innerHTML=`<div class="card"><div class="ct">Выберите ученика для просмотра питания</div>
+        <input class="fi" id="nutStudentSearch" placeholder="🔍 Поиск по имени..." oninput="filterNutStudents()" style="margin-bottom:10px">
+        <div class="nut-student-list" id="nutStudentList">
+          ${students.map(s=>`<div class="nut-student-row" data-sid="${s.id}" data-name="${esc(s.name).toLowerCase()}" onclick="anutSelectStudent(this.dataset.sid)">
+            <div class="sc-ava">${(s.name||'?')[0].toUpperCase()}</div>
+            <div><div style="font-weight:700;font-size:14px">${esc(s.name)}</div><div style="font-size:12px;color:var(--mu2)">@${esc(s.login)}</div></div>
+            <div style="margin-left:auto;color:var(--ac);font-size:20px;font-weight:300">›</div>
+          </div>`).join('')}
+        </div></div>`;
     }catch(e){box.innerHTML=`<div class="empty">${esc(e.message)}</div>`;}
     return;
   }
@@ -2986,6 +2998,13 @@ async function loadAdminNutrition(){
       <div class="sh"><div class="st" style="font-size:13px">📋 Дневник питания</div></div>
       ${rows}`;
   }catch(e){box.innerHTML=`<div class="empty"><button class="nut-back-btn" onclick="_anutStudentId=null;loadAdminNutrition()">← Назад</button><div class="ei">⚠️</div>${esc(e.message)}</div>`;}
+}
+
+function filterNutStudents(){
+  const q=(document.getElementById('nutStudentSearch')?.value||'').trim().toLowerCase();
+  document.querySelectorAll('#nutStudentList .nut-student-row').forEach(row=>{
+    row.style.display=(!q||row.dataset.name.includes(q))?'':'none';
+  });
 }
 
 function anutSelectStudent(sid){
