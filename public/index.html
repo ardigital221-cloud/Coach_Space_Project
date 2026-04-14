@@ -752,16 +752,6 @@
     .rules50-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;line-height:1.5;}
     .rules50-item:last-child{border-bottom:none;}
     .rules50-n{flex-shrink:0;width:24px;height:24px;background:rgba(139,92,246,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--ac);margin-top:1px;}
-    /* ── ВИЗИТКА: слайдшоу ── */
-    .land-slideshow{width:100%;max-width:480px;position:relative;margin-bottom:10px;border-radius:20px;overflow:hidden;height:260px;background:rgba(255,255,255,.04);}
-    .land-slides{display:flex;width:100%;height:100%;transition:transform .45s cubic-bezier(.4,0,.2,1);}
-    .land-slide{flex:0 0 100%;width:100%;height:100%;object-fit:cover;display:block;}
-    .land-slide-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);backdrop-filter:blur(4px);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;transition:background .2s;line-height:1;}
-    .land-slide-btn:hover{background:rgba(0,0,0,.7);}
-    .land-slide-prev{left:10px;}.land-slide-next{right:10px;}
-    .land-slide-dots{display:flex;gap:7px;justify-content:center;margin-bottom:24px;margin-top:10px;}
-    .land-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.22);cursor:pointer;transition:all .25s;}
-    .land-dot.active{background:var(--ac);transform:scale(1.3);}
     /* ── ВИЗИТКА: карточка события кросса ── */
     .cross-event-card{display:none;width:100%;max-width:480px;margin-bottom:24px;position:relative;border-radius:22px;overflow:hidden;background:linear-gradient(135deg,rgba(56,189,248,.1),rgba(99,102,241,.08));border:1px solid rgba(56,189,248,.35);box-shadow:0 0 32px rgba(56,189,248,.12),0 8px 32px rgba(0,0,0,.3);}
     .cross-event-card.visible{display:block;animation:fadeUp .4s ease;}
@@ -817,26 +807,6 @@
       <div class="land-tag">Спортивное комьюнити</div>
       <div class="land-title">Coach Space</div>
       <div class="land-sub">Тренируйся. Развивайся.<br>Будь частью команды.</div>
-    </div>
-
-    <!-- Слайдшоу -->
-    <div class="land-slideshow">
-      <div class="land-slides" id="landSlides">
-        <img class="land-slide" src="/api/img/community/photo1.jpg" alt="Coach Space" loading="eager" onerror="this.style.background='rgba(255,255,255,.05)'">
-        <img class="land-slide" src="/api/img/community/photo2.jpg" alt="Coach Space" loading="lazy" onerror="this.style.background='rgba(255,255,255,.05)'">
-        <img class="land-slide" src="/api/img/community/photo3.jpg" alt="Coach Space" loading="lazy" onerror="this.style.background='rgba(255,255,255,.05)'">
-        <img class="land-slide" src="/api/img/community/photo4.jpg" alt="Coach Space" loading="lazy" onerror="this.style.background='rgba(255,255,255,.05)'">
-        <img class="land-slide" src="/api/img/community/photo5.jpg" alt="Coach Space" loading="lazy" onerror="this.style.background='rgba(255,255,255,.05)'">
-      </div>
-      <button class="land-slide-btn land-slide-prev" onclick="landSlideMove(-1)">‹</button>
-      <button class="land-slide-btn land-slide-next" onclick="landSlideMove(1)">›</button>
-    </div>
-    <div class="land-slide-dots" id="landDots">
-      <div class="land-dot active" onclick="landSlideTo(0)"></div>
-      <div class="land-dot" onclick="landSlideTo(1)"></div>
-      <div class="land-dot" onclick="landSlideTo(2)"></div>
-      <div class="land-dot" onclick="landSlideTo(3)"></div>
-      <div class="land-dot" onclick="landSlideTo(4)"></div>
     </div>
 
     <!-- Карточка ближайшего кросса -->
@@ -3643,45 +3613,6 @@ async function loadCrossEventAdmin() {
   } catch (e) { console.warn(e); }
 }
 
-// ── Слайдшоу визитки ──
-let _slideIdx = 0;
-let _slideTimer = null;
-const SLIDE_COUNT = 5;
-
-function landSlideTo(idx) {
-  _slideIdx = (idx + SLIDE_COUNT) % SLIDE_COUNT;
-  const slides = document.getElementById('landSlides');
-  if (slides) {
-    const w = slides.parentElement.offsetWidth;
-    slides.style.transform = `translateX(-${_slideIdx * w}px)`;
-  }
-  document.querySelectorAll('.land-dot').forEach((d, i) => {
-    d.classList.toggle('active', i === _slideIdx);
-  });
-}
-
-function landSlideMove(dir) {
-  landSlideTo(_slideIdx + dir);
-  landSlideRestart();
-}
-
-function landSlideRestart() {
-  clearInterval(_slideTimer);
-  _slideTimer = setInterval(() => landSlideTo(_slideIdx + 1), 4000);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  landSlideRestart();
-  // свайп на мобиле
-  const el = document.getElementById('landSlides');
-  if (!el) return;
-  let startX = 0;
-  el.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive:true});
-  el.addEventListener('touchend', e => {
-    const dx = e.changedTouches[0].clientX - startX;
-    if (Math.abs(dx) > 40) { landSlideMove(dx < 0 ? 1 : -1); }
-  }, {passive:true});
-});
 
 let _cregCooldown=0;
 async function submitCrossReg(){
