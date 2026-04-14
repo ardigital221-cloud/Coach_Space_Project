@@ -1105,6 +1105,18 @@
           </div>
         </div>
       </div>
+      <!-- Ближайший кросс -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="st" style="margin-bottom:12px">🏃 Ближайший кросс</div>
+        <div class="fg"><label class="fl">Дата и время</label><input class="fi" id="ceEditDate" placeholder="20 апреля, 10:00"></div>
+        <div class="fg"><label class="fl">Место</label><input class="fi" id="ceEditLocation" placeholder="Парк Горького, главный вход"></div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="btn btn-p" style="flex:1" onclick="saveCrossEvent()">Опубликовать на визитке</button>
+          <button class="btn btn-d sm" id="ceClearBtn" onclick="clearCrossEvent()" style="display:none">Убрать</button>
+        </div>
+        <div id="ceStatus" style="font-size:12px;color:var(--mu2);margin-top:8px;text-align:center"></div>
+      </div>
+
       <div class="sh"><div class="st">👥 Ученики</div><div style="display:flex;gap:6px"><button class="btn btn-g sm" onclick="openTemplates()">📄 Шаблоны</button><button class="btn btn-p sm" onclick="openMo('mAddU')">+ Добавить</button></div></div>
       <input class="fi" id="studentSearch" placeholder="🔍 Поиск по имени..." oninput="renderStudentCards()" style="margin-bottom:10px">
       <div id="aStudents"></div>
@@ -1472,34 +1484,6 @@
       </div>
 
       <div class="across-section active" id="acrossCrossSection">
-
-        <!-- Редактор события -->
-        <div class="card ce-editor-wrap">
-          <div class="ce-editor">
-            <div class="ce-editor-title">🗓 Параметры ближайшего кросса</div>
-            <div class="ce-editor-grid">
-              <div class="fg" style="margin-bottom:0">
-                <label class="fl">Дата</label>
-                <input class="fi" type="date" id="ceEditDate">
-              </div>
-              <div class="fg" style="margin-bottom:0">
-                <label class="fl">Время</label>
-                <input class="fi" type="time" id="ceEditTime">
-              </div>
-            </div>
-            <div class="ce-editor-full">
-              <div class="fg" style="margin-bottom:0">
-                <label class="fl">Место встречи</label>
-                <input class="fi" id="ceEditLocation" placeholder="Парк Горького, главный вход">
-              </div>
-            </div>
-            <div class="ce-editor-btns">
-              <button class="btn btn-p" style="flex:1" onclick="saveCrossEvent()">💾 Сохранить и опубликовать</button>
-              <button class="btn btn-d sm" id="ceClearBtn" onclick="clearCrossEvent()" style="display:none">✕ Убрать</button>
-            </div>
-            <div id="ceStatus" style="font-size:12px;color:var(--mu2);margin-top:8px;text-align:center"></div>
-          </div>
-        </div>
 
         <!-- Список заявок -->
         <div class="card">
@@ -2122,7 +2106,7 @@ function showTab(id,btn){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('p-'+id).classList.add('active');
-  if(id==='ah')    { loadAdminHome(); loadCalendar(); loadAdminWorkouts(); }
+  if(id==='ah')    { loadAdminHome(); loadCalendar(); loadAdminWorkouts(); loadCrossEventAdmin(); }
   if(id==='aprog') loadProgPanel();
   if(id==='ashop') loadAdminShop();
   if(id==='uh')    loadUserHome();
@@ -3551,67 +3535,55 @@ async function loadCrossEvent() {
   if (!card) return;
   try {
     const r = await fetch('/api/cross-event');
-    const text = await r.text();
-    let ev;
-    try { ev = JSON.parse(text); } catch(_) { card.style.display='none'; return; }
-    if (!ev || (!ev.date && !ev.time && !ev.location)) { card.style.display='none'; return; }
-    let dtStr = '';
-    if (ev.date) {
-      const d = new Date(ev.date + 'T00:00:00');
-      dtStr = d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
-      if (ev.time) dtStr += ' · ' + ev.time;
-    } else if (ev.time) {
-      dtStr = ev.time;
-    }
-    document.getElementById('ceDateTime').textContent = dtStr || '—';
+    const ev = await r.json();
+    if (!ev || (!ev.datetime && !ev.location)) { card.style.display='none'; return; }
+    document.getElementById('ceDateTime').textContent = ev.datetime || '—';
     document.getElementById('ceLocation').textContent = ev.location || '—';
     card.style.display = 'block';
-  } catch (e) { card.style.display='none'; }
+  } catch(e) { card.style.display='none'; }
 }
 
-// ── Сохранение события (тренер) ──
 async function saveCrossEvent() {
-  const date = document.getElementById('ceEditDate')?.value || '';
-  const time = document.getElementById('ceEditTime')?.value || '';
-  const location = document.getElementById('ceEditLocation')?.value || '';
-  if (!date && !location) { toast('Укажите хотя бы дату или место','e'); return; }
+  const datetime = (document.getElementById('ceEditDate')?.value || '').trim();
+  const location = (document.getElementById('ceEditLocation')?.value || '').trim();
+  if (!datetime && !location) { toast('Заполните хотя бы одно поле','e'); return; }
   const status = document.getElementById('ceStatus');
   if (status) status.textContent = 'Сохранение...';
   try {
-    await api('/api/cross-event', 'POST', { date, time, location });
-    toast('✅ Событие опубликовано', 's');
-    if (status) status.textContent = '✅ Опубликовано на визитке';
+    await api('/api/cross-event', 'POST', { datetime, location });
+    if (status) status.textContent = '✅ Опубликовано';
+    document.getElementById('ceClearBtn').style.display = '';
     loadCrossEvent();
-    const clearBtn = document.getElementById('ceClearBtn');
-    if (clearBtn) clearBtn.style.display = '';
-  } catch (e) { toast('Ошибка: ' + e.message, 'e'); if (status) status.textContent = ''; }
+    toast('✅ Опубликовано на визитке', 's');
+  } catch(e) { toast('Ошибка: ' + e.message, 'e'); if (status) status.textContent = ''; }
 }
 
 async function clearCrossEvent() {
-  if (!confirm('Убрать событие с визитки?')) return;
+  if (!confirm('Убрать с визитки?')) return;
   try {
     await api('/api/cross-event', 'DELETE');
-    toast('Событие убрано', 'w');
-    ['ceEditDate','ceEditTime','ceEditLocation'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-    const status = document.getElementById('ceStatus');
-    if (status) status.textContent = '';
-    const clearBtn = document.getElementById('ceClearBtn');
-    if (clearBtn) clearBtn.style.display = 'none';
-  } catch (e) { toast('Ошибка: ' + e.message, 'e'); }
+    document.getElementById('ceEditDate').value = '';
+    document.getElementById('ceEditLocation').value = '';
+    document.getElementById('ceStatus').textContent = '';
+    document.getElementById('ceClearBtn').style.display = 'none';
+    document.getElementById('crossEventCard').style.display = 'none';
+    toast('Убрано', 'w');
+  } catch(e) { toast('Ошибка: ' + e.message, 'e'); }
 }
 
 async function loadCrossEventAdmin() {
   try {
     const ev = await api('/api/cross-event');
-    if (ev.date) { const el = document.getElementById('ceEditDate'); if (el) el.value = ev.date; }
-    if (ev.time) { const el = document.getElementById('ceEditTime'); if (el) el.value = ev.time; }
-    if (ev.location) { const el = document.getElementById('ceEditLocation'); if (el) el.value = ev.location; }
-    const hasEvent = ev.date || ev.location;
+    const dtEl = document.getElementById('ceEditDate');
+    const locEl = document.getElementById('ceEditLocation');
+    if (dtEl && ev.datetime) dtEl.value = ev.datetime;
+    if (locEl && ev.location) locEl.value = ev.location;
+    const hasEvent = ev.datetime || ev.location;
     const status = document.getElementById('ceStatus');
-    if (status) status.textContent = hasEvent ? '✅ Сейчас опубликовано на визитке' : '';
+    if (status) status.textContent = hasEvent ? '✅ Сейчас опубликовано' : '';
     const clearBtn = document.getElementById('ceClearBtn');
     if (clearBtn) clearBtn.style.display = hasEvent ? '' : 'none';
-  } catch (e) { console.warn(e); }
+  } catch(e) {}
 }
 
 

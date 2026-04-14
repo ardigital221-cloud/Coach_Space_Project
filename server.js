@@ -1239,10 +1239,9 @@ app.get('/api/cross-event', async (_req, res) => {
 
 app.post('/api/cross-event', requireAdmin, async (req, res) => {
   try {
-    const { date, time, location } = req.body;
+    const { datetime, location } = req.body;
     await db.collection('config').doc('crossEvent').set({
-      date: date || '',
-      time: time || '',
+      datetime: (datetime || '').trim(),
       location: (location || '').trim(),
       updatedAt: new Date().toISOString()
     });
