@@ -3530,17 +3530,14 @@ function showLanding(){
 }
 
 // ── Карточка события кросса на лендинге ──
-async function loadCrossEvent() {
+function loadCrossEvent() {
   const card = document.getElementById('crossEventCard');
   if (!card) return;
-  try {
-    const r = await fetch('/api/cross-event');
-    const ev = await r.json();
-    if (!ev || (!ev.datetime && !ev.location)) { card.style.display='none'; return; }
-    document.getElementById('ceDateTime').textContent = ev.datetime || '—';
-    document.getElementById('ceLocation').textContent = ev.location || '—';
-    card.style.display = 'block';
-  } catch(e) { card.style.display='none'; }
+  const ev = window._CE || {};
+  if (!ev.datetime && !ev.location) { card.style.display = 'none'; return; }
+  document.getElementById('ceDateTime').textContent = ev.datetime || '—';
+  document.getElementById('ceLocation').textContent = ev.location || '—';
+  card.style.display = 'block';
 }
 
 async function saveCrossEvent() {
@@ -3551,6 +3548,7 @@ async function saveCrossEvent() {
   if (status) status.textContent = 'Сохранение...';
   try {
     await api('/api/cross-event', 'POST', { datetime, location });
+    window._CE = { datetime, location };
     if (status) status.textContent = '✅ Опубликовано';
     document.getElementById('ceClearBtn').style.display = '';
     loadCrossEvent();

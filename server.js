@@ -1598,6 +1598,16 @@ app.listen(PORT, () => {
 });
 
 // SPA fallback — СТРОГО ПОСЛЕДНЕЙ!
+// Вставляем данные события прямо в HTML чтобы не делать отдельный fetch
+const fs = require('fs');
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  try {
+    const html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+    const injected = html.replace('</head>', `<script>window._CE=${JSON.stringify(_crossEvent)};</script></head>`);
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.send(injected);
+  } catch(e) {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  }
 });
