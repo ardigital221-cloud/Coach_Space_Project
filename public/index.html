@@ -2134,6 +2134,7 @@ function startApp(){
   ME.role==='admin'?(r.textContent='Тренер',r.className='t-role ra'):(r.textContent='Ученик',r.className='t-role rs');
   loadLocalFoods();
   buildNav();
+  loadCrossEvent();
 }
 
 const TABS={
@@ -3581,7 +3582,7 @@ async function loadCrossEvent() {
     const ev = await r.json();
     const card = document.getElementById('crossEventCard');
     if (!card) return;
-    if (!ev.date && !ev.location) { card.classList.remove('visible'); return; }
+    if (!ev.date && !ev.time && !ev.location) { card.classList.remove('visible'); return; }
     // Форматируем дату
     let dtStr = '';
     if (ev.date) {
@@ -3609,6 +3610,7 @@ async function saveCrossEvent() {
     await api('/api/cross-event', 'POST', { date, time, location });
     toast('✅ Событие опубликовано', 's');
     if (status) status.textContent = '✅ Опубликовано на визитке';
+    loadCrossEvent();
     const clearBtn = document.getElementById('ceClearBtn');
     if (clearBtn) clearBtn.style.display = '';
   } catch (e) { toast('Ошибка: ' + e.message, 'e'); if (status) status.textContent = ''; }
