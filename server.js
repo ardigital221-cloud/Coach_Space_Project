@@ -1228,32 +1228,32 @@ app.post('/api/notifications/test', requireAdmin, async (req, res) => {
 // ═══════════════════════════════════════════
 
 // ═══════════════════════════════════════════
-// СОБЫТИЕ КРОССА (дата, время, место)
+// СОБЫТИЕ КРОССА
 // ═══════════════════════════════════════════
-app.get('/api/cross-event', async (_req, res) => {
-  try {
-    const doc = await db.collection('config').doc('crossEvent').get();
-    res.json(doc.exists ? doc.data() : {});
-  } catch (e) { res.status(500).json({ error: e.message }); }
+let _crossEvent = { datetime: '', location: '' };
+
+// Загружаем сохранённое событие из Firestore при старте
+db.collection('config').doc('crossEvent').get()
+  .then(doc => { if (doc.exists) _crossEvent = doc.data(); })
+  .catch(() => {});
+
+app.get('/api/cross-event', (_req, res) => {
+  res.json(_crossEvent);
 });
 
-app.post('/api/cross-event', requireAdmin, async (req, res) => {
-  try {
-    const { datetime, location } = req.body;
-    await db.collection('config').doc('crossEvent').set({
-      datetime: (datetime || '').trim(),
-      location: (location || '').trim(),
-      updatedAt: new Date().toISOString()
-    });
-    res.json({ success: true });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+app.post('/api/cross-event', requireAdmin, (req, res) => {
+  const datetime = (req.body.datetime || '').trim();
+  const location = (req.body.location || '').trim();
+  _crossEvent = { datetime, location };
+  // Сохраняем в Firestore асинхронно (не ждём)
+  db.collection('config').doc('crossEvent').set({ datetime, location }).catch(() => {});
+  res.json({ success: true });
 });
 
-app.delete('/api/cross-event', requireAdmin, async (_req, res) => {
-  try {
-    await db.collection('config').doc('crossEvent').delete();
-    res.json({ success: true });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+app.delete('/api/cross-event', requireAdmin, (req, res) => {
+  _crossEvent = { datetime: '', location: '' };
+  db.collection('config').doc('crossEvent').delete().catch(() => {});
+  res.json({ success: true });
 });
 
 // ═══════════════════════════════════════════
