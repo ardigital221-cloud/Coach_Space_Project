@@ -377,7 +377,7 @@
     .avg-num{font-family:'Unbounded',sans-serif;font-size:44px;font-weight:700;color:var(--ac);text-shadow:0 0 24px rgba(139,92,246,.35);}
     .avg-stars{font-size:20px;margin:5px 0;}
     .avg-count{font-size:12px;color:var(--mu2);}
-    .ped-week-tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap;}
+    .ped-week-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
     .ped-week-tab{flex:1;min-width:70px;padding:9px 6px;border-radius:var(--r2);border:1px solid rgba(255,255,255,.07);font-size:11px;font-weight:700;text-align:center;cursor:pointer;background:rgba(255,255,255,.03);color:var(--mu2);transition:all .2s;font-family:'Unbounded',sans-serif;}
     .ped-week-tab.active{border-color:var(--ac);color:var(--ac);background:rgba(139,92,246,.1);}
     .ped-block{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);margin-bottom:14px;overflow:hidden;}
@@ -386,9 +386,9 @@
     .ped-block-name::placeholder{color:rgba(167,139,250,.3);}
     .ped-block-del{background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;transition:color .15s;}
     .ped-block-del:hover{color:var(--red);}
-    .ped-ex-row{display:grid;grid-template-columns:18px 1fr 72px 72px 32px;gap:8px;align-items:center;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.03);}
+    .ped-ex-row{display:grid;grid-template-columns:40px minmax(0,1fr) 72px 72px 40px;gap:8px;align-items:center;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.03);}
     .ped-ex-row:last-of-type{border-bottom:none;}
-    .ped-drag-handle{color:var(--mu);cursor:grab;font-size:14px;line-height:1;user-select:none;text-align:center;}
+    .ped-drag-handle{color:var(--mu);cursor:grab;font-size:16px;line-height:1;user-select:none;text-align:center;display:flex;align-items:center;justify-content:center;min-height:40px;min-width:40px;border-radius:10px;touch-action:none;}
     .ped-ex-row.drag-over{background:rgba(139,92,246,.08);border-radius:var(--r3);}
     .ped-ex-row.dragging{opacity:.35;}
     .ped-fi{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--r3);color:var(--tx);padding:7px 10px;font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:border .15s;}
@@ -397,11 +397,25 @@
     .ped-fi.sm{text-align:center;font-weight:600;}
     .ped-add-ex{display:flex;align-items:center;gap:6px;padding:9px 14px;color:var(--ac);font-size:12px;cursor:pointer;background:none;border:none;opacity:.65;transition:opacity .15s;width:100%;}
     .ped-add-ex:hover{opacity:1;}
-    .ped-del-ex{background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:2px;border-radius:4px;transition:color .15s;line-height:1;}
+    .ped-del-ex{background:none;border:none;color:var(--mu);cursor:pointer;font-size:16px;padding:0;border-radius:10px;transition:color .15s;line-height:1;display:flex;align-items:center;justify-content:center;min-height:40px;min-width:40px;}
     .ped-del-ex:hover{color:var(--red);}
     .ped-copy-bar{background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.2);border-radius:var(--r2);padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-    .ped-col-heads{display:grid;grid-template-columns:18px 1fr 72px 72px 32px;gap:8px;padding:4px 14px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);}
-    #mPlanEditor .modal{max-width:96vw;width:100%;}
+    .ped-col-heads{display:grid;grid-template-columns:40px minmax(0,1fr) 72px 72px 40px;gap:8px;padding:4px 14px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);}
+    #mPlanEditor .modal{max-width:96vw;width:100%;padding:0;overflow:hidden;max-height:min(96dvh,calc(var(--vvh,100vh) - 16px));}
+    #mPlanEditor .ped-editor{display:flex;flex-direction:column;height:min(96dvh,calc(var(--vvh,100vh) - 16px));}
+    #mPlanEditor .ped-editor-head{padding:16px 16px 10px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(10,12,22,.98);}
+    #mPlanEditor .ped-editor-scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:12px 16px calc(16px + env(safe-area-inset-bottom));overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+    #mPlanEditor .ped-input-section{padding:10px 16px 12px;border-top:1px solid rgba(255,255,255,.06);background:linear-gradient(180deg,rgba(10,12,22,.92),rgba(10,12,22,.98));position:sticky;bottom:0;z-index:4;padding-bottom:calc(12px + env(safe-area-inset-bottom));}
+    #mPlanEditor .ped-footer{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    #mPlanEditor .ped-footer .btn{width:100%;justify-content:center;}
+    #mPlanEditor .ped-add-block{width:100%;justify-content:center;}
+    #mPlanEditor .ped-blocks{display:flex;flex-direction:column;gap:10px;}
+    @media(max-width:640px){
+      #mPlanEditor .ped-footer{grid-template-columns:1fr;}
+      .ped-ex-row{grid-template-columns:36px minmax(0,1fr) 64px 64px 36px;gap:6px;padding:8px 10px;}
+      .ped-col-heads{grid-template-columns:36px minmax(0,1fr) 64px 64px 36px;gap:6px;padding:4px 10px 6px;}
+      .ped-fi{padding:8px 8px;font-size:12px;}
+    }
     @media(min-width:700px){#mPlanEditor .modal{max-width:860px;}}
     .tg-status{background:rgba(139,92,246,.05);border:1px solid var(--ba);border-radius:var(--r);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
     .tg-status-icon{font-size:22px;}
@@ -1648,29 +1662,36 @@
 
 <datalist id="pedExSuggest"></datalist>
 <div class="mo" id="mPlanEditor"><div class="modal" style="max-width:680px;width:96vw">
-  <div class="mh"></div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:8px">
-    <div class="mt" style="margin-bottom:0">📋 Редактор плана</div>
-    <div style="font-size:13px;font-weight:600;color:var(--ac)" id="pedUserName"></div>
-  </div>
-  <input type="hidden" id="pedUserId"/>
-  <div class="ped-week-tabs" id="pedWeekTabs"></div>
-  <div class="ped-copy-bar" id="pedCopyBar">
-    <span style="font-size:12px;color:var(--mu2);flex-shrink:0">Копировать Нед.</span>
-    <select class="fsel" id="pedCopyFrom" style="width:auto;padding:5px 10px;font-size:12px;flex-shrink:0">
-      <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
-    </select>
-    <span style="font-size:12px;color:var(--mu2);flex-shrink:0">→</span>
-    <select class="fsel" id="pedCopyTo" style="width:auto;padding:5px 10px;font-size:12px;flex-shrink:0">
-      <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="all">Все</option>
-    </select>
-    <button class="btn btn-g sm" onclick="copyWeekAny()">Копировать</button>
-  </div>
-  <div id="pedWeekContent"></div>
-  <button class="btn btn-g sm" style="margin-bottom:16px;width:100%;justify-content:center" onclick="pedAddBlock()">+ Добавить блок</button>
-  <div class="mf">
-    <button class="btn btn-g" onclick="if(_pedDirty&&!confirm('Есть несохранённые изменения. Закрыть?'))return;_pedDirty=false;closeMo('mPlanEditor')">Отмена</button>
-    <button class="btn btn-p" onclick="savePlanEditor()">💾 Сохранить план</button>
+  <div class="ped-editor">
+    <div class="ped-editor-head">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div class="mt" style="margin-bottom:0">📋 Редактор плана</div>
+        <div style="font-size:13px;font-weight:600;color:var(--ac)" id="pedUserName"></div>
+      </div>
+    </div>
+    <input type="hidden" id="pedUserId"/>
+    <div class="ped-editor-scroll">
+      <div class="ped-week-tabs" id="pedWeekTabs"></div>
+      <div class="ped-copy-bar" id="pedCopyBar">
+        <span style="font-size:12px;color:var(--mu2);flex-shrink:0">Копировать Нед.</span>
+        <select class="fsel" id="pedCopyFrom" style="width:auto;padding:5px 10px;font-size:12px;flex-shrink:0">
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+        </select>
+        <span style="font-size:12px;color:var(--mu2);flex-shrink:0">→</span>
+        <select class="fsel" id="pedCopyTo" style="width:auto;padding:5px 10px;font-size:12px;flex-shrink:0">
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="all">Все</option>
+        </select>
+        <button class="btn btn-g sm" onclick="copyWeekAny()">Копировать</button>
+      </div>
+      <div id="pedWeekContent" class="ped-blocks"></div>
+    </div>
+    <div class="ped-input-section">
+      <button class="btn btn-g sm ped-add-block" onclick="pedAddBlock()">+ Добавить блок</button>
+      <div class="ped-footer" style="margin-top:10px">
+        <button class="btn btn-g" onclick="if(_pedDirty&&!confirm('Есть несохранённые изменения. Закрыть?'))return;_pedDirty=false;closeMo('mPlanEditor')">Отмена</button>
+        <button class="btn btn-p" onclick="savePlanEditor()">💾 Сохранить план</button>
+      </div>
+    </div>
   </div>
 </div></div>
 
@@ -3467,8 +3488,22 @@ function clr(a){a.forEach(id=>document.getElementById(id).value='');}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fmtDt(iso){return new Date(iso).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
 function toast(msg,type='s'){const ic={s:'✅',e:'❌',w:'⚠️'};const t=document.createElement('div');t.className=`toast ${type}`;t.textContent=`${ic[type]||'•'} ${msg}`;document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),4500);}
+function updateViewportVars(){
+  const vv=window.visualViewport;
+  const h=vv?Math.round(vv.height):window.innerHeight;
+  document.documentElement.style.setProperty('--vvh',`${h}px`);
+}
+function syncPlanEditorToInput(target){
+  if(!target)return;
+  const mo=document.getElementById('mPlanEditor');
+  if(!mo||!mo.classList.contains('open'))return;
+  const scroller=mo.querySelector('.ped-editor-scroll');
+  if(!scroller||!scroller.contains(target))return;
+  requestAnimationFrame(()=>target.scrollIntoView({block:'nearest',inline:'nearest'}));
+}
 function openMo(id,nutType){
   document.getElementById(id).classList.add('open');
+  updateViewportVars();
   if(id==='mAddW')onOpenAddW();
   if(id==='mAddNut'){
     nutSetupAutocomplete();
@@ -3490,6 +3525,16 @@ function openMo(id,nutType){
   }
 }
 function closeMo(id){document.getElementById(id).classList.remove('open');}
+updateViewportVars();
+window.addEventListener('resize',updateViewportVars);
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',updateViewportVars);
+  window.visualViewport.addEventListener('scroll',updateViewportVars);
+}
+document.addEventListener('focusin',e=>{
+  const t=e.target;
+  if(t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))syncPlanEditorToInput(t);
+});
 document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',e=>{
   if(e.target!==m)return;
   if(m.id==='mPlanEditor'){
