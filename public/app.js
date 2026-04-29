@@ -103,20 +103,25 @@ function _shouldReloadTab(tabId){
 function _markTabLoaded(tabId){
   _tabLastLoadedAt[tabId] = Date.now();
 }
+const _tabLoaders = {
+  ah: () => { loadAdminHome(); loadCalendar(); loadAdminWorkouts(); loadCrossEventAdmin(); },
+  aprog: () => loadProgPanel(),
+  ashop: () => loadAdminShop(),
+  uh: () => loadUserHome(),
+  uw: () => loadUserWorkouts(),
+  uprog: () => loadUserProgress(),
+  ushop: () => loadUserShop(),
+  uplan: () => { loadUserPlan(); loadUserVideoLibrary(); },
+  avid: () => loadVideoLibrary(),
+  anut: () => loadAdminNutrition(),
+  unut: () => loadUserNutrition(),
+  ucross: () => loadUserCross(),
+  across: () => { loadAdminCross(); loadCrossEventAdmin(); },
+};
 function _loadTabData(tabId){
-  if(tabId==='ah')    { loadAdminHome(); loadCalendar(); loadAdminWorkouts(); loadCrossEventAdmin(); }
-  if(tabId==='aprog') loadProgPanel();
-  if(tabId==='ashop') loadAdminShop();
-  if(tabId==='uh')    loadUserHome();
-  if(tabId==='uw')    loadUserWorkouts();
-  if(tabId==='uprog') loadUserProgress();
-  if(tabId==='ushop') loadUserShop();
-  if(tabId==='uplan') { loadUserPlan(); loadUserVideoLibrary(); }
-  if(tabId==='avid')  loadVideoLibrary();
-  if(tabId==='anut')  loadAdminNutrition();
-  if(tabId==='unut')  loadUserNutrition();
-  if(tabId==='ucross') loadUserCross();
-  if(tabId==='across') { loadAdminCross(); loadCrossEventAdmin(); }
+  const loader = _tabLoaders[tabId];
+  if (!loader) return;
+  loader();
 }
 function showTab(id,btn,forceReload=false){
   if(!forceReload && _currentTabId===id) return;
