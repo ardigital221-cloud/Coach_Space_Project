@@ -36,8 +36,9 @@
     input,select,textarea{font-family:inherit;outline:none;}
     img{max-width:100%;display:block;}
     ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(139,92,246,.3);border-radius:4px;}
-    #splash{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .4s;}
+    #splash{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .4s;overflow:hidden;}
     #splash.hide{opacity:0;pointer-events:none;}
+    #splash::before{content:'';position:absolute;inset:-20% -10%;background:radial-gradient(circle at 20% 20%,rgba(56,189,248,.18),transparent 38%),radial-gradient(circle at 80% 75%,rgba(139,92,246,.2),transparent 42%),radial-gradient(circle at 50% 50%,rgba(167,139,250,.14),transparent 55%);filter:blur(22px);animation:splashDrift 10s ease-in-out infinite alternate;pointer-events:none;}
     .sp-logo{font-family:'Unbounded',sans-serif;font-size:24px;font-weight:700;background:linear-gradient(135deg,#c4b5fd,#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
     .sp-logo .char{display:inline-block;opacity:0;transform:translateY(8px);animation:spChar .42s cubic-bezier(.2,.7,.2,1) forwards;}
     .sp-logo .space{width:.34em;}
@@ -447,6 +448,11 @@
     @keyframes spin    {to{transform:rotate(360deg)}}
     @keyframes spChar  {to{opacity:1;transform:translateY(0)}}
     @keyframes pulse   {0%,100%{transform:scale(1)}50%{transform:scale(1.16)}}
+    @keyframes splashDrift{0%{transform:translate3d(-1%,0,0) scale(1)}100%{transform:translate3d(2%,-2%,0) scale(1.06)}}
+    @keyframes blobA{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(30px,22px,0)}}
+    @keyframes blobB{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-28px,-18px,0)}}
+    @keyframes shineSweep{0%{transform:translateX(-18%)}100%{transform:translateX(18%)}}
+    @keyframes heroPulse{0%,100%{text-shadow:0 6px 22px rgba(139,92,246,.2)}50%{text-shadow:0 10px 30px rgba(56,189,248,.35)}}
     .nut-macro-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);overflow:hidden;margin-bottom:14px;}
     .nut-mb-item{background:rgba(255,255,255,.025);padding:12px 6px;text-align:center;}
     .nut-mb-val{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;color:var(--tx);line-height:1;}
@@ -625,8 +631,9 @@
     #landingPage{position:fixed;inset:0;z-index:200;background:var(--bg);display:none;flex-direction:column;overflow-y:auto;}
     #landingPage.show{display:flex;}
     .land-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
-    .land-bg::before{content:'';position:absolute;top:-120px;left:-80px;width:500px;height:500px;background:radial-gradient(circle,rgba(56,189,248,.13),transparent 65%);}
-    .land-bg::after{content:'';position:absolute;bottom:-100px;right:-60px;width:420px;height:420px;background:radial-gradient(circle,rgba(139,92,246,.12),transparent 65%);}
+    .land-bg::before{content:'';position:absolute;top:-120px;left:-80px;width:500px;height:500px;background:radial-gradient(circle,rgba(56,189,248,.13),transparent 65%);animation:blobA 12s ease-in-out infinite alternate;}
+    .land-bg::after{content:'';position:absolute;bottom:-100px;right:-60px;width:420px;height:420px;background:radial-gradient(circle,rgba(139,92,246,.12),transparent 65%);animation:blobB 14s ease-in-out infinite alternate;}
+    .land-bg i{position:absolute;inset:0;display:block;background:radial-gradient(circle at 50% 35%,rgba(255,255,255,.06),transparent 48%);mix-blend-mode:screen;animation:shineSweep 9s linear infinite;}
     .land-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:0 20px 40px;}
     .land-top{width:100%;max-width:480px;display:flex;align-items:center;justify-content:space-between;padding:18px 0;}
     .land-logo{font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;background:linear-gradient(135deg,#c4b5fd,#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
@@ -635,11 +642,12 @@
     .land-hero{width:100%;max-width:480px;text-align:center;padding:32px 0 28px;}
     .land-emoji{font-size:72px;line-height:1;margin-bottom:18px;display:block;animation:pulse 2s ease infinite;}
     .land-tag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--blu);background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25);border-radius:20px;padding:4px 14px;margin-bottom:14px;}
-    .land-title{font-family:'Unbounded',sans-serif;font-size:28px;font-weight:700;line-height:1.2;margin-bottom:12px;background:linear-gradient(135deg,#f1f5f9,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+    .land-title{font-family:'Unbounded',sans-serif;font-size:28px;font-weight:700;line-height:1.2;margin-bottom:12px;background:linear-gradient(135deg,#f1f5f9,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 6px 22px rgba(139,92,246,.22);animation:heroPulse 3.2s ease-in-out infinite;}
     @media(max-width:380px){.land-title{font-size:22px;}}
     .land-sub{font-size:15px;color:var(--mu2);line-height:1.7;margin-bottom:28px;}
     .land-cta{width:100%;max-width:340px;padding:16px 24px;border-radius:16px;background:linear-gradient(135deg,#38bdf8,#6366f1);color:#fff;font-family:'Unbounded',sans-serif;font-size:13px;font-weight:700;border:none;cursor:pointer;box-shadow:0 8px 30px rgba(56,189,248,.35);transition:all .22s;margin-bottom:12px;}
     .land-cta:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(56,189,248,.5);}
+    .land-cta:active{transform:translateY(0) scale(.99);}
     .land-secondary{font-size:13px;color:var(--mu2);cursor:pointer;background:none;border:none;font-family:inherit;transition:color .2s;text-decoration:underline;text-underline-offset:3px;}
     .land-secondary:hover{color:var(--tx);}
     .land-cards{width:100%;max-width:480px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px;}
@@ -812,7 +820,7 @@
 <div id="splash"><div class="sp-logo">⚡ Coach Space</div><div class="sp-ring"></div></div>
 
 <div id="landingPage">
-  <div class="land-bg"></div>
+  <div class="land-bg"><i></i></div>
   <div class="land-inner">
 
     <div class="land-top">
