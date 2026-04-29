@@ -277,3 +277,25 @@ Guardrails for future edits:
    - text visible with animations on,
    - text visible with reduced-motion/fallback.
 4. Validate inline script syntax after JS edits extracted from `index.html`.
+
+## Update 2026-04-29 (Design V3)
+
+Scope completed:
+- Reworked the visual direction in `public/index.html` without touching API calls, auth flow, data handling, or route logic.
+- Added a new Coach Space V3 CSS layer inspired by the provided dark premium reference:
+  - black studio/grid background,
+  - oversized uppercase brand hero,
+  - lime/cyan accent system,
+  - stronger mobile-first CTA buttons,
+  - sharper cards, modals, forms, nav, shop, nutrition, video, rules, and workout surfaces.
+- Used existing local project photos for the landing/login visual atmosphere.
+- Preserved the existing splash letter animation and adjusted it into the new visual style.
+
+Validation completed:
+- `node --check server.js` passed.
+- Extracted inline app script from `public/index.html` and checked it with Node successfully.
+- Captured mobile and desktop Chrome screenshots of the landing page and fixed mobile overflow/wrapping issues found during review.
+
+Watch next:
+- Full logged-in smoke test still needs a real local Firebase `serviceAccountKey.json` or a deployed environment.
+- Keep future design edits in small CSS patches to avoid encoding regressions in Russian UI text.
