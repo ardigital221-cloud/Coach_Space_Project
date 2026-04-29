@@ -60,32 +60,74 @@ const TABS={
   user: [{id:'uh',icon:'рџЏ ',lbl:'Р“Р»Р°РІРЅР°СЏ'},{id:'uplan',icon:'рџ“‹',lbl:'РџР»Р°РЅ'},{id:'uprog',icon:'рџ“€',lbl:'РџСЂРѕРіСЂРµСЃСЃ'},{id:'ushop',icon:'рџ›’',lbl:'РњР°РіР°Р·РёРЅ'},{id:'unut',icon:'рџҐ—',lbl:'РџРёС‚Р°РЅРёРµ'}],
   cross:[{id:'ucross',icon:'рџЏѓ',lbl:'РљСЂРѕСЃСЃ'}]
 };
+let _currentTabId = null;
+const _tabLastLoadedAt = {};
+const _tabReloadTtlMs = {
+  ap: 0,
+  ah: 0,
+  uh: 0,
+  aprog: 12000,
+  uprog: 12000,
+  ashop: 10000,
+  ushop: 10000,
+  avid: 15000,
+  uplan: 15000,
+  anut: 15000,
+  unut: 10000,
+  across: 10000,
+  ucross: 8000,
+};
 function buildNav(){
   const nav=document.getElementById('bnav'),tabs=ME.role==='admin'?TABS.admin:ME.role==='cross'?TABS.cross:TABS.user;
   nav.innerHTML=tabs.map((t,i)=>`<button class="nb${i===0?' active':''}" onclick="showTab('${t.id}',this)"><span class="ni">${t.icon}</span>${t.lbl}</button>`).join('');
   showTab(tabs[0].id,nav.querySelector('.nb'));
 }
-function showTab(id,btn){
+function _shouldReloadTab(tabId){
+  const ttl = _tabReloadTtlMs[tabId] ?? 10000;
+  if (ttl === 0) return true;
+  const lastAt = _tabLastLoadedAt[tabId] || 0;
+  return (Date.now() - lastAt) > ttl;
+}
+function _markTabLoaded(tabId){
+  _tabLastLoadedAt[tabId] = Date.now();
+}
+function _loadTabData(tabId){
+  if(tabId==='ah')    { loadAdminHome(); loadCalendar(); loadAdminWorkouts(); loadCrossEventAdmin(); }
+  if(tabId==='aprog') loadProgPanel();
+  if(tabId==='ashop') loadAdminShop();
+  if(tabId==='uh')    loadUserHome();
+  if(tabId==='uw')    loadUserWorkouts();
+  if(tabId==='uprog') loadUserProgress();
+  if(tabId==='ushop') loadUserShop();
+  if(tabId==='uplan') { loadUserPlan(); loadUserVideoLibrary(); }
+  if(tabId==='avid')  loadVideoLibrary();
+  if(tabId==='anut')  loadAdminNutrition();
+  if(tabId==='unut')  loadUserNutrition();
+  if(tabId==='ucross') loadUserCross();
+  if(tabId==='across') { loadAdminCross(); loadCrossEventAdmin(); }
+}
+function showTab(id,btn,forceReload=false){
+  if(!forceReload && _currentTabId===id) return;
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('p-'+id).classList.add('active');
-  if(id==='ah')    { loadAdminHome(); loadCalendar(); loadAdminWorkouts(); loadCrossEventAdmin(); }
-  if(id==='aprog') loadProgPanel();
-  if(id==='ashop') loadAdminShop();
-  if(id==='uh')    loadUserHome();
-  if(id==='uw')    loadUserWorkouts();
-  if(id==='uprog') loadUserProgress();
-  if(id==='ushop') loadUserShop();
-  if(id==='uplan') { loadUserPlan(); loadUserVideoLibrary(); }
-  if(id==='avid')  loadVideoLibrary();
-  if(id==='anut')  loadAdminNutrition();
-  if(id==='unut')  loadUserNutrition();
-  if(id==='ucross') loadUserCross();
-  if(id==='across') { loadAdminCross(); loadCrossEventAdmin(); }
+  const shouldReload = forceReload || _shouldReloadTab(id);
+  if(shouldReload){
+    _loadTabData(id);
+    _markTabLoaded(id);
+  }
+  _currentTabId = id;
 }
 
 const galleryState = {};
+let _shopItemsCache = [];
+function _setShopCache(items){
+  _shopItemsCache = Array.isArray(items) ? items : [];
+}
+function _getShopItemById(id){
+  return _shopItemsCache.find(x=>x.id===id) || null;
+}
 function getItemPhotos(item){if(item.photos&&item.photos.length)return item.photos.map(p=>p.url||p);if(item.photoUrl)return[item.photoUrl];return[];}
 function renderShopGallery(item,isAdmin){
   const photos=getItemPhotos(item);const id=item.id;
@@ -98,16 +140,30 @@ function renderShopGallery(item,isAdmin){
 function gallerySwitchTo(id,idx){galleryState[id]=idx;updateGalleryDOM(id);}
 function galleryPrev(id,total){galleryState[id]=((galleryState[id]||0)-1+total)%total;updateGalleryDOM(id);}
 function galleryNext(id,total){galleryState[id]=((galleryState[id]||0)+1)%total;updateGalleryDOM(id);}
-function updateGalleryDOM(id){const isAdmin=ME&&ME.role==='admin';authFetch('/api/shop').then(r=>r.json()).then(items=>{const item=items.find(x=>x.id===id);if(!item)return;const photos=getItemPhotos(item);const idx=Math.min(galleryState[id]||0,photos.length-1);const gEl=document.getElementById('gallery-'+id);if(!gEl)return;const imgEl=document.getElementById('gimg-'+id);if(imgEl)imgEl.src=photos[idx];gEl.querySelectorAll('.sg-dot').forEach((d,i)=>d.classList.toggle('a',i===idx));const cnt=gEl.querySelector('.sg-count');if(cnt)cnt.textContent=`${idx+1} / ${photos.length}`;const del=gEl.querySelector('.sg-del-btn');if(del)del.setAttribute('onclick',`event.stopPropagation();delShopPhoto('${id}',${idx})`);}).catch(()=>{});}
+function updateGalleryDOM(id){
+  const item = _getShopItemById(id);
+  if(!item) return;
+  const photos = getItemPhotos(item);
+  const idx = Math.min(galleryState[id] || 0, photos.length - 1);
+  const gEl = document.getElementById('gallery-' + id);
+  if(!gEl) return;
+  const imgEl = document.getElementById('gimg-' + id);
+  if(imgEl) imgEl.src = photos[idx];
+  gEl.querySelectorAll('.sg-dot').forEach((d,i)=>d.classList.toggle('a', i===idx));
+  const cnt = gEl.querySelector('.sg-count');
+  if(cnt) cnt.textContent = `${idx + 1} / ${photos.length}`;
+  const del = gEl.querySelector('.sg-del-btn');
+  if(del) del.setAttribute('onclick', `event.stopPropagation();delShopPhoto('${id}',${idx})`);
+}
 async function addShopPhoto(itemId,input){const file=input.files[0];if(!file)return;toast('вЏі Р—Р°РіСЂСѓР·РєР°...','w');const fd=new FormData();fd.append('photo',file);try{const r=await authFetch(`/api/shop/${itemId}/photos`,{method:'POST',body:fd});const d=await r.json();if(!r.ok)throw new Error(d.error);toast('вњ… Р¤РѕС‚Рѕ РґРѕР±Р°РІР»РµРЅРѕ','s');input.value='';loadAdminShop();}catch(e){toast('РћС€РёР±РєР°: '+e.message,'e');}}
 async function delShopPhoto(itemId,idx){if(!confirm('РЈРґР°Р»РёС‚СЊ СЌС‚Рѕ С„РѕС‚Рѕ?'))return;try{await api(`/api/shop/${itemId}/photos/${idx}`,'DELETE');toast('рџ—‘ Р¤РѕС‚Рѕ СѓРґР°Р»РµРЅРѕ','w');galleryState[itemId]=0;loadAdminShop();}catch(e){toast('РћС€РёР±РєР°: '+e.message,'e');}}
 let _shFilesArr=[];
 function prevShopMulti(e){_shFilesArr=Array.from(e.target.files);const prev=document.getElementById('shMultiPrev');prev.innerHTML=_shFilesArr.map((f,i)=>{const url=URL.createObjectURL(f);return`<div class="multi-prev-item" id="shprev-${i}"><img src="${url}" alt=""/><button class="multi-prev-del" onclick="removeShFile(${i})">вњ•</button></div>`;}).join('');}
 function removeShFile(idx){_shFilesArr.splice(idx,1);const prev=document.getElementById('shMultiPrev');prev.innerHTML=_shFilesArr.map((f,i)=>{const url=URL.createObjectURL(f);return`<div class="multi-prev-item" id="shprev-${i}"><img src="${url}" alt=""/><button class="multi-prev-del" onclick="removeShFile(${i})">вњ•</button></div>`;}).join('');}
 async function addShopItem(){const name=v('shN'),price=v('shP');if(!name||!price){toast('РќР°Р·РІР°РЅРёРµ Рё С†РµРЅР° РѕР±СЏР·Р°С‚РµР»СЊРЅС‹','e');return;}const fd=new FormData();fd.append('name',name);fd.append('price',price);_shFilesArr.forEach(f=>fd.append('photos',f));try{const r=await fetch('/api/shop',{method:'POST',body:fd});const d=await r.json();if(!r.ok)throw new Error(d.error);toast('вњ… РўРѕРІР°СЂ РґРѕР±Р°РІР»РµРЅ','s');closeMo('mAddShop');clr(['shN','shP']);document.getElementById('shFile').value='';document.getElementById('shMultiPrev').innerHTML='';_shFilesArr=[];loadAdminShop();}catch(e){toast(e.message,'e');}}
-async function loadAdminShop(){const g=document.getElementById('aShopGrid');try{const items=await api('/api/shop');if(!items.length){g.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">рџ›’</div>РњР°РіР°Р·РёРЅ РїСѓСЃС‚</div>`;return;}g.innerHTML=items.map(i=>`<div class="shopi">${renderShopGallery(i,true)}<div class="sbody"><div class="sname">${esc(i.name)}</div><div class="sprice">${i.price} в‚ё</div><button class="btn btn-d sm" style="width:100%;margin-top:auto" onclick="delShopItem('${i.id}')">рџ—‘ РЈРґР°Р»РёС‚СЊ С‚РѕРІР°СЂ</button></div></div>`).join('');}catch(e){g.innerHTML=`<div class="empty">${e.message}</div>`;}}
+async function loadAdminShop(){const g=document.getElementById('aShopGrid');try{const items=await api('/api/shop');_setShopCache(items);if(!items.length){g.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">рџ›’</div>РњР°РіР°Р·РёРЅ РїСѓСЃС‚</div>`;return;}g.innerHTML=items.map(i=>`<div class="shopi">${renderShopGallery(i,true)}<div class="sbody"><div class="sname">${esc(i.name)}</div><div class="sprice">${i.price} в‚ё</div><button class="btn btn-d sm" style="width:100%;margin-top:auto" onclick="delShopItem('${i.id}')">рџ—‘ РЈРґР°Р»РёС‚СЊ С‚РѕРІР°СЂ</button></div></div>`).join('');}catch(e){g.innerHTML=`<div class="empty">${e.message}</div>`;}}
 async function delShopItem(id){if(!confirm('РЈРґР°Р»РёС‚СЊ С‚РѕРІР°СЂ?'))return;try{await api('/api/shop/'+id,'DELETE');delete galleryState[id];toast('РўРѕРІР°СЂ СѓРґР°Р»С‘РЅ','w');loadAdminShop();}catch(e){toast(e.message,'e');}}
-async function loadUserShop(){const g=document.getElementById('uShopGrid');try{const items=await api('/api/shop');if(!items.length){g.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">рџ›’</div>РњР°РіР°Р·РёРЅ РїСѓСЃС‚</div>`;return;}g.innerHTML=items.map(i=>`<div class="shopi">${renderShopGallery(i,false)}<div class="sbody"><div class="sname">${esc(i.name)}</div><div class="sprice">${i.price} в‚ё</div><button class="btn btn-p sm" style="width:100%;margin-top:auto" onclick="orderItem('${i.id}','${esc(i.name)}')">Р—Р°РєР°Р·Р°С‚СЊ</button></div></div>`).join('');}catch(e){g.innerHTML=`<div class="empty">${e.message}</div>`;}}
+async function loadUserShop(){const g=document.getElementById('uShopGrid');try{const items=await api('/api/shop');_setShopCache(items);if(!items.length){g.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">рџ›’</div>РњР°РіР°Р·РёРЅ РїСѓСЃС‚</div>`;return;}g.innerHTML=items.map(i=>`<div class="shopi">${renderShopGallery(i,false)}<div class="sbody"><div class="sname">${esc(i.name)}</div><div class="sprice">${i.price} в‚ё</div><button class="btn btn-p sm" style="width:100%;margin-top:auto" onclick="orderItem('${i.id}','${esc(i.name)}')">Р—Р°РєР°Р·Р°С‚СЊ</button></div></div>`).join('');}catch(e){g.innerHTML=`<div class="empty">${e.message}</div>`;}}
 async function orderItem(id,name){if(!confirm(`Р—Р°РєР°Р·Р°С‚СЊ В«${name}В»? РўСЂРµРЅРµСЂ РїРѕР»СѓС‡РёС‚ СѓРІРµРґРѕРјР»РµРЅРёРµ РІ Telegram.`))return;try{await api('/api/shop/'+id+'/order','POST',{userId:ME.id,userName:ME.name});toast('вњ… Р—Р°РєР°Р· РѕС‚РїСЂР°РІР»РµРЅ! РўСЂРµРЅРµСЂ СЃРІСЏР¶РµС‚СЃСЏ СЃ РІР°РјРё.','s');}catch(e){toast(e.message,'e');}}
 
 let _pedPlan={1:[],2:[],3:[],4:[]},_pedWeek=1,_pedUserId='';
