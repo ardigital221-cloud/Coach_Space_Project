@@ -227,3 +227,20 @@ Files changed in this pass:
 Status:
 - Visual system is now clearly shifted to a premium mobile product style.
 - Business logic unchanged.
+
+## Update 2026-04-29 (Design Phase - Final Pass + Self-check)
+
+Scope completed:
+- Applied full internal UI polish across forms, tabs, cards, modals, toasts, and workout constructor surfaces.
+- Increased touch ergonomics in workout editor controls and input rows.
+- Unified contrast and borders for clearer mobile scanning in dense sections.
+- Finished visual consistency pass for app-wide components under one style direction.
+
+Validation completed:
+- `node --check server.js` passed.
+- Extracted inline app script from `public/index.html` and ran `node --check` successfully.
+- Fixed a real runtime-risk bug in inline script: corrupted variable names inside `haversine(...)` replaced with ASCII-safe names.
+
+Files changed in this pass:
+- `public/index.html`
+- `agent.md`
