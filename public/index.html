@@ -936,6 +936,78 @@
       from{opacity:0;transform:translateY(10px);}
       to{opacity:1;transform:translateY(0);}
     }
+    .land-hero{
+      position:relative;
+      padding:44px 0 20px;
+    }
+    .land-hero::before{
+      content:'';
+      position:absolute;
+      left:50%;
+      top:16px;
+      transform:translateX(-50%);
+      width:min(88vw,420px);
+      height:170px;
+      border-radius:999px;
+      background:radial-gradient(circle,rgba(34,211,238,.17) 0%,rgba(34,211,238,0) 72%);
+      pointer-events:none;
+    }
+    .land-sub{
+      max-width:28ch;
+      margin:0 auto 24px;
+    }
+    .cross-event-card{
+      border-color:rgba(34,211,238,.32);
+      background:linear-gradient(150deg,rgba(10,25,44,.94),rgba(8,18,32,.9));
+      box-shadow:0 14px 34px rgba(0,0,0,.34),0 0 0 1px rgba(34,211,238,.12);
+    }
+    .ce-row{
+      border-color:rgba(34,211,238,.16);
+      background:rgba(255,255,255,.03);
+    }
+    .land-service-item,.land-rule{
+      background:linear-gradient(140deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      border-color:rgba(255,255,255,.09);
+    }
+    .land-service-item:hover{
+      border-color:rgba(34,211,238,.32);
+      transform:translateY(-1px);
+    }
+    .land-rule-title{
+      color:#d9e8fb;
+    }
+    .nb{
+      font-size:8px;
+      letter-spacing:.55px;
+      gap:5px;
+      padding:8px 3px 10px;
+    }
+    .nb .ni{
+      font-size:19px;
+    }
+    .btn-out{
+      width:34px;
+      height:34px;
+      border-radius:10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .btn-out:hover{
+      border-color:rgba(251,113,133,.45);
+      background:rgba(251,113,133,.1);
+    }
+    @media(max-width:420px){
+      .land-title{font-size:38px;line-height:1.06;}
+      .land-sub{font-size:16px;}
+      .land-logo{font-size:30px;}
+      .land-login-link{font-size:14px;}
+      .ce-title{font-size:15px;}
+      .ce-row-val{font-size:14px;}
+      .nb .ni{font-size:18px;}
+    }
   </style>
 </head>
 <body>

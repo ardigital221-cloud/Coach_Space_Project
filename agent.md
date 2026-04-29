@@ -209,3 +209,21 @@ Next design pass:
 - Refine topbar and bottom-nav icon/text balance for thumb scanning.
 - Review constructor/editor components visually after theme shift.
 - Then run full mobile smoke test before push.
+
+## Update 2026-04-29 (Design Phase - Pass 2)
+
+Scope completed:
+- Strengthened landing hero composition for small screens.
+- Added atmospheric hero glow layer while preserving fast rendering.
+- Refined cross-event card contrast, edges, and depth.
+- Refined service/rules cards for cleaner mobile scanning.
+- Improved bottom-nav rhythm (icon/text spacing) and topbar logout button ergonomics.
+- Added extra narrow-screen polish (`<= 420px`) for type and card legibility.
+
+Files changed in this pass:
+- `public/index.html`
+- `agent.md`
+
+Status:
+- Visual system is now clearly shifted to a premium mobile product style.
+- Business logic unchanged.
