@@ -244,3 +244,36 @@ Validation completed:
 Files changed in this pass:
 - `public/index.html`
 - `agent.md`
+
+## Update 2026-04-29 (Critical Stability Notes)
+
+What happened:
+- During later design edits, `public/index.html` was repeatedly exposed to encoding regressions (mojibake in Russian UI text).
+- A startup state was observed where splash spinner showed but title text did not appear.
+
+Root causes:
+- Unsafe full-file rewrites of `public/index.html` can silently corrupt UTF-8 Russian content.
+- Splash letters originally started at `opacity: 0`, so on environments with reduced/disabled motion the text could remain invisible.
+
+Fixes applied:
+- Restored stable `index.html` baseline from commit `e1088b2`, then re-applied changes with small patches only.
+- Kept and stabilized splash animation:
+  - `initSplashBrand()` builds `Coach Space` per-letter.
+  - `.sp-logo .char` now defaults to visible.
+  - animation runs only via `.sp-logo.is-animating`.
+  - `requestAnimationFrame` is used to start animation reliably.
+  - `prefers-reduced-motion` fallback keeps text visible and disables nonessential motion.
+- Added extra landing atmosphere effects (background drift, glow, hero pulse) without changing business logic.
+
+Deployment/check status:
+- Commits pushed to `main` with latest splash/landing fixes:
+  - `c1e194c`
+  - `88378a8`
+
+Guardrails for future edits:
+1. Do not run broad encoding conversion scripts on `public/index.html`.
+2. Prefer `apply_patch` and targeted line edits only.
+3. After any splash change, verify:
+   - text visible with animations on,
+   - text visible with reduced-motion/fallback.
+4. Validate inline script syntax after JS edits extracted from `index.html`.

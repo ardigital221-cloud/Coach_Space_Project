@@ -40,8 +40,8 @@
     #splash.hide{opacity:0;pointer-events:none;}
     #splash::before{content:'';position:absolute;inset:-20% -10%;background:radial-gradient(circle at 20% 20%,rgba(56,189,248,.18),transparent 38%),radial-gradient(circle at 80% 75%,rgba(139,92,246,.2),transparent 42%),radial-gradient(circle at 50% 50%,rgba(167,139,250,.14),transparent 55%);filter:blur(22px);animation:splashDrift 10s ease-in-out infinite alternate;pointer-events:none;}
     .sp-logo{font-family:'Unbounded',sans-serif;font-size:24px;font-weight:700;background:linear-gradient(135deg,#c4b5fd,#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-    .sp-logo .char{display:inline-block;opacity:1;transform:none;}
-    .sp-logo.is-animating .char{opacity:0;transform:translateY(8px);animation:spChar .42s cubic-bezier(.2,.7,.2,1) forwards;}
+    .sp-logo .char{display:inline-block;opacity:1;transform:none;background:linear-gradient(135deg,#e0f2fe,#c4b5fd 48%,#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+    .sp-logo.is-animating .char{animation:spChar .52s cubic-bezier(.2,.7,.2,1) both;}
     .sp-logo .space{width:.34em;}
     .sp-ring{width:38px;height:38px;border:2.5px solid rgba(139,92,246,.2);border-top-color:var(--ac);border-radius:50%;animation:spin .9s linear infinite;}
     #loginPage{min-height:100vh;display:none;align-items:center;justify-content:center;padding:24px;}
@@ -447,7 +447,7 @@
     @keyframes slideIn {from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
     @keyframes slideUp {from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
     @keyframes spin    {to{transform:rotate(360deg)}}
-    @keyframes spChar  {to{opacity:1;transform:translateY(0)}}
+    @keyframes spChar  {0%{opacity:0;transform:translateY(10px) scale(.96);filter:blur(5px)}70%{filter:blur(0)}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
     @keyframes pulse   {0%,100%{transform:scale(1)}50%{transform:scale(1.16)}}
     @keyframes splashDrift{0%{transform:translate3d(-1%,0,0) scale(1)}100%{transform:translate3d(2%,-2%,0) scale(1.06)}}
     @keyframes blobA{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(30px,22px,0)}}
@@ -3576,10 +3576,11 @@ function initSplashBrand(){
     const span=document.createElement('span');
     span.className=ch===' ' ? 'char space' : 'char';
     span.textContent=ch===' ' ? '' : ch;
-    span.style.animationDelay=`${i*0.05}s`;
+    span.style.animationDelay=`${i*0.07}s`;
     el.appendChild(span);
   });
-  requestAnimationFrame(()=>el.classList.add('is-animating'));
+  void el.offsetWidth;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('is-animating')));
 }
 
 (async function init(){
@@ -3594,7 +3595,7 @@ function initSplashBrand(){
       document.getElementById('landingPage').classList.add('show');
       loadCrossEvent();
     }
-  },1300);
+  },1700);
 })();
 
 function showLogin(){
