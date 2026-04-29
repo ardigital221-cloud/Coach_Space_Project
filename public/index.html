@@ -40,7 +40,8 @@
     #splash.hide{opacity:0;pointer-events:none;}
     #splash::before{content:'';position:absolute;inset:-20% -10%;background:radial-gradient(circle at 20% 20%,rgba(56,189,248,.18),transparent 38%),radial-gradient(circle at 80% 75%,rgba(139,92,246,.2),transparent 42%),radial-gradient(circle at 50% 50%,rgba(167,139,250,.14),transparent 55%);filter:blur(22px);animation:splashDrift 10s ease-in-out infinite alternate;pointer-events:none;}
     .sp-logo{font-family:'Unbounded',sans-serif;font-size:24px;font-weight:700;background:linear-gradient(135deg,#c4b5fd,#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
-    .sp-logo .char{display:inline-block;opacity:0;transform:translateY(8px);animation:spChar .42s cubic-bezier(.2,.7,.2,1) forwards;}
+    .sp-logo .char{display:inline-block;opacity:1;transform:none;}
+    .sp-logo.is-animating .char{opacity:0;transform:translateY(8px);animation:spChar .42s cubic-bezier(.2,.7,.2,1) forwards;}
     .sp-logo .space{width:.34em;}
     .sp-ring{width:38px;height:38px;border:2.5px solid rgba(139,92,246,.2);border-top-color:var(--ac);border-radius:50%;animation:spin .9s linear infinite;}
     #loginPage{min-height:100vh;display:none;align-items:center;justify-content:center;padding:24px;}
@@ -453,6 +454,10 @@
     @keyframes blobB{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-28px,-18px,0)}}
     @keyframes shineSweep{0%{transform:translateX(-18%)}100%{transform:translateX(18%)}}
     @keyframes heroPulse{0%,100%{text-shadow:0 6px 22px rgba(139,92,246,.2)}50%{text-shadow:0 10px 30px rgba(56,189,248,.35)}}
+    @media (prefers-reduced-motion: reduce){
+      .sp-logo.is-animating .char{animation:none;opacity:1;transform:none;}
+      #splash::before,.land-bg::before,.land-bg::after,.land-bg i,.land-title{animation:none;}
+    }
     .nut-macro-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);overflow:hidden;margin-bottom:14px;}
     .nut-mb-item{background:rgba(255,255,255,.025);padding:12px 6px;text-align:center;}
     .nut-mb-val{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:700;color:var(--tx);line-height:1;}
@@ -3565,6 +3570,7 @@ function initSplashBrand(){
   if(!el)return;
   const brand='Coach Space';
   el.setAttribute('aria-label',brand);
+  el.classList.remove('is-animating');
   el.textContent='';
   [...brand].forEach((ch,i)=>{
     const span=document.createElement('span');
@@ -3573,6 +3579,7 @@ function initSplashBrand(){
     span.style.animationDelay=`${i*0.05}s`;
     el.appendChild(span);
   });
+  requestAnimationFrame(()=>el.classList.add('is-animating'));
 }
 
 (async function init(){
