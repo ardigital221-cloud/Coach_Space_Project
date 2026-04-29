@@ -299,3 +299,21 @@ Validation completed:
 Watch next:
 - Full logged-in smoke test still needs a real local Firebase `serviceAccountKey.json` or a deployed environment.
 - Keep future design edits in small CSS patches to avoid encoding regressions in Russian UI text.
+
+## Update 2026-04-29 (Design V3 Geometry Pass)
+
+Scope completed:
+- Removed the photo-based landing/login atmosphere from the new visual layer.
+- Shifted the reference direction closer to the requested site style:
+  - abstract dark digital background,
+  - animated grid,
+  - colorful geometric shapes,
+  - glassy sphere/triangle accents,
+  - stronger cyber/premium mood without fitness photos.
+- Added a global click/tap visual effect (`cs-click-pop`) that creates an animated ring/shape burst at the pointer position.
+
+Validation completed:
+- `node --check server.js` passed.
+- Inline script extraction/check from `public/index.html` passed.
+- Verified there are no remaining `photo1` / `photo2` CSS background references in the active visual layer.
+- Captured mobile and desktop Chrome screenshots to review the geometry layout.
