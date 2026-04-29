@@ -11,6 +11,7 @@ const { Telegraf } = require('telegraf');
 const bcrypt     = require('bcrypt');
 const crypto     = require('crypto');
 const rateLimit  = require('express-rate-limit');
+const compression = require('compression');
 
 // ═══════════════════════════════════════════
 // БЕЗОПАСНОСТЬ
@@ -127,6 +128,10 @@ const upload      = multer({ storage: multer.memoryStorage(), limits: { fileSize
 const uploadVideo = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
 app.use(cors());
+app.use(compression({
+  level: 6,
+  threshold: 1024,
+}));
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -136,7 +141,10 @@ app.use(express.static(path.join(__dirname, 'public'), {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
+      return;
     }
+    // Cache static assets aggressively; file names are versioned by deployment.
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
   }
 }));
 
