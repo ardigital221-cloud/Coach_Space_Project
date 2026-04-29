@@ -7,6 +7,10 @@ let _mVidCatName = '';
 let _uVidData = {};
 let _pedDirty = false;
 const EMOJIS = ['рџ‘Ќ','вќ¤пёЏ','рџ”Ґ','рџ‚','рџ®','рџ‘Џ','рџ’Є','вњ…'];
+const $id = (id) => document.getElementById(id);
+const showEl = (id, className='show') => { const el = $id(id); if (el) el.classList.add(className); };
+const hideEl = (id, className='show') => { const el = $id(id); if (el) el.classList.remove(className); };
+const setDisplay = (id, value) => { const el = $id(id); if (el) el.style.display = value; };
 
 function _getToken(){return localStorage.getItem('auth_token');}
 function _setToken(t){localStorage.setItem('auth_token',t);}
@@ -19,7 +23,14 @@ async function api(url, method='GET', body=null) {
   if (token) opts.headers['Authorization'] = 'Bearer ' + token;
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(url, opts);
-  if (r.status === 401) { _clearAuth(); ME=null; document.getElementById('app').classList.remove('show'); document.getElementById('bnav').style.display='none'; document.getElementById('loginPage').classList.add('show'); throw new Error('РЎРµСЃСЃРёСЏ РёСЃС‚РµРєР»Р°'); }
+  if (r.status === 401) {
+    _clearAuth();
+    ME = null;
+    hideEl('app');
+    setDisplay('bnav', 'none');
+    showEl('loginPage');
+    throw new Error('РЎРµСЃСЃРёСЏ РёСЃС‚РµРєР»Р°');
+  }
   const ct = r.headers.get('content-type') || '';
   if (!ct.includes('application/json')) {
     throw new Error(`РЎРµСЂРІРµСЂ РІРµСЂРЅСѓР» РЅРµ JSON (СЃС‚Р°С‚СѓСЃ ${r.status}). РџСЂРѕРІРµСЂСЊС‚Рµ РєРѕРЅСЃРѕР»СЊ.`);
@@ -39,17 +50,18 @@ async function doLogin(){
   catch(e){err.style.display='block';err.textContent=e.message;}
 }
 async function tryAutoLogin(){const id=localStorage.getItem('auth_id');if(!id||!_getToken())return false;try{ME=await api('/api/me/'+id);return true;}catch{_clearAuth();return false;}}
-async function doLogout(){try{await api('/api/logout','POST');}catch(e){}ME=null;_clearAuth();document.getElementById('app').classList.remove('show');document.getElementById('bnav').style.display='none';document.getElementById('loginPage').classList.add('show');}
+async function doLogout(){try{await api('/api/logout','POST');}catch(e){}ME=null;_clearAuth();hideEl('app');setDisplay('bnav','none');showEl('loginPage');}
 ['inL','inP'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();}));
 
 function startApp(){
-  document.getElementById('landingPage').classList.remove('show');
-  document.getElementById('loginPage').classList.remove('show');
-  document.getElementById('app').classList.add('show');
-  document.getElementById('bnav').style.display='flex';
-  document.getElementById('hName').textContent=(ME.name==='Tect'?'рџ”Ґ ':'')+ME.name;
-  const r=document.getElementById('hRole');
-  ME.role==='admin'?(r.textContent='РўСЂРµРЅРµСЂ',r.className='t-role ra'):(r.textContent='РЈС‡РµРЅРёРє',r.className='t-role rs');
+  hideEl('landingPage');
+  hideEl('loginPage');
+  showEl('app');
+  setDisplay('bnav','flex');
+  const hName = $id('hName');
+  if (hName) hName.textContent = (ME.name==='Tect'?'рџ”Ґ ':'') + ME.name;
+  const r=$id('hRole');
+  if(r){ME.role==='admin'?(r.textContent='РўСЂРµРЅРµСЂ',r.className='t-role ra'):(r.textContent='РЈС‡РµРЅРёРє',r.className='t-role rs');}
   loadLocalFoods();
   buildNav();
   loadCrossEvent();
@@ -110,8 +122,10 @@ function showTab(id,btn,forceReload=false){
   if(!forceReload && _currentTabId===id) return;
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('p-'+id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  const panelEl = $id('p-'+id);
+  if (!panelEl) return;
+  panelEl.classList.add('active');
   const shouldReload = forceReload || _shouldReloadTab(id);
   if(shouldReload){
     _loadTabData(id);
@@ -1501,7 +1515,9 @@ function syncPlanEditorToInput(target){
   requestAnimationFrame(()=>target.scrollIntoView({block:'nearest',inline:'nearest'}));
 }
 function openMo(id,nutType){
-  document.getElementById(id).classList.add('open');
+  const modal = $id(id);
+  if (!modal) return;
+  modal.classList.add('open');
   updateViewportVars();
   if(id==='mAddW')onOpenAddW();
   if(id==='mAddNut'){
@@ -1523,7 +1539,7 @@ function openMo(id,nutType){
     loadNutRecent();
   }
 }
-function closeMo(id){document.getElementById(id).classList.remove('open');}
+function closeMo(id){const modal=$id(id);if(modal)modal.classList.remove('open');}
 updateViewportVars();
 window.addEventListener('resize',updateViewportVars);
 if(window.visualViewport){
