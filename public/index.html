@@ -39,6 +39,8 @@
     #splash{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .4s;}
     #splash.hide{opacity:0;pointer-events:none;}
     .sp-logo{font-family:'Unbounded',sans-serif;font-size:24px;font-weight:700;background:linear-gradient(135deg,#c4b5fd,#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+    .sp-logo .char{display:inline-block;opacity:0;transform:translateY(8px);animation:spChar .42s cubic-bezier(.2,.7,.2,1) forwards;}
+    .sp-logo .space{width:.34em;}
     .sp-ring{width:38px;height:38px;border:2.5px solid rgba(139,92,246,.2);border-top-color:var(--ac);border-radius:50%;animation:spin .9s linear infinite;}
     #loginPage{min-height:100vh;display:none;align-items:center;justify-content:center;padding:24px;}
     #loginPage.show{display:flex;}
@@ -443,6 +445,7 @@
     @keyframes slideIn {from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
     @keyframes slideUp {from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
     @keyframes spin    {to{transform:rotate(360deg)}}
+    @keyframes spChar  {to{opacity:1;transform:translateY(0)}}
     @keyframes pulse   {0%,100%{transform:scale(1)}50%{transform:scale(1.16)}}
     .nut-macro-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);overflow:hidden;margin-bottom:14px;}
     .nut-mb-item{background:rgba(255,255,255,.025);padding:12px 6px;text-align:center;}
@@ -3549,8 +3552,24 @@ function closeLightbox(e){if(e&&e.target===document.getElementById('lightbox-img
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox();});
 function exportExcel(){toast('⏳ Подготовка файла...','w');const a=document.createElement('a');a.href='/api/export/students';a.download='';document.body.appendChild(a);a.click();document.body.removeChild(a);}
 
+function initSplashBrand(){
+  const el=document.querySelector('#splash .sp-logo');
+  if(!el)return;
+  const brand='Coach Space';
+  el.setAttribute('aria-label',brand);
+  el.textContent='';
+  [...brand].forEach((ch,i)=>{
+    const span=document.createElement('span');
+    span.className=ch===' ' ? 'char space' : 'char';
+    span.textContent=ch===' ' ? '' : ch;
+    span.style.animationDelay=`${i*0.05}s`;
+    el.appendChild(span);
+  });
+}
+
 (async function init(){
   const splash=document.getElementById('splash');
+  initSplashBrand();
   const ok=await tryAutoLogin();
   setTimeout(()=>{
     splash.classList.add('hide');
@@ -3560,7 +3579,7 @@ function exportExcel(){toast('⏳ Подготовка файла...','w');const
       document.getElementById('landingPage').classList.add('show');
       loadCrossEvent();
     }
-  },800);
+  },1300);
 })();
 
 function showLogin(){
