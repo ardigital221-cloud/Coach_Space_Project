@@ -974,6 +974,59 @@
     @keyframes csShapeThree{0%{transform:translate3d(0,0,0) scale(.96)}100%{transform:translate3d(18px,-12px,0) scale(1.08)}}
     @keyframes csClickPop{0%{opacity:1;transform:translate(-50%,-50%) scale(.35)}100%{opacity:0;transform:translate(-50%,-50%) scale(7.5)}}
     @keyframes csClickSpin{0%{opacity:1;transform:rotate(0) scale(.4)}100%{opacity:0;transform:rotate(160deg) scale(1.4)}}
+
+    /* Coach Space V4: black / white reference pass */
+    :root{
+      --bg:#030303;--bg2:#070707;--card:rgba(10,10,10,.82);
+      --b:rgba(255,255,255,.12);--ba:rgba(255,255,255,.22);
+      --ac:#ffffff;--ac2:#b8b8b8;--acd:rgba(255,255,255,.08);
+      --red:#ff5a6f;--yel:#d7d7d7;--blu:#f5f5f5;
+      --tx:#f8f8f8;--mu:#5f5f5f;--mu2:#b6b6b6;
+      --glow:0 0 0 1px rgba(255,255,255,.2),0 28px 90px rgba(0,0,0,.72);
+      --glow2:0 0 0 1px rgba(255,255,255,.14),0 30px 100px rgba(0,0,0,.78);
+    }
+    body{background:#030303;color:#f8f8f8;}
+    body::before{background:radial-gradient(circle at 18% 20%,rgba(255,255,255,.1),transparent 18%),radial-gradient(circle at 74% 18%,rgba(255,255,255,.06),transparent 24%),linear-gradient(115deg,#020202 0%,#070707 52%,#020202 100%);}
+    body::after{background:linear-gradient(rgba(255,255,255,.026) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px),repeating-linear-gradient(135deg,transparent 0 74px,rgba(255,255,255,.04) 75px,transparent 76px 148px);background-size:62px 62px,62px 62px,100% 100%;opacity:.8;}
+    .cs-network{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.72;mix-blend-mode:screen;}
+
+    #splash,#landingPage,#loginPage{background:#030303;}
+    #splash::before{background:radial-gradient(circle at 24% 26%,rgba(255,255,255,.12),transparent 24%),radial-gradient(circle at 80% 70%,rgba(255,255,255,.06),transparent 28%),linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:100% 100%,100% 100%,52px 52px,52px 52px;opacity:.5;}
+    .sp-logo .char,.land-logo,.t-logo,.l-logo{background:linear-gradient(135deg,#fff 0%,#d7d7d7 58%,#777 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+    .sp-ring{border-color:rgba(255,255,255,.14);border-top-color:#fff;box-shadow:0 0 28px rgba(255,255,255,.24);}
+
+    .land-bg::before{inset:0;background:linear-gradient(90deg,#030303 0%,rgba(3,3,3,.72) 42%,rgba(3,3,3,.96) 100%),radial-gradient(circle at 18% 18%,rgba(255,255,255,.12),transparent 18%),radial-gradient(circle at 72% 78%,rgba(255,255,255,.08),transparent 22%),linear-gradient(115deg,#020202,#090909 46%,#020202);filter:none;animation:csMonoPulse 9s ease-in-out infinite alternate;}
+    .land-bg::after{background:linear-gradient(rgba(255,255,255,.036) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px),repeating-linear-gradient(135deg,transparent 0 58px,rgba(255,255,255,.055) 59px,transparent 60px 116px);background-size:58px 58px,58px 58px,100% 100%;opacity:.64;}
+    .land-bg i{right:auto;left:-7%;top:0;width:min(48vw,560px);max-width:none;border:0;border-radius:0;background:linear-gradient(90deg,rgba(255,255,255,.24),rgba(255,255,255,.02));clip-path:polygon(0 18%,14% 18%,14% 100%,20% 100%,20% 48%,28% 48%,28% 100%,36% 100%,36% 30%,44% 30%,44% 100%,52% 100%,52% 12%,61% 12%,61% 100%,72% 100%,72% 38%,82% 38%,82% 100%,100% 100%,100% 0,0 0);opacity:.22;box-shadow:none;transform:none;animation:csCityDrift 13s ease-in-out infinite alternate;}
+    .land-bg i::before{left:26%;top:18%;bottom:auto;width:44%;height:44%;clip-path:polygon(8% 62%,44% 12%,92% 38%,68% 88%);background:transparent;border:1px solid rgba(255,255,255,.42);box-shadow:0 0 38px rgba(255,255,255,.08);animation:csWireSpin 11s ease-in-out infinite alternate;}
+    .land-bg i::after{right:-48%;bottom:2%;width:76%;border-radius:50%;background:radial-gradient(circle at 38% 35%,rgba(255,255,255,.28),rgba(255,255,255,.04) 36%,transparent 68%);border:1px solid rgba(255,255,255,.14);animation:csMonoOrb 10s ease-in-out infinite alternate;}
+
+    .land-title{color:#fff;-webkit-text-fill-color:#fff;text-shadow:0 18px 60px rgba(0,0,0,.8);font-style:italic;}
+    .land-tag,.land-block-title{color:#fff;background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.24);}
+    .land-sub{color:#d7d7d7;}
+    .land-cta,.btn-p,.mark-btn,.ai-send-btn,.nt-add-btn,.cross-start-btn{background:#fff!important;color:#050505!important;border-color:#fff!important;box-shadow:0 14px 36px rgba(255,255,255,.08)!important;}
+    .land-cta:hover,.btn-p:hover,.mark-btn:hover,.ai-send-btn:hover,.nt-add-btn:hover{background:#111!important;color:#fff!important;border-color:rgba(255,255,255,.72)!important;}
+    .land-secondary{color:#dcdcdc;border-bottom-color:rgba(255,255,255,.46);}
+    .land-service-item,.land-rule,.land-card,.land-desc,.cross-event-card,.card,.student-card,.post-card,.wcard,.shopi,.rules-card,.diary-ex-card,.review-card,.tpl-card,.nut-sel-card,.vid-cat-card,.cross-result-card,.ai-chat-card,.subst-rule,.subst-group,.rules50-section{background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.018));border-color:rgba(255,255,255,.15);box-shadow:0 26px 90px rgba(0,0,0,.5);backdrop-filter:blur(16px);}
+    .land-service-item:hover,.land-rule:hover,.cross-event-card:hover,.card:hover,.student-card:hover,.post-card:hover,.wcard:hover,.shopi:hover,.tpl-card:hover,.vid-cat-card:hover{border-color:rgba(255,255,255,.42);}
+    .ct,.st,.rules-title,.ai-title,.nt-modal-title,.mt{color:#fff;}
+    .ct{color:#dcdcdc;}
+    .sn,.cg,.cw,.cr{color:#fff;}
+    .pill-green,.wb-p,.block-btn.active,.week-btn.active,.nut-modal-tab.active,.ai-chip,.wb-g,.across-tab.active,.lb-btn.active{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.08);color:#fff;}
+    .fi:focus,.fsel:focus,.fta:focus,.ai-input:focus{border-color:#fff;background:rgba(255,255,255,.08);box-shadow:0 0 0 3px rgba(255,255,255,.08);}
+    .bnav .nb.active{background:#fff;color:#050505;}
+    .cs-click-pop{border-color:rgba(255,255,255,.95);box-shadow:0 0 0 1px rgba(255,255,255,.28),0 0 38px rgba(255,255,255,.44);}
+    .cs-click-pop::before,.cs-click-pop::after{border-color:rgba(255,255,255,.5);}
+    .cs-click-pop::after{border-color:rgba(255,255,255,.34);}
+    @keyframes csMonoPulse{0%{filter:brightness(.9);transform:scale(1)}100%{filter:brightness(1.16);transform:scale(1.03)}}
+    @keyframes csCityDrift{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(22px,-8px,0)}}
+    @keyframes csWireSpin{0%{transform:rotate(-8deg) translate3d(0,0,0)}100%{transform:rotate(12deg) translate3d(24px,18px,0)}}
+    @keyframes csMonoOrb{0%{transform:translate3d(0,0,0) scale(.94)}100%{transform:translate3d(-30px,-18px,0) scale(1.04)}}
+    @media(max-width:640px){
+      .land-bg i{left:-34%;top:0;width:122vw;opacity:.18;}
+      .land-title{font-size:39px;}
+      .land-cta{background:#fff!important;color:#050505!important;}
+    }
   </style>
 </head>
 <body>
@@ -3741,6 +3794,57 @@ function initSplashBrand(){
 function initVisualEffects(){
   if(window._csVisualEffectsReady)return;
   window._csVisualEffectsReady=true;
+  const canvas=document.createElement('canvas');
+  canvas.className='cs-network';
+  canvas.setAttribute('aria-hidden','true');
+  document.body.prepend(canvas);
+  const ctx=canvas.getContext('2d');
+  let w=0,h=0,dpr=1,points=[];
+  const reset=()=>{
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    w=window.innerWidth;
+    h=window.innerHeight;
+    canvas.width=Math.floor(w*dpr);
+    canvas.height=Math.floor(h*dpr);
+    canvas.style.width=w+'px';
+    canvas.style.height=h+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const count=Math.max(22,Math.min(58,Math.floor(w*h/18000)));
+    points=Array.from({length:count},()=>({
+      x:Math.random()*w,
+      y:Math.random()*h,
+      vx:(Math.random()-.5)*.26,
+      vy:(Math.random()-.5)*.22,
+      r:Math.random()*1.4+.4
+    }));
+  };
+  const draw=()=>{
+    ctx.clearRect(0,0,w,h);
+    ctx.lineWidth=1;
+    for(const p of points){
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<-40)p.x=w+40;if(p.x>w+40)p.x=-40;
+      if(p.y<-40)p.y=h+40;if(p.y>h+40)p.y=-40;
+    }
+    for(let i=0;i<points.length;i++){
+      const a=points[i];
+      for(let j=i+1;j<points.length;j++){
+        const b=points[j],dx=a.x-b.x,dy=a.y-b.y,dist=Math.hypot(dx,dy);
+        if(dist<150){
+          ctx.strokeStyle=`rgba(255,255,255,${(1-dist/150)*.22})`;
+          ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+        }
+      }
+    }
+    for(const p of points){
+      ctx.fillStyle='rgba(255,255,255,.74)';
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  };
+  reset();
+  window.addEventListener('resize',reset,{passive:true});
+  requestAnimationFrame(draw);
   document.addEventListener('pointerdown',e=>{
     const pop=document.createElement('span');
     pop.className='cs-click-pop';

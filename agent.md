@@ -317,3 +317,17 @@ Validation completed:
 - Inline script extraction/check from `public/index.html` passed.
 - Verified there are no remaining `photo1` / `photo2` CSS background references in the active visual layer.
 - Captured mobile and desktop Chrome screenshots to review the geometry layout.
+
+## Update 2026-04-29 (Design V4 Monochrome Pass)
+
+Scope completed:
+- Replaced the green/cyan active visual direction with a black-and-white reference-inspired layer.
+- Converted CTAs and primary controls to white/black instead of lime green.
+- Added a darker skyline/geometric atmosphere with monochrome contours and glassy wire shapes.
+- Added a persistent animated canvas network (`.cs-network`) with moving points and connecting lines.
+- Kept the click/tap burst effect, restyled to monochrome.
+
+Validation completed:
+- `node --check server.js` passed.
+- Inline script extraction/check from `public/index.html` passed.
+- Captured a mobile Chrome screenshot and confirmed the first screen no longer shows green buttons.
